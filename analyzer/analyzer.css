@@ -1,0 +1,15 @@
+.applet-info {
+}
+.applet-name {
+	font-size: 1.2em;
+	color: black;
+}
+.more-icon {
+	cursor: pointer;
+}
+.error-list {
+	color: red;
+}
+textarea {
+	tab-size: 4;
+}
