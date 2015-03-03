@@ -194,15 +194,13 @@ function loadBonzaLibrary(url) {
                         }
                     }
                 }
-            }
-        }, {
+            },
             prop: {
                 name: "nbsp",
                 type: {
                     string: null
                 }
-            }
-        }, {
+            },
             prop: {
                 name: "math",
                 type: {
@@ -255,62 +253,6 @@ function loadBonzaLibrary(url) {
                                     },
                                     ret: {
                                         none: null
-                                    }
-                                }
-                            }
-                        }
-                    }]
-                }
-            }
-        }, {
-            prop: {
-                name: "time",
-                type: {
-                    all: [{
-                        prop: {
-                            name: "msec",
-                            type: {
-                                interval: null
-                            }
-                        }
-                    }, {
-                        prop: {
-                            name: "sec",
-                            type: {
-                                interval: null
-                            }
-                        }
-                    }, {
-                        prop: {
-                            name: "date",
-                            type: {
-                                func: {
-                                    arg: {
-                                        all: [{
-                                            prop: {
-                                                name: "year",
-                                                type: {
-                                                    integer: null
-                                                }
-                                            }
-                                        }, {
-                                            prop: {
-                                                name: "month",
-                                                type: {
-                                                    integer: null
-                                                }
-                                            }
-                                        }, {
-                                            prop: {
-                                                name: "day",
-                                                type: {
-                                                    integer: null
-                                                }
-                                            }
-                                        }]
-                                    },
-                                    ret: {
-                                        time: null
                                     }
                                 }
                             }

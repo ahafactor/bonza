@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<library>
+	<doc>
+		<title>Calculator Demo</title>
+		<author>Roman Movchan, Melbourne, Australia</author>
+	</doc>
+	<type name="Command">
+		<any>
+			<prop name="equal"/>
+			<prop name="clear"/>
+			<prop name="plus"/>
+			<prop name="minus"/>
+			<prop name="multiply"/>
+			<prop name="divide"/>
+			<prop name="char">
+				<string/>
+			</prop>
+		</any>
+	</type>
+	<common>
+		<unwrap>core</unwrap>
+		<unwrap>string</unwrap>
+		<unwrap>format</unwrap>
+		<unwrap>math</unwrap>
+		<def var="maxlen">19</def>
+	</common>
+	<applet name="calculator">
+		<output>
+			<string />
+		</output>
+		<state name="state">
+			<all>
+				<prop name="value">
+					<string/>
+				</prop>
+				<prop name="result">
+					<number/>
+				</prop>
+				<prop name="command">
+					<type name="Command"/>
+				</prop>
+				<prop name="op">
+					<type name="Command"/>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<text>
+				<table class="calculator">
+					<tr>
+						<td colspan="4">
+							<div class="[%classname('display')%]" id="display"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="[%classname('button')%]" id="clear">C</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="divide">[%nbsp%]/[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="multiply">[%nbsp%]x[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="minus">[%nbsp%]-[%nbsp%]</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="[%classname('button')%]" id="7">[%nbsp%]7[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="8">[%nbsp%]8[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="9">[%nbsp%]9[%nbsp%]</div>
+						</td>
+						<td rowspan="2">
+							<div class="[%classname('button')%]" id="plus"><br/>[%nbsp%]+[%nbsp%]</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="[%classname('button')%]" id="4">[%nbsp%]4[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="5">[%nbsp%]5[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="6">[%nbsp%]6[%nbsp%]</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="[%classname('button')%]" id="1">[%nbsp%]1[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="2">[%nbsp%]2[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="3">[%nbsp%]3[%nbsp%]</div>
+						</td>
+						<td rowspan="2">
+							<div class="[%classname('button')%]" id="equal"><br/>[%nbsp%]=[%nbsp%]</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<div class="[%classname('button')%]" id="0">[%nbsp%]0[%nbsp%]</div>
+						</td>
+						<td>
+							<div class="[%classname('button')%]" id="period">[%nbsp%].[%nbsp%]</div>
+						</td>
+					</tr>
+				</table>
+			</text>
+		</content>
+		<init id="id">
+			<state>{ value: "0", result: 0, command: {clear:}, op: {clear:} }</state>
+			<actions>
+				<list>
+					<output>state.value</output>
+				</list>
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				<type name="Command"/>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>input.clear</is>
+								<def var="newstate">{ value: "0", result: 0, command: {clear:}, op: {clear:} }</def>
+							</all>
+							<all>
+								<is>input.char</is>
+								<def var="newstate">
+									<calc>
+										{ value: newvalue, result: state.result, command: input, op: state.op }
+										<where>
+											<any>
+												<all>
+													<not>
+														<is>state.command.char</is>
+													</not>
+													<def var="newvalue">input.char</def>
+												</all>
+												<all>
+													<is>length(state.value) `lt` maxlen</is>
+													<def var="newvalue">
+														<text>[%state.value%][%input.char%]</text>
+													</def>
+													<is>strToNum(newvalue)</is>
+												</all>
+												<def var="newvalue">state.value</def>
+											</any>
+										</where>
+									</calc>
+								</def>
+							</all>
+							<all>
+								<any>
+									<is>input.plus</is>
+									<is>input.minus</is>
+									<is>input.multiply</is>
+									<is>input.divide</is>
+								</any>
+								<any>
+									<all>
+										<is>state.op.plus</is>
+										<def var="result">state.result + strToNum(state.value)</def>
+									</all>
+									<all>
+										<is>state.op.minus</is>
+										<def var="result">state.result - strToNum(state.value)</def>
+									</all>
+									<all>
+										<is>state.op.multiply</is>
+										<def var="result">state.result * strToNum(state.value)</def>
+									</all>
+									<all>
+										<is>state.op.divide</is>
+										<def var="result">state.result / strToNum(state.value)</def>
+									</all>
+									<def var="result">strToNum(state.value)</def>
+								</any>
+								<def var="newstate">{ value: state.value, result: result, command: input, op: input }</def>
+							</all>
+							<all>
+								<is>input.equal</is>
+								<any>
+									<all>
+										<is>state.op.plus</is>
+										<def var="result">state.result + strToNum(state.value)</def>
+									</all>
+									<all>
+										<is>state.op.minus</is>
+										<def var="result">state.result - strToNum(state.value)</def>
+									</all>
+									<all>
+										<is>state.op.multiply</is>
+										<def var="result">state.result * strToNum(state.value)</def>
+									</all>
+									<all>
+										<is>state.op.divide</is>
+										<def var="result">state.result / strToNum(state.value)</def>
+									</all>
+									<def var="result">state.result</def>
+								</any>
+								<def var="newstate">
+									<calc>
+										{ value: displayResult, result: result, command: input, op: input }
+										<where>
+											<any>
+												<all>
+													<any>
+														<is>NaN(result)</is>
+														<not>
+															<is>finite(result)</is>
+														</not>
+													</any>
+													<def var="displayResult">"ERROR"</def>
+												</all>
+												<all>
+													<def var="str">numToStr(result)</def>
+													<any>
+														<all>
+															<is>length(str) `gt` maxlen</is>
+															<def var="displayResult">formatNum({num: result, exp: 3})</def>
+														</all>
+														<def var="displayResult">numToStr(result)</def>
+													</any>
+												</all>
+											</any>
+										</where>
+									</calc>
+								</def>
+							</all>
+							<def var="newstate">{ value: "ERROR", result: 0, command: input, op: state.op }</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<list>
+					<output>state.value</output>
+				</list>
+			</actions>
+		</respond>
+		<accept>
+			<from applet="button" data="id">
+				<calc>
+					input
+					<where>
+						<any>
+							<all>
+								<is>id = "clear"</is>
+								<def var="input">{clear:}</def>
+							</all>
+							<all>
+								<is>id = "equal"</is>
+								<def var="input">{equal:}</def>
+							</all>
+							<all>
+								<is>id = "plus"</is>
+								<def var="input">{plus:}</def>
+							</all>
+							<all>
+								<is>id = "minus"</is>
+								<def var="input">{minus:}</def>
+							</all>
+							<all>
+								<is>id = "multiply"</is>
+								<def var="input">{multiply:}</def>
+							</all>
+							<all>
+								<is>id = "divide"</is>
+								<def var="input">{divide:}</def>
+							</all>
+							<all>
+								<is>id = "period"</is>
+								<def var="input">{char: "."}</def>
+							</all>
+							<def var="input">{char: id}</def>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="display">
+		<state name="state">
+			<string/>
+		</state>
+		<content>
+			<text><div class="display">[%state%]</div></text>
+		</content>
+		<init id="id">
+			<state>"0"</state>
+		</init>
+		<respond>
+			<input name="input">
+				<string/>
+			</input>
+			<state>input</state>
+			<actions>
+				<list>
+					<redraw/>
+				</list>
+			</actions>
+		</respond>
+		<accept>
+			<from applet="calculator" data="value">value</from>
+		</accept>
+	</applet>
+	<applet name="button">
+		<output>
+			<string/>
+		</output>
+		<state name="state">
+			<all>
+				<prop name="text">
+					<string/>
+				</prop>
+				<any>
+					<prop name="up"/>
+					<prop name="down"/>
+				</any>
+			</all>
+		</state>
+		<content>
+			<calc>
+				<text>
+					<div class="[%updown%]">[%state.text%]</div>
+				</text>
+				<where>
+					<any>
+						<all>
+							<is>state.down</is>
+							<def var="updown">"button-down"</def>
+						</all>
+						<def var="updown">"button-up"</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init id="id" content="text">
+			<state>{id: id, text: text, up:}</state>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="up"/>
+					<prop name="down"/>
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>input.up</is>
+								<def var="newstate">{id: state.id, text: state.text, up:}</def>
+							</all>
+							<all>
+								<is>input.down</is>
+								<def var="newstate">{id: state.id, text: state.text, down:}</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<calc>
+					actions
+					<where>
+						<any>
+							<all>
+								<is>state.down</is>
+								<def var="actions">
+									<list>
+										<redraw/>
+										<output>state.id</output>
+										<delay>
+											<input>{up:}</input>
+											<by>100*core.time.msec</by>
+										</delay>
+									</list>
+								</def>
+							</all>
+							<def var="actions">
+								<list>
+									<redraw/>
+								</list>
+							</def>
+						</any>
+					</where>
+				</calc>
+			</actions>
+		</respond>
+		<events>
+			<mousedown>{down:}</mousedown>
+		</events>
+	</applet>
+</library>
