@@ -16,11 +16,7 @@
 							<any>
 								<all>
 									<is>list# = 0</is>
-									<def var="errors">
-										<text>
-											<p>No errors found</p>
-										</text>
-									</def>
+									<def var="errors">""</def>
 								</all>
 								<def var="errors">
 									<calc>
@@ -282,13 +278,15 @@
 								<text>
 									<div class="applet-info">
 										<span class="more-icon">
-											<image src="double-arrow-up.png"/>
+											<image src="arrow337.png"/>
 										</span>
-										<span class="applet-name">[%core.nbsp%][%state.name%][%core.nbsp%]</span>
+										<span class="applet-name">[%core.nbsp%][%state.info.name%][%core.nbsp%]</span>
 										[%errors(state.info.errors)%]
 										<ul>
-											<li>output: [%core.code.typeStr(state.info.output)%][%core.nbsp%]</li>
-											<li>state([%state.info.statename%]): [%core.code.typeStr(state.info.state)%][%core.nbsp%]</li>
+											<li>output: [%core.code.typeStr(state.info.output.type)%]</li>
+											<li>state([%state.info.state.name%]): [%core.code.typeStr(state.info.state)%]</li>
+											<li>content: [%errors(state.info.content.errors)%]</li>
+											<li>init: [%core.code.typeStr(state.info.init.state.type)%] [%errors(state.info.state.errors)%]</li>
 										</ul>
 									</div>
 								</text>
@@ -298,7 +296,7 @@
 							<text>
 								<div class="applet-info">
 									<span class="more-icon">
-										<image src="double-arrow-down.png"/>
+										<image src="play119.png"/>
 									</span>
 									<span class="applet-name">[%core.nbsp%][%state.name%][%core.nbsp%]</span>
 								</div>
@@ -320,6 +318,7 @@
 			<input name="input">
 				<any>
 					<prop name="toggle"/>
+					<prop name="refresh" />
 					<prop name="info">
 						<type name ="AppletInfo"/>
 					</prop>
@@ -340,6 +339,12 @@
 								<is>state.expanded</is>
 								<def var="newstate">{name: state.name, info: state.info, collapsed:}</def>
 							</all>
+							<all>
+								<is>input.refresh</is>
+								<def var="newstate">
+									state
+								</def>
+							</all>
 							<def var="newstate">{name: state.name, info: input.info, collapsed:}</def>
 						</any>
 					</where>
@@ -356,7 +361,15 @@
 				<calc>
 					{info: data.info}
 					<where>
-						<is>data.name `eq` state.name</is>
+						<is>data.name = state.name</is>
+					</where>
+				</calc>
+			</from>
+			<from applet="action" data="action">
+				<calc>
+					{refresh:}
+					<where>
+						<is>action = "submit"</is>
 					</where>
 				</calc>
 			</from>

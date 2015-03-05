@@ -11,7 +11,7 @@ function loadBonzaLibrary(url) {
         var i = 0;
         var result = [];
         for (i = 0; i < node.childNodes.length; i++) {
-            if (node.childNodes[i].nodeType != 8 && (node.childNodes[i].nodeType != 3 || node.childNodes[i].nodeValue.trim() != "")) {
+            if (node.childNodes[i].nodeType != 8 && (node.childNodes[i].nodeType != 3 || node.childNodes[i].nodeValue.trim() !== "")) {
                 result.push(node.childNodes[i]);
             }
         }
@@ -20,7 +20,7 @@ function loadBonzaLibrary(url) {
 
     function firstExpr(node) {
         var first = 0;
-        while (node.childNodes[first].nodeType == 8 || (node.childNodes[first].nodeType == 3 && node.childNodes[first].nodeValue.trim() == "")) {
+        while (node.childNodes[first].nodeType == 8 || (node.childNodes[first].nodeType == 3 && node.childNodes[first].nodeValue.trim() === "")) {
             first++;
         }
         return node.childNodes[first];
@@ -55,6 +55,15 @@ function loadBonzaLibrary(url) {
         math: {
             sin: function(x) {
                 return Math.sin(x);
+            },
+            cos: function(x) {
+                return Math.cos(x);
+            },
+            exp: function(x) {
+                return Math.exp(x);
+            },
+            log: function(x) {
+                return Math.log(x);
             },
             trunc: function(x) {
                 return Math.trunc(x);
@@ -140,7 +149,7 @@ function loadBonzaLibrary(url) {
                 return result;
             },
             charAt: function(arg) {
-                return arg.str.charAt(arg.pos);
+                return arg.str.charAt(arg.index);
             },
             trim: function(str) {
                 return str.trim();
@@ -180,6 +189,471 @@ function loadBonzaLibrary(url) {
             }
         },
     };
+
+    var coremathtype = {
+        all: [{
+            prop: {
+                name: "sin",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            number: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "cos",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            number: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "exp",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            number: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "log",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            number: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "trunc",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            integer: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "NaN",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            none: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "finite",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            none: null
+                        }
+                    }
+                }
+            }
+        }]
+    };
+
+    var coretimetype = {
+        all: [{
+            prop: {
+                name: "msec",
+                type: {
+                    interval: null
+                }
+            }
+        }, {
+            prop: {
+                name: "sec",
+                type: {
+                    interval: null
+                }
+            }
+        }, {
+            prop: {
+                name: "date",
+                type: {
+                    func: {
+                        arg: {
+                            all: [{
+                                prop: {
+                                    name: "year",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "month",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "day",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }]
+                        },
+                        ret: {
+                            time: null
+                        }
+                    }
+                }
+            }
+        }]
+    };
+
+    var coreformattype = {
+        all: [{
+            prop: {
+                name: "intToStr",
+                type: {
+                    func: {
+                        arg: {
+                            integer: null
+                        },
+                        ret: {
+                            string: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "numToStr",
+                type: {
+                    func: {
+                        arg: {
+                            number: null
+                        },
+                        ret: {
+                            string: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "dateToStr",
+                type: {
+                    func: {
+                        arg: {
+                            time: null
+                        },
+                        ret: {
+                            string: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "strToInt",
+                type: {
+                    func: {
+                        arg: {
+                            string: null
+                        },
+                        ret: {
+                            integer: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "strToNum",
+                type: {
+                    func: {
+                        arg: {
+                            string: null
+                        },
+                        ret: {
+                            number: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "formatNum",
+                type: {
+                    func: {
+                        arg: {
+                            any: [{
+                                prop: {
+                                    name: "prec",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "exp",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "dec",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }]
+                        },
+                        ret: {
+                            string: null
+                        }
+                    }
+                }
+            }
+        }]
+    };
+
+    var corestringtype = {
+        all: [{
+            prop: {
+                name: "substr",
+                type: {
+                    func: {
+                        arg: {
+                            all: [{
+                                prop: {
+                                    name: "str",
+                                    type: {
+                                        string: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "start",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }, {
+                                any: [{
+                                    prop: {
+                                        name: "end",
+                                        type: {
+                                            integer: null
+                                        }
+                                    }
+                                }, {
+                                    prop: {
+                                        name: "length",
+                                        type: {
+                                            integer: null
+                                        }
+                                    }
+                                }]
+                            }]
+                        },
+                        ret: {
+                            string: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "join",
+                type: {
+                    func: {
+                        arg: {
+                            all: [{
+                                prop: {
+                                    name: "parts",
+                                    type: {
+                                        array: {
+                                            string: null
+                                        }
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "sep",
+                                    type: {
+                                        array: {
+                                            string: null
+                                        }
+                                    }
+                                }
+                            }]
+                        },
+                        ret: {
+                            string: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "split",
+                type: {
+                    func: {
+                        arg: {
+                            all: [{
+                                prop: {
+                                    name: "str",
+                                    type: {
+                                        string: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "sep",
+                                    type: {
+                                        string: null
+                                    }
+                                }
+                            }]
+                        },
+                        ret: {
+                            array: {
+                                string: null
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "length",
+                type: {
+                    func: {
+                        arg: {
+                            string: null
+                        },
+                        ret: {
+                            integer: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "trim",
+                type: {
+                    func: {
+                        arg: {
+                            string: null
+                        },
+                        ret: {
+                            string: null
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "repeat",
+                type: {
+                    func: {
+                        arg: {
+                            all: [{
+                                prop: {
+                                    name: "str",
+                                    type: {
+                                        string: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "times",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }]
+                        },
+                        ret: {
+                            array: {
+                                string: null
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            prop: {
+                name: "charAt",
+                type: {
+                    func: {
+                        arg: {
+                            all: [{
+                                prop: {
+                                    name: "str",
+                                    type: {
+                                        string: null
+                                    }
+                                }
+                            }, {
+                                prop: {
+                                    name: "index",
+                                    type: {
+                                        integer: null
+                                    }
+                                }
+                            }]
+                        },
+                        ret: {
+                            array: {
+                                string: null
+                            }
+                        }
+                    }
+                }
+            }
+        }]
+    };
+
+    var corexmltype = {};
+
     var coretype = {
         all: [{
             prop: {
@@ -205,119 +679,29 @@ function loadBonzaLibrary(url) {
         }, {
             prop: {
                 name: "math",
-                type: {
-                    all: [{
-                        prop: {
-                            name: "sin",
-                            type: {
-                                func: {
-                                    arg: {
-                                        number: null
-                                    },
-                                    ret: {
-                                        number: null
-                                    }
-                                }
-                            }
-                        },
-                        prop: {
-                            name: "trunc",
-                            type: {
-                                func: {
-                                    arg: {
-                                        number: null
-                                    },
-                                    ret: {
-                                        integer: null
-                                    }
-                                }
-                            }
-                        },
-                        prop: {
-                            name: "NaN",
-                            type: {
-                                func: {
-                                    arg: {
-                                        number: null
-                                    },
-                                    ret: {
-                                        none: null
-                                    }
-                                }
-                            }
-                        },
-                        prop: {
-                            name: "finite",
-                            type: {
-                                func: {
-                                    arg: {
-                                        number: null
-                                    },
-                                    ret: {
-                                        none: null
-                                    }
-                                }
-                            }
-                        }
-                    }]
-                }
+                type: coremathtype
             }
         }, {
             prop: {
                 name: "time",
-                type: {
-                    all: [{
-                        prop: {
-                            name: "msec",
-                            type: {
-                                interval: null
-                            }
-                        }
-                    }, {
-                        prop: {
-                            name: "sec",
-                            type: {
-                                interval: null
-                            }
-                        }
-                    }, {
-                        prop: {
-                            name: "date",
-                            type: {
-                                func: {
-                                    arg: {
-                                        all: [{
-                                            prop: {
-                                                name: "year",
-                                                type: {
-                                                    integer: null
-                                                }
-                                            }
-                                        }, {
-                                            prop: {
-                                                name: "month",
-                                                type: {
-                                                    integer: null
-                                                }
-                                            }
-                                        }, {
-                                            prop: {
-                                                name: "day",
-                                                type: {
-                                                    integer: null
-                                                }
-                                            }
-                                        }]
-                                    },
-                                    ret: {
-                                        time: null
-                                    }
-                                }
-                            }
-                        }
-                    }]
-                }
+                type: coretimetype
             }
+        }, {
+            prop: {
+                name: "format",
+                type: coreformattype
+            }
+        }, {
+            prop: {
+                name: "string",
+                type: corestringtype
+            }
+        }, {
+            prop: {
+                name: "xml",
+                type: corexmltype
+            }
+
         }]
     };
 
@@ -454,7 +838,7 @@ function loadBonzaLibrary(url) {
                             throw "Fail";
                         }
                     }
-                    if (args.length == 0) {
+                    if (args.length === 0) {
                         result = prev();
                     } else if (args.length == 1) {
                         result = prev(args[0]);
@@ -691,6 +1075,7 @@ function loadBonzaLibrary(url) {
             }
 
             function parseVar() {
+                var i;
                 if (token !== null && token[0] === token[3]) {
                     result = context[token[0]];
                     token = scanner.exec(formula);
@@ -733,7 +1118,7 @@ function loadBonzaLibrary(url) {
             } catch (error) {
                 return false;
             }
-        };
+        }
 
         function evalExpr(expr, context, output) {
             var stmt;
@@ -979,7 +1364,7 @@ function loadBonzaLibrary(url) {
             } catch (error) {
                 return false;
             }
-        };
+        }
 
         function evalStmt(stmt, context, output) {
             var name;
@@ -1043,7 +1428,7 @@ function loadBonzaLibrary(url) {
             } catch (error) {
                 return false;
             }
-        };
+        }
 
         this.evalExpr = evalExpr;
         this.evalStmt = evalStmt;
@@ -1055,8 +1440,23 @@ function loadBonzaLibrary(url) {
 
     function analyzeApplet(code, context) {
         var result = {
+            name: "unknown",
+            output: {
+                type: {
+                    other: null
+                },
+                errors: []
+            },
+            state: {
+                name: "unknown",
+                type: {
+                    other: null
+                },
+                errors: []
+            },
             errors: []
         };
+        var name;
         var type;
         var temp;
         var temp2;
@@ -1068,117 +1468,117 @@ function loadBonzaLibrary(url) {
             types: context.types.slice()
         };
 
-        try {
-            result.name = code.getAttribute("name");
-        } catch (error) {
+        name = code.getAttribute("name");
+        if (name === null || name === "") {
             result.errors.push("Applet name not specified");
-            result.noname = null;
+        } else {
+            result.name = name;
         }
         temp = findChildren(code, "output");
         if (temp.length > 1) {
             result.errors.push("More than one output type");
-            type = {
-                none: null,
-                errors: []
-            };
         } else if (temp.length == 1) {
             type = analyzeType(temp[0].children[0], context);
-        } else {
-            type = {
-                none: null,
-                errors: []
-            };
+            result.output = type;
+            if (type.errors.length > 0) {
+                result.errors.push("Erroneous output type");
+            }
         }
-        result.output = type;
 
         temp = findChildren(code, "state");
         if (temp.length > 1) {
             result.errors.push("More than one state specified");
-            result.nostate = null;
-        } else if (temp.length == 0) {
+        } else if (temp.length === 0) {
             result.errors.push("State not specified");
-            result.nostate = null;
+        } else {
+            type = analyzeType(temp[0].children[0], context);
+            if (type.errors.length > 0) {
+                result.errors.push("Invalid state definition");
+            }
+            result.state.type = type.type;
+            result.state.errors = type.errors;
+            name = temp[0].getAttribute("name");
+            if (name === null || name === "") {
+                result.errors.push("Missing state name");
+            } else {
+                result.state.name = name;
+            }
+            local.vars.push({
+                name: result.state.name,
+                type: result.state.type
+            });
+        }
+
+        temp = findChildren(code, "content");
+        if (temp.length > 1) {
+            result.errors.push("More than one content specified");
+            result.nocontent = null;
+        } else if (temp.length === 0) {
+            result.errors.push("Content not specified");
+            result.nocontent = null;
         } else {
             try {
-                result.state = analyzeType(temp[0].children[0], context);
-                try {
-                    result.statename = temp[0].getAttribute("name");
-                    local.vars.push({
-                        name: result.statename,
-                        type: result.state
-                    });
-                } catch (error) {
-                    result.nostatename = null;
-                }
+                result.content = analyzeExpr(temp[0].children[0]);
             } catch (error) {
-                result.errors.push("Invalid state definition");
-                result.nostate = null;
+                result.errors.push("Invalid or missing content");
+                result.nocontent = null;
             }
         }
 
-        /*		 temp = findChildren(code, "content");
-		 if (temp.length > 1) {
-		 result.errors.push("More than one content specified");
-		 result.nocontent = null;
-		 } else if (temp.length == 0) {
-		 result.errors.push("Content not specified");
-		 result.nocontent = null;
-		 } else {
-		 try {
-		 result.content = analyzeExpr(temp[0].children[0]);
-		 } catch(error) {
-		 result.errors.push("Invalid or missing content");
-		 result.nocontent = null;
-		 }
-		 }
+        temp = findChildren(code, "init");
+        if (temp.length > 1) {
+            result.errors.push("More than one initialization specified");
+            result.noinit = null;
+        } else if (temp.length === 0) {
+            result.errors.push("Initialization not specified");
+            result.noinit = null;
+        } else {
+            result.init = {};
+        }
 
-		 temp = findChildren(code, "init");
-		 if (temp.length > 1) {
-		 result.errors.push("More than one initialization specified");
-		 result.noinit = null;
-		 } else if (temp.length == 0) {
-		 result.errors.push("Initialization not specified");
-		 result.noinit = null;
-		 } else {
-		 result.init = {};
-		 }
+        try {
+            local.vars.push({
+                name: temp[0].getAttribute("id"),
+                type: {
+                    string: null
+                }
+            });
+        } catch (error) {}
 
-		 try {
-		 local.vars.push({
-		 name : temp[0].getAttribute("id"),
-		 type : {
-		 string : null
-		 }
-		 });
-		 } catch(error) {
-		 }
+        try {
+            local.vars.push({
+                name: temp[0].getAttribute("content"),
+                type: {
+                    string: null
+                }
+            });
+        } catch (error) {}
 
-		 try {
-		 local.vars.push({
-		 name : temp[0].getAttribute("content"),
-		 type : {
-		 string : null
-		 }
-		 });
-		 } catch(error) {
-		 }
+        temp2 = findChildren(temp[0], "state");
+        if (temp2.length > 1) {
+            result.errors.push("More than one initial state specified");
+            result.init.nostate = null;
+        } else if (temp2.length === 0) {
+            result.errors.push("Initial state not specified");
+            result.init.nostate = null;
+        } else {
+            temp2 = getChildren(temp2[0]);
+            if (temp2.length > 1) {
+                result.errors.push("More than one initial state specified");
+                result.init.nostate = null;
+            } else if (temp2.length === 0) {
+                result.errors.push("Initial state not specified");
+                result.init.nostate = null;
+            } else {
+                result.init.state = analyzeExpr(temp2[0], local);
+                if (!covariant(result.init.state.type, result.state.type)) {
+                    result.errors.push("Initial state does not meet state type");
+                }
+            }
+        }
 
-		 temp2 = findChildren(temp[0], "state");
-		 if (temp2.length > 1) {
-		 result.errors.push("More than one initial state specified");
-		 result.init.nostate = null;
-		 } else if (temp2.length == 0) {
-		 result.errors.push("Initial state not specified");
-		 result.init.nostate = null;
-		 } else {
-		 result.init.state = analyzeExpr(temp2[0], local);
-		 }
 
-		 if (result.nostate || !covariant(result.init.state, result.state)) {
-		 result.errors.push("Initial state does not meet state type");
-		 }
-
-		 temp2 = findChildren(temp[0], "actions");
+        /*temp2 = findChildren(temp[0], "actions");
 		 if (temp2.length > 1) {
 		 result.errors.push("More than one initial action list specified");
 		 result.init.noactions = null;
@@ -1357,7 +1757,7 @@ function loadBonzaLibrary(url) {
                 }
                 token = scanner.exec(formula);
                 level--;
-                if (obj.all.length == 0) {
+                if (obj.all.length === 0) {
                     result = obj.all[0];
                 } else {
                     result = obj;
@@ -1646,9 +2046,12 @@ function loadBonzaLibrary(url) {
                 for (var i = 0; i < context.vars.length; i++) {
                     if (context.vars[i].name == token[0]) {
                         result = context.vars[i].type;
+                        break;
                     }
                 }
-                throw "Variable " + token[0] + " not found";
+                if (i == context.vars.length) {
+                    throw "Variable " + token[0] + " not found";
+                }
                 token = scanner.exec(formula);
                 return true;
             } else {
@@ -1700,7 +2103,7 @@ function loadBonzaLibrary(url) {
             };
         }
 
-    };
+    }
 
     function analyzeExpr(expr, context) {
         var stmt;
@@ -1713,7 +2116,10 @@ function loadBonzaLibrary(url) {
             },
             errors: []
         };
-        var context2 = {};
+        var context2 = {
+            types: context.types.slice(),
+            vars: context.vars.slice()
+        };
         var prop;
         var temp;
         var idxname;
@@ -1730,7 +2136,7 @@ function loadBonzaLibrary(url) {
                 if (type.errors.length > 0) {
                     result.errors.push("Invalid data type");
                 }
-                result.type = type;
+                result.type = type.type;
                 return result;
             }
             switch (expr.nodeName) {
@@ -1749,8 +2155,8 @@ function loadBonzaLibrary(url) {
                         if (type.errors.length > 0) {
                             result.errors.push(type.errors[0]);
                         }
-                        if (type.hasOwnProperty("string") || type.hasOwnProperty("integer") || type.hasOwnProperty("number")) {
-                            result.errors.push("Formula of type " + typeStr(type) + " cannot be inserted in text");
+                        if (type.type.hasOwnProperty("string") || type.type.hasOwnProperty("integer") || type.type.hasOwnProperty("number")) {
+                            result.errors.push("Formula of type " + typeStr(type.type) + " cannot be inserted in text");
                         }
                         formula = frmpat.exec(temp);
                     }
@@ -1762,7 +2168,7 @@ function loadBonzaLibrary(url) {
                     temp = getChildren(temp);
                     if (temp.length > 1) {
                         result.errors.push("More than one expression specified");
-                    } else if (temp.length == 0) {
+                    } else if (temp.length === 0) {
                         result.errors.push("Expression not specified");
                     } else {}
                     temp = analyzeExpr(temp[0], context);
@@ -1782,12 +2188,12 @@ function loadBonzaLibrary(url) {
                     if (temp.length > 0) {
                         type = analyzeType(temp[0], context);
                         result.type = {
-                            array: type
+                            array: type.type
                         };
                         for (i = 1; i < temp.length; i++) {
-                            type = analyzeType(temp[0], context);
-                            if (!covariant(type, result.type)) {
-                                result.errors.push("Element type is " + typeStr(type) + "; must be " + typeStr(result.type));
+                            type = analyzeType(temp[i], context);
+                            if (!covariant(type.type, result.type)) {
+                                result.errors.push("Element type is " + typeStr(type.type) + "; must be " + typeStr(result.type));
                             }
                         }
                     } else {
@@ -1798,13 +2204,13 @@ function loadBonzaLibrary(url) {
                     temp = findChildren(expr, "size");
                     if (temp.length > 1) {
                         result.errors.push("More than one array size specified");
-                    } else if (temp.length == 0) {
+                    } else if (temp.length === 0) {
                         result.errors.push("Array size not specified");
                     } else {
                         temp = getChildren(temp);
                         if (temp.length > 1) {
                             result.errors.push("More than one array size specified");
-                        } else if (temp.length == 0) {
+                        } else if (temp.length === 0) {
                             result.errors.push("Array size not specified");
                         } else {
                             temp = analyzeExpr(temp, context);
@@ -1818,29 +2224,29 @@ function loadBonzaLibrary(url) {
                     temp = findChildren(expr, "item");
                     if (temp.length > 1) {
                         result.errors.push("More than one item expression specified");
-                    } else if (temp.length == 0) {
+                    } else if (temp.length === 0) {
                         result.errors.push("Item expression not specified");
                     } else {
                         idxname = temp.getAttribute("index");
                         if (idxname === null || idxname === "") {
                             result.errors.push("Index attribute not specified");
                         }
-                        for (prop in context) {
-                            context2[prop] = context[prop];
-                        }
-                        context2.vars.push({
-                            name: idxname,
-                            type: {
-                                integer: null
-                            }
-                        });
                         temp = getChildren(temp);
                         if (temp.length > 1) {
                             result.errors.push("More than one item expression specified");
-                        } else if (temp.length == 0) {
+                        } else if (temp.length === 0) {
                             result.errors.push("Item expression not specified");
                         } else {
+                            context2.vars.push({
+                                name: idxname,
+                                type: {
+                                    integer: null
+                                }
+                            });
                             temp = analyzeExpr(temp[0], context2);
+                            if (temp.errors.length > 0) {
+                                result.errors.push("Invalid item expression");
+                            }
                             result.type = {
                                 array: temp.type
                             };
@@ -1851,22 +2257,23 @@ function loadBonzaLibrary(url) {
                     temp = getChildren(expr);
                     if (temp.length > 1) {
                         result.errors.push("More than one item type specified");
-                    } else if (temp.length == 0) {
+                    } else if (temp.length === 0) {
                         result.errors.push("Item type not specified");
                     } else {
                         type = analyzeType(temp[0], context);
                         result.type = {
-                            array: type
+                            array: type.type
                         };
                     }
                     break;
                 case "calc":
                     where = getChildren(expr);
-                    for (prop in context) {
-                        context2[prop] = context[prop];
-                    }
                     for (i = where.length - 1; i > 0; i--) {
-                        stmt = where[i].children[0];
+                        temp = getChildren(where[i]);
+                        if (temp.length > 1) {
+                            result.errors.push("More than one statement after <where>");
+                        }
+                        stmt = temp[0];
                         if (evalStmt(stmt, context2, result)) {
                             for (prop in result) {
                                 context2[prop] = result[prop];
@@ -1972,7 +2379,9 @@ function loadBonzaLibrary(url) {
                     }
                     return false;
                 case "redraw":
-                    output.result = actions.redraw();
+                    result.type = {
+                        action: null
+                    };
                     break;
                 case "delay":
                     temp = getChildren(expr);
@@ -2008,7 +2417,7 @@ function loadBonzaLibrary(url) {
             result.errors.push(error);
         }
         return result;
-    };
+    }
 
     function analyzeStmt(stmt, context) {
         var result = {
@@ -2027,13 +2436,13 @@ function loadBonzaLibrary(url) {
         switch (stmt.nodeName) {
             case "is":
                 children = getChildren(stmt);
-                if (children.length == 0) {
+                if (children.length === 0) {
                     result.errors.push("Missing expression");
                 } else if (children.length > 1) {
                     result.errors.push("More than one expression specified");
                 } else {
                     expr = analyzeExpr(firstExpr(stmt), context);
-                    if (expr.errors.length != 0) {
+                    if (expr.errors.length !== 0) {
                         result.errors.push("Invalid expression");
                     }
                     result.is = expr;
@@ -2041,13 +2450,13 @@ function loadBonzaLibrary(url) {
                 break;
             case "not":
                 children = getChildren(stmt);
-                if (children.length == 0) {
+                if (children.length === 0) {
                     result.errors.push("Missing statement");
                 } else if (children.length > 1) {
                     result.errors.push("More than one statement specified");
                 } else {
                     expr = analyzeStmt(stmt.children[0], context);
-                    if (expr.errors.length != 0) {
+                    if (expr.errors.length !== 0) {
                         result.errors.push("Invalid statement");
                     }
                     result.not = expr;
@@ -2060,13 +2469,13 @@ function loadBonzaLibrary(url) {
                         name: name
                     });
                     children = getChildren(stmt);
-                    if (children.length == 0) {
+                    if (children.length === 0) {
                         result.errors.push("Missing expression");
                     } else if (children.length > 1) {
                         result.errors.push("More than one expression specified");
                     } else {
                         expr = analyzeExpr(firstExpr(stmt), context);
-                        if (expr.errors.length != 0) {
+                        if (expr.errors.length !== 0) {
                             result.errors.push("Invalid expression");
                         }
                         result.vars[0].type = expr.type;
@@ -2213,228 +2622,194 @@ function loadBonzaLibrary(url) {
         var name;
         var temp;
         var i;
-        var chidren = [];
+        var children = [];
         var argerrors = [];
         var reterrors = [];
         var argtype;
         var rettype;
         var prop;
         var result = {
+            type: {
+                none: null
+            },
             errors: []
         };
 
         switch (code.nodeName) {
             case "none":
-                return {
-                    none: null,
-                    errors: []
-                };
+                break;
             case "integer":
-                return {
-                    integer: null,
-                    errors: []
+                result.type = {
+                    integer: null
                 };
+                break;
             case "number":
-                return {
-                    number: null,
-                    errors: []
+                result.type = {
+                    number: null
                 };
+                break;
             case "string":
-                return {
-                    string: null,
-                    errors: []
+                result.type = {
+                    string: null
                 };
+                break;
             case "time":
-                return {
-                    time: null,
-                    errors: []
+                result.type = {
+                    time: null
                 };
+                break;
             case "interval":
-                return {
-                    interval: null,
-                    errors: []
+                result.type = {
+                    interval: null
                 };
+                break;
             case "dynamic":
-                return {
-                    dynamic: null,
-                    errors: []
+                result.type = {
+                    dynamic: null
                 };
+                break;
             case "action":
-                return {
-                    action: null,
-                    errors: []
+                result.type = {
+                    action: null
                 };
+                break;
             case "prop":
-                try {
-                    name = code.getAttribute("name");
-                } catch (error) {
-                    return {
-                        none: null,
-                        errors: ["Missing property name"]
-                    };
+                name = code.getAttribute("name");
+                if (name === null || name === "") {
+                    result.errors.push("Missing property name");
                 }
-                if (code.children.length == 0) {
-                    type = {
-                        none: null,
-                        errors: []
+                children = getChildren(code);
+                if (children.length === 0) {
+                    result.type = {
+                        none: null
                     };
                 } else {
-                    type = analyzeType(code.children[0], context);
-                }
-                if (type.errors.length == 0) {
-                    return {
+                    type = analyzeType(children[0], context);
+                    if (type.errors.length > 0) {
+                        result.errors.push(type.errors[0]);
+                    }
+                    result.type = {
                         prop: {
                             name: name,
-                            type: type
-                        },
-                        errors: []
-                    };
-                } else {
-                    return {
-                        prop: {
-                            name: name,
-                            type: type
-                        },
-                        errors: ["Invalid object property type"]
+                            type: type.type
+                        }
                     };
                 }
+                break;
             case "all":
-                chidren.length = code.children.length;
-                for (i = 0; i < code.children.length; i++) {
-                    type = analyzeType(code.children[i], context);
-                    if (!isObjType(type)) {
-                        errors++;
+                result.type.all = [];
+                children = getChildren(code);
+                for (i = 0; i < children.length; i++) {
+                    type = analyzeType(children[i], context);
+                    if (!isObjType(type.type)) {
+                        result.errors.push("Invalid object property type");
                     }
-                    chidren[i] = type;
-                    if (type.errors.length != 0) {
-                        errors++;
+                    if (type.errors.length !== 0) {
+                        result.errors.push(type.errors[0]);
                     }
+                    result.type.all.push(type.type);
                 }
-                if (errors == 0) {
-                    return {
-                        all: chidren,
-                        errors: []
-                    };
-                } else {
-                    return {
-                        all: chidren,
-                        errors: ["Invalid object property type"]
-                    };
-                }
+                break;
             case "any":
-                chidren.length = code.children.length;
-                for (i = 0; i < code.children.length; i++) {
-                    type = analyzeType(code.children[i], context);
-                    if (!isObjType(type)) {
-                        errors++;
+                result.type.any = [];
+                children = getChildren(code);
+                for (i = 0; i < children.length; i++) {
+                    type = analyzeType(children[i], context);
+                    if (!isObjType(type.type)) {
+                        result.errors.push("Invalid object property type");
                     }
-                    chidren[i] = type;
-                    if (type.errors.length != 0) {
-                        errors++;
+                    if (type.errors.length !== 0) {
+                        result.errors.push(type.errors[0]);
                     }
+                    result.type.any.push(type.type);
                 }
-                if (errors == 0) {
-                    return {
-                        any: chidren,
-                        errors: []
-                    };
-                } else {
-                    return {
-                        any: chidren,
-                        errors: ["Invalid object property type"]
-                    };
-                }
+                break;
             case "array":
-                try {
-                    type = analyzeType(code.children[0], context);
-                } catch (error) {
-                    return {
-                        none: null,
-                        errors: ["Missing array element type"]
+                children = getChildren(code);
+                if (children.length > 1) {
+                    result.errors.push("More than one item type");
+                    result.type = {
+                        none: null
                     };
-                }
-                if (type.errors.length == 0) {
-                    return {
-                        array: type,
-                        errors: []
+                } else if (children.length === 0 || (children.length == 1 && children[0].children.length === 0)) {
+                    result.errors.push("Missing item type");
+                    result.type = {
+                        none: null
                     };
                 } else {
-                    return {
-                        array: type,
-                        errors: ["Invalid array element type"]
+                    type = analyzeType(children[0], context);
+                    if (type.errors.length > 0) {
+                        result.errors.push(type.errors[0]);
+                    }
+                    result.type = {
+                        array: type.type
                     };
                 }
+                break;
             case "func":
                 children = findChildren(code, "arg");
-                if (chidren.length > 1 || (chidren.length == 1 && children[0].children.length > 1)) {
-                    argerrors = ["More than one argument type"];
+                if (children.length > 1 || (children.length == 1 && children[0].children.length > 1)) {
+                    result.errors.push("More than one argument type");
                     argtype = {
                         none: null,
-                        errors: []
                     };
-                } else if (chidren.length == 0 || (chidren.length == 1 && children[0].children.length == 0)) {
-                    argerrors = ["Missing argument type"];
+                } else if (children.length === 0 || (children.length == 1 && children[0].children.length === 0)) {
+                    result.errors.push("Missing argument type");
                     argtype = {
                         none: null,
-                        errors: []
                     };
                 } else {
-                    argtype = analyzeType(chidren[0].children[0], context);
+                    type = analyzeType(children[0].children[0], context);
+                    if (type.errors.length > 0) {
+                        result.errors.push(type.errors[0]);
+                    }
+                    argtype = type.type;
                 }
                 children = findChildren(code, "return");
-                if (chidren.length > 1 || (chidren.length == 1 && children[0].children.length > 1)) {
-                    reterrors = ["More than one return type"];
+                if (children.length > 1 || (children.length == 1 && children[0].children.length > 1)) {
+                    result.errors.push("More than one return type");
                     rettype = {
                         none: null,
-                        errors: []
                     };
-                } else if (chidren.length == 0 || (chidren.length == 1 && children[0].children.length == 0)) {
-                    reterrors = ["Missing return type"];
+                } else if (children.length === 0 || (children.length == 1 && children[0].children.length === 0)) {
+                    result.errors.push("Missing return type");
                     rettype = {
                         none: null,
-                        errors: []
                     };
                 } else {
-                    rettype = analyzeType(chidren[0].children[0], context);
+                    type = analyzeType(children[0].children[0], context);
+                    if (type.errors.length > 0) {
+                        result.errors.push(type.errors[0]);
+                    }
+                    rettype = type.type;
                 }
                 temp = [];
-                if (argerrors.length > 0) {
-                    temp.push(argerrors[0]);
-                }
-                if (reterrors.length > 0) {
-                    temp.push(reterrors[0]);
-                }
-                return {
+                result.type = {
                     func: {
                         arg: argtype,
-                        ret: rettype,
-                        errors: temp
+                        ret: rettype
                     }
                 };
+                break;
             case "type":
-                try {
-                    name = code.getAttribute("name");
-                } catch (error) {
-                    return {
-                        none: null,
-                        errors: ["Missing type name"]
-                    };
+                name = code.getAttribute("name");
+                if (name === null || name === "") {
+                    result.errors.push("Missing type name");
                 }
                 for (i = 0; i < context.types.length; i++) {
                     if (context.types[i].name == name) {
-                        return context.types[i].type;
+                        result.type = context.types[i].type;
+                        break;
                     }
                 }
-                return {
-                    none: null,
-                    errors: ["Unknown user-defined data type: " + name]
-                };
+                if (i == context.types.length) {
+                    result.errors.push("Unknown user-defined data type: " + name);
+                }
+                break;
             default:
-                return {
-                    none: null,
-                    errors: ["Unknown data type: " + code.nodeName]
-                };
+                result.errors.push("Unknown data type: " + code.nodeName);
         }
+        return result;
     }
 
     function typeStr(type) {
@@ -2542,7 +2917,10 @@ function loadBonzaLibrary(url) {
     function analyzeLib(code) {
         var result = {
             global: {
-                vars: [],
+                vars: [{
+                    name: "core",
+                    type: coretype
+                }],
                 types: []
             },
             errors: [],
@@ -2572,7 +2950,7 @@ function loadBonzaLibrary(url) {
                     }
                     result.global.types.push({
                         name: name,
-                        type: type
+                        type: type.type
                     });
 
                 }
@@ -2885,7 +3263,7 @@ function loadBonzaLibrary(url) {
                                 local[prop] = target.local[prop];
                             }
                             local[target.listeners[applet.name].data] = msg;
-                            for (var id in target.instances) {
+                            for (id in target.instances) {
                                 var state = target.instances[id];
                                 local[target.statename] = state;
                                 if (engine.evalExpr(target.listeners[applet.name].expr, local, output)) {
