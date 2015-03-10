@@ -1,3 +1,8 @@
+body {
+	background-color: green;
+	background-image: url("Free-High-Quality-Wallpaper-Minimalist-Green-Background-Nice-and-Fit.jpg");
+	color: white;
+}
 .applet-info {
 }
 .applet-name {
@@ -7,9 +12,16 @@
 .more-icon {
 	cursor: pointer;
 }
-.error-list {
+.error {
 	color: red;
 }
 textarea {
 	tab-size: 4;
+}
+.expandable {
+	background-color: white;
+	color: black;
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 4px;
 }

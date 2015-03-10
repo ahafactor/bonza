@@ -47,6 +47,15 @@ function loadBonzaLibrary(url) {
         return result;
     }
 
+    function single(a, name) {
+        if (a.length > 1) {
+            throw "More than one " + name;
+        } else if (a.length === 0) {
+            throw "Missing " + name;
+        }
+        return a[0];
+    }
+
     var core = {
         classname: function(name) {
             return "bonza-" + name;
@@ -1454,6 +1463,31 @@ function loadBonzaLibrary(url) {
                 },
                 errors: []
             },
+            init: {
+                state: {
+                    name: "unknown",
+                    type: {
+                        other: null
+                    },
+                    errors: []
+                },
+                actions: []
+            },
+            respond: {
+                input: {
+                    name: "unknown"
+                },
+                state: {
+                    name: "unknown",
+                    type: {
+                        other: null
+                    },
+                    errors: []
+                },
+                actions: []
+            },
+            events: [],
+            accept: [],
             errors: []
         };
         var name;
@@ -1467,6 +1501,8 @@ function loadBonzaLibrary(url) {
             vars: context.vars.slice(),
             types: context.types.slice()
         };
+        var templocal;
+        var i;
 
         name = code.getAttribute("name");
         if (name === null || name === "") {
@@ -1474,165 +1510,136 @@ function loadBonzaLibrary(url) {
         } else {
             result.name = name;
         }
+
         temp = findChildren(code, "output");
-        if (temp.length > 1) {
-            result.errors.push("More than one output type");
-        } else if (temp.length == 1) {
-            type = analyzeType(temp[0].children[0], context);
-            result.output = type;
-            if (type.errors.length > 0) {
-                result.errors.push("Erroneous output type");
-            }
+        temp = getChildren(single(temp, "output type"));
+        type = analyzeType(single(temp, "output type"), context);
+        result.output = type;
+        if (type.errors.length > 0) {
+            result.errors.push("Erroneous output type");
         }
 
-        temp = findChildren(code, "state");
-        if (temp.length > 1) {
-            result.errors.push("More than one state specified");
-        } else if (temp.length === 0) {
-            result.errors.push("State not specified");
+        temp = single(findChildren(code, "state"), "state");
+        name = temp.getAttribute("name");
+        if (name === null || name === "") {
+            result.errors.push("Missing state name");
         } else {
-            type = analyzeType(temp[0].children[0], context);
-            if (type.errors.length > 0) {
-                result.errors.push("Invalid state definition");
-            }
-            result.state.type = type.type;
-            result.state.errors = type.errors;
-            name = temp[0].getAttribute("name");
-            if (name === null || name === "") {
-                result.errors.push("Missing state name");
-            } else {
-                result.state.name = name;
-            }
-            local.vars.push({
-                name: result.state.name,
-                type: result.state.type
-            });
+            result.state.name = name;
+        }
+        temp = getChildren(temp);
+        type = analyzeType(single(temp, "state"), context);
+        if (type.errors.length > 0) {
+            result.errors.push("Invalid state definition");
+        }
+        result.state.type = type.type;
+        result.state.errors = type.errors;
+        local.vars.push({
+            name: result.state.name,
+            type: result.state.type
+        });
+
+        temp = single(findChildren(code, "content"), "content");
+        temp = single(getChildren(temp), "content");
+        result.content = analyzeExpr(temp, local);
+        if (result.content.errors.length > 0) {
+            result.errors.push("Invalid or missing content");
         }
 
-        temp = findChildren(code, "content");
-        if (temp.length > 1) {
-            result.errors.push("More than one content specified");
-            result.nocontent = null;
-        } else if (temp.length === 0) {
-            result.errors.push("Content not specified");
-            result.nocontent = null;
-        } else {
-            try {
-                result.content = analyzeExpr(temp[0].children[0]);
-            } catch (error) {
-                result.errors.push("Invalid or missing content");
-                result.nocontent = null;
+        temp = single(findChildren(code, "init"), "initialization");
+
+        templocal = {
+            vars: local.vars.slice(),
+            types: local.types.slice()
+        };
+
+        local.vars.push({
+            name: temp.getAttribute("id"),
+            type: {
+                string: null
             }
+        });
+
+        local.vars.push({
+            name: temp.getAttribute("content"),
+            type: {
+                string: null
+            }
+        });
+
+        temp2 = single(findChildren(temp, "state"));
+        temp2 = single(getChildren(temp2));
+        result.init.state = analyzeExpr(temp2, local);
+        if (!covariant(result.init.state.type, result.state.type)) {
+            result.errors.push("Initial state does not conform state type");
         }
 
-        temp = findChildren(code, "init");
-        if (temp.length > 1) {
-            result.errors.push("More than one initialization specified");
-            result.noinit = null;
-        } else if (temp.length === 0) {
-            result.errors.push("Initialization not specified");
-            result.noinit = null;
+        local = templocal;
+
+        try {
+            temp2 = single(findChildren(temp, "actions"), "action list");
+            temp2 = getChildren(temp2);
+            for (i = 0; i < temp2.length; i++) {
+                result.init.actions.push(analyzeExpr(temp2[i], context));
+                if (!covariant(result.init.actions[i].type, {
+                    action: null
+                })) {
+                    result.errors.push("Expression of invalid type in action list");
+                }
+            }
+        } catch (error) {}
+
+        temp = single(findChildren(code, "respond"), "response");
+        temp2 = single(findChildren(temp, "input"), "input");
+        name = temp2.getAttribute("name");
+        if (name === null || name === "") {
+            result.errors.push("Response input name not specified");
         } else {
-            result.init = {};
+            result.respond.input.name = name;
+        }
+        temp2 = single(getChildren(temp2), "response input type");
+        type = analyzeType(temp2, context);
+        local.vars.push({
+            name: name,
+            type: type.type
+        });
+        if (type.errors.length > 0) {
+            result.errors.push("Invalid response state type");
+        }
+        result.respond.input.type = type.type;
+        result.respond.input.errors = type.errors;
+
+        local.vars.push({
+            name: result.respond.input.name,
+            type: result.respond.input.type
+        });
+
+        temp2 = single(findChildren(temp, "state"), "response state");
+        temp2 = single(getChildren(temp2), "response state");
+        result.respond.state = analyzeExpr(temp2, local);
+        if (!covariant(result.respond.state.type, result.state.type)) {
+            result.errors.push("Response state does not meet state type");
         }
 
         try {
-            local.vars.push({
-                name: temp[0].getAttribute("id"),
-                type: {
-                    string: null
-                }
-            });
-        } catch (error) {}
-
-        try {
-            local.vars.push({
-                name: temp[0].getAttribute("content"),
-                type: {
-                    string: null
-                }
-            });
-        } catch (error) {}
-
-        temp2 = findChildren(temp[0], "state");
-        if (temp2.length > 1) {
-            result.errors.push("More than one initial state specified");
-            result.init.nostate = null;
-        } else if (temp2.length === 0) {
-            result.errors.push("Initial state not specified");
-            result.init.nostate = null;
-        } else {
-            temp2 = getChildren(temp2[0]);
-            if (temp2.length > 1) {
-                result.errors.push("More than one initial state specified");
-                result.init.nostate = null;
-            } else if (temp2.length === 0) {
-                result.errors.push("Initial state not specified");
-                result.init.nostate = null;
-            } else {
-                result.init.state = analyzeExpr(temp2[0], local);
-                if (!covariant(result.init.state.type, result.state.type)) {
-                    result.errors.push("Initial state does not meet state type");
+            temp2 = single(findChildren(temp, "actions"), "response action list");
+            temp2 = getChildren(temp2);
+            for (i = 0; i < temp2.length; i++) {
+                result.respond.actions.push(analyzeExpr(temp2[i], context));
+                if (!covariant(result.respond.actions[i].type, {
+                    action: null
+                })) {
+                    result.errors.push("Expression of invalid type in action list");
                 }
             }
-        }
+        } catch (error) {}
 
-
-        /*temp2 = findChildren(temp[0], "actions");
-		 if (temp2.length > 1) {
-		 result.errors.push("More than one initial action list specified");
-		 result.init.noactions = null;
-		 } else if (temp2.length == 0) {
-		 result.errors.push("Initial actions not specified");
-		 result.init.noactions = null;
-		 } else {
-		 result.init.actions = analyzeExpr(temp2[0], local);
-		 if (!covariant(result.init.actions, {
-		 array : {
-		 action : null
-		 }
-		 })) {
-		 result.errors.push("Initial actions must be an array of actions");
-		 }
-		 }
-
-		 temp = findChildren(code, "respond");
-		 if (temp.length > 1) {
-		 result.errors.push("More than one response specified");
-		 result.noinit = null;
-		 } else if (temp.length == 0) {
-		 result.errors.push("Response not specified");
-		 result.noinit = null;
-		 } else {
-		 try {
-		 temp2 = findChildren(temp[0], "input");
-		 } catch(error) {
-		 temp2 = [];
-		 }
-		 if (temp2.length > 1) {
-		 result.errors.push("More than one input specified");
-		 result.noinput = null;
-		 } else if (temp2.length == 0) {
-		 result.errors.push("Response input not specified");
-		 result.noinput = null;
-		 } else {
-		 result.input = analyzeType(temp2[0]);
-		 }
-		 local.vars.push({
-		 name : temp[0].getAttribute("content"),
-		 type : {
-		 string : null
-		 }
-		 });
-		 }
-		 */
         return result;
 
     }
 
     function analyzeFormula(formula, context) {
 
-        var scanner = /\s*(-?\d*\.\d+)|(-?\d+)|(\w+)|(\".*\")|('.*')|(`..`)|(#)|(\+)|(-)|(\*)|(\/)|(\.)|(\()|(\))|(\[)|(\])|(\{)|(\})|(:)|(,)|(<=?)|(\/?=)|(>=?)/g;
+        var scanner = /\s*(-?\d*\.\d+)|(-?\d+)|(\w+)|(\".*\")|('.*')|(`.*`)|(#)|(\+)|(-)|(\*)|(\/)|(\.)|(\()|(\))|(\[)|(\])|(\{)|(\})|(:)|(,)|(<=?)|(\/?=)|(>=?)/g;
         var token = scanner.exec(formula);
         var result = {
             none: null
@@ -2089,26 +2096,35 @@ function loadBonzaLibrary(url) {
             }
         }
 
-        try {
+        if (parseFormula()) {
             return {
-                type: parseFormula(),
+                type: result,
                 errors: []
             };
-        } catch (error) {
+        } else {
             return {
                 type: {
                     none: null
                 },
-                errors: [error]
+                errors: ["Invalid formula"]
             };
         }
-
     }
 
-    function analyzeExpr(expr, context) {
+    function varpresent(name, context) {
+        for (var i = 0; i < context.vars.length; i++) {
+            if (context.vars[i].name === name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function analyzeExpr(expr, context, inputtype, outputtype) {
         var stmt;
         var where;
         var i;
+        var j;
         var result = {
             code: expr,
             type: {
@@ -2122,6 +2138,7 @@ function loadBonzaLibrary(url) {
         };
         var prop;
         var temp;
+        var temp2;
         var idxname;
         var arg;
         var argname;
@@ -2134,7 +2151,7 @@ function loadBonzaLibrary(url) {
             if (expr.nodeType == 3) {
                 type = analyzeFormula(expr.nodeValue.trim(), context);
                 if (type.errors.length > 0) {
-                    result.errors.push("Invalid data type");
+                    result.errors.push("Invalid formula data type");
                 }
                 result.type = type.type;
                 return result;
@@ -2155,7 +2172,7 @@ function loadBonzaLibrary(url) {
                         if (type.errors.length > 0) {
                             result.errors.push(type.errors[0]);
                         }
-                        if (type.type.hasOwnProperty("string") || type.type.hasOwnProperty("integer") || type.type.hasOwnProperty("number")) {
+                        if (!(type.type.hasOwnProperty("string") || type.type.hasOwnProperty("integer") || type.type.hasOwnProperty("number"))) {
                             result.errors.push("Formula of type " + typeStr(type.type) + " cannot be inserted in text");
                         }
                         formula = frmpat.exec(temp);
@@ -2237,6 +2254,9 @@ function loadBonzaLibrary(url) {
                         } else if (temp.length === 0) {
                             result.errors.push("Item expression not specified");
                         } else {
+                            if (varpresent(idxname, context2)) {
+                                result.errors.push("Variable " + idxname + " is already used");
+                            }
                             context2.vars.push({
                                 name: idxname,
                                 type: {
@@ -2272,53 +2292,96 @@ function loadBonzaLibrary(url) {
                         temp = getChildren(where[i]);
                         if (temp.length > 1) {
                             result.errors.push("More than one statement after <where>");
-                        }
-                        stmt = temp[0];
-                        if (evalStmt(stmt, context2, result)) {
-                            for (prop in result) {
-                                context2[prop] = result[prop];
+                        } else if (temp.length === 0) {
+                            result.errors.push("Missing statement after <where>");
+                        } else {
+                            stmt = temp[0];
+                            temp = analyzeStmt(stmt, context2);
+                            for (j = 0; j < temp.vars.length; j++) {
+                                if (varpresent(temp.vars[j].name, context2)) {
+                                    result.errors.push("Variable " + temp.vars[j].name + " is already used");
+                                }
+                                context2.vars.push(temp.vars[j]);
                             }
-                        } else {
-                            output.result = undefined;
-                            return false;
+                            if (temp.errors.length > 0) {
+                                result.errors.push("Erroneous statement after <where>");
+                            }
                         }
                     }
-                    return evalExpr(where[0], context2, output);
+                    return analyzeExpr(where[0], context2);
                 case "func":
-                    arg = findChild(expr, "arg");
-                    argname = arg.getAttribute("name");
-                    ret = findChild(expr, "return");
-                    for (prop in context) {
-                        context2[prop] = context[prop];
+                    arg = findChildren(expr, "arg");
+                    if (arg.length > 1) {
+                        throw "More than one argument";
+                    } else if (arg.length === 0) {
+                        throw "Missing argument";
                     }
-                    output.result = function(x) {
-                        var funcout = {};
-                        context2[argname] = x;
-                        if (evalExpr(ret, context2, funcout)) {
-                            return funcout.result;
-                        } else {
-                            throw "Fail";
+                    argname = arg[0].getAttribute("name");
+                    if (argname === null || argname === "") {
+                        throw "Missing argument name";
+                    }
+                    arg = getChildren(arg[0]);
+                    if (arg.length > 1) {
+                        throw "More than one argument";
+                    } else if (arg.length === 0) {
+                        throw "Missing argument";
+                    }
+                    arg = analyzeType(arg[0], context);
+                    if (arg.errors.length > 0) {
+                        result.errors.push("Erroneous argument type");
+                    }
+                    ret = findChildren(expr, "return");
+                    if (ret.length > 1) {
+                        throw "More than one result";
+                    } else if (ret.length === 0) {
+                        throw "Missing result";
+                    }
+                    ret = getChildren(ret[0]);
+                    if (ret.length > 1) {
+                        throw "More than one result";
+                    } else if (ret.length === 0) {
+                        throw "Missing result";
+                    }
+                    if (varpresent(argname, context2)) {
+                        result.errors.push("Variable " + argname + " is already used");
+                    }
+                    context2.vars.push({
+                        name: argname,
+                        type: arg.type
+                    });
+                    ret = analyzeExpr(ret[0], context2);
+                    if (ret.errors.length > 0) {
+                        result.errors.push("Erroneous return expression");
+                    }
+                    result.type = {
+                        func: {
+                            arg: arg.type,
+                            ret: ret.type
                         }
                     };
                     break;
                 case "wrap":
-                    for (prop in context) {
-                        context2[prop] = context[prop];
+                    temp = getChildren(stmt);
+                    if (temp.length > 1) {
+                        throw "More than one statement after <wrap>";
+                    } else if (temp.length === 0) {
+                        throw "Missing statement after <wrap>";
                     }
-                    for (i = 0; i < stmt.childNodes.length; i++) {
-                        if (stmt.childNodes[i].nodeType != 3) {
-                            if (evalStmt(stmt.childNodes[i], context2, result)) {
-                                for (prop in result) {
-                                    context2[prop] = result[prop];
-                                    output2[prop] = result[prop];
-                                }
-                                result = {};
-                            } else {
-                                return false;
+                    result.type = {
+                        all: []
+                    };
+                    temp2 = analyzeStmt(temp[0], context);
+                    if (temp2.errors.length > 0) {
+                        result.errors.push("Erroneous statement after <wrap>");
+                    }
+                    for (i = 0; i < temp2.vars.length; i++) {
+                        result.type.all.push({
+                            prop: {
+                                name: temp2.vars[i].name,
+                                type: temp2.vars[i].type
                             }
-                        }
+                        });
                     }
-                    output.result = output2;
                     break;
                 case "find":
                     temp = firstExpr(findChild(expr, "in"));
@@ -2464,7 +2527,7 @@ function loadBonzaLibrary(url) {
                 break;
             case "def":
                 try {
-                    name = code.getAttribute("var");
+                    name = stmt.getAttribute("var");
                     result.vars.push({
                         name: name
                     });
@@ -2681,7 +2744,12 @@ function loadBonzaLibrary(url) {
                 children = getChildren(code);
                 if (children.length === 0) {
                     result.type = {
-                        none: null
+                        prop: {
+                            name: name,
+                            type: {
+                                none: null
+                            }
+                        }
                     };
                 } else {
                     type = analyzeType(children[0], context);
@@ -2697,7 +2765,9 @@ function loadBonzaLibrary(url) {
                 }
                 break;
             case "all":
-                result.type.all = [];
+                result.type = {
+                    all: []
+                };
                 children = getChildren(code);
                 for (i = 0; i < children.length; i++) {
                     type = analyzeType(children[i], context);
@@ -2711,7 +2781,9 @@ function loadBonzaLibrary(url) {
                 }
                 break;
             case "any":
-                result.type.any = [];
+                result.type = {
+                    any: []
+                };
                 children = getChildren(code);
                 for (i = 0; i < children.length; i++) {
                     type = analyzeType(children[i], context);
@@ -2783,7 +2855,6 @@ function loadBonzaLibrary(url) {
                     }
                     rettype = type.type;
                 }
-                temp = [];
                 result.type = {
                     func: {
                         arg: argtype,
@@ -2813,8 +2884,13 @@ function loadBonzaLibrary(url) {
     }
 
     function typeStr(type) {
+        return "<code>" + formatType(type, "") + "</code>";
+    }
+
+    function formatType(type, indent) {
         var temp;
         var i;
+        var newindent = "&nbsp;&nbsp;&nbsp;&nbsp;" + indent;
 
         if (type.hasOwnProperty("none")) {
             return "none";
@@ -2838,22 +2914,22 @@ function loadBonzaLibrary(url) {
             if (type.prop.type.hasOwnProperty("none")) {
                 return type.prop.name + ': ';
             } else {
-                return type.prop.name + ': ' + typeStr(type.prop.type);
+                return type.prop.name + ': ' + formatType(type.prop.type, newindent);
             }
         } else if (type.hasOwnProperty("all")) {
-            temp = "{ ";
+            temp = "<br/>" + indent + "{ <br/>";
             for (i = 0; i < type.all.length - 1; i++) {
-                temp = temp.concat(typeStr(type.all[i]), ", ");
+                temp = temp.concat(newindent, formatType(type.all[i], newindent), ", <br/>");
             }
-            return temp + typeStr(type.all[type.all.length - 1]) + " }";
+            return temp + newindent + formatType(type.all[type.all.length - 1], newindent) + "<br/>" + indent + "}";
         } else if (type.hasOwnProperty("any")) {
-            temp = "{ ";
+            temp = "<br/>" + indent + "{ <br/>";
             for (i = 0; i < type.any.length - 1; i++) {
-                temp = temp.concat(typeStr(type.any[i]), " | ");
+                temp = temp.concat(newindent, formatType(type.any[i], newindent), " | <br/>");
             }
-            return temp + typeStr(type.any[type.any.length - 1]) + " }";
+            return temp + newindent + formatType(type.any[type.any.length - 1], newindent) + "<br/>" + indent + "}";
         } else if (type.hasOwnProperty("func")) {
-            return typeStr(type.arg) + " -> " + typeStr(type.ret);
+            return formatType(type.func.arg, newindent) + " -> " + formatType(type.func.ret, newindent);
         } else {
             return "unknown";
         }
@@ -2911,7 +2987,7 @@ function loadBonzaLibrary(url) {
             return type1.hasOwnProperty(name) && type2.hasOwnProperty(name);
         }
 
-        return both("none") || covNum(type1, type2) || both("string") || both("time") || both("interval") || (both("array") && covariant(type1.array, type2.array)) || covObj(type1, type2) || covFunc(type1, type2);
+        return both("none") || covNum(type1, type2) || both("string") || both("time") || both("interval") || (both("array") && covariant(type1.array, type2.array)) || covObj(type1, type2) || covFunc(type1, type2) || both("action");
     }
 
     function analyzeLib(code) {
@@ -3002,6 +3078,8 @@ function loadBonzaLibrary(url) {
 
     function Applet(xml, context, engine) {
         var temp;
+        var children;
+        var child;
         var prop;
         this.local = {};
         var i;
@@ -3011,41 +3089,48 @@ function loadBonzaLibrary(url) {
         this.events = {};
         this.listeners = {};
 
-        for (i = 0; i < xml.children.length; i++) {
-            temp = xml.children[i];
-            switch (temp.nodeName) {
+        children = getChildren(xml);
+        for (i = 0; i < children.length; i++) {
+            child = children[i];
+            switch (child.nodeName) {
                 case "state":
-                    this.statename = temp.getAttribute("name");
+                    this.statename = child.getAttribute("name");
                     break;
                 case "content":
-                    this.content = firstExpr(temp);
+                    this.content = firstExpr(child);
                     break;
                 case "init":
-                    this.idname = temp.getAttribute("id");
-                    this.contentname = temp.getAttribute("content");
-                    this.initState = firstExpr(findChild(temp, "state"));
-                    try {
-                        this.initActions = firstExpr(findChild(temp, "actions"));
-                    } catch (error) {}
+                    this.idname = child.getAttribute("id");
+                    this.contentname = child.getAttribute("content");
+                    this.initState = firstExpr(findChild(child, "state"));
+                    temp = findChildren(child, "actions");
+                    if (temp.length === 1) {
+                        this.initActions = getChildren(temp[0]);
+                    } else {
+                        this.initActions = [];
+                    }
                     break;
                 case "respond":
-                    this.inputname = findChild(temp, "input").getAttribute("name");
-                    this.respState = firstExpr(findChild(temp, "state"));
-                    try {
-                        this.respActions = firstExpr(findChild(temp, "actions"));
-                    } catch (error) {}
+                    this.inputname = findChild(child, "input").getAttribute("name");
+                    this.respState = firstExpr(findChild(child, "state"));
+                    temp = findChildren(child, "actions");
+                    if (temp.length === 1) {
+                        this.respActions = getChildren(temp[0]);
+                    } else {
+                        this.respActions = [];
+                    }
                     break;
                 case "events":
-                    this.eventname = temp.getAttribute("data");
-                    for (j = 0; j < temp.children.length; j++) {
-                        this.events[temp.children[j].nodeName] = firstExpr(temp.children[j]);
+                    this.eventname = child.getAttribute("data");
+                    for (j = 0; j < child.children.length; j++) {
+                        this.events[child.children[j].nodeName] = firstExpr(child.children[j]);
                     }
                     break;
                 case "accept":
-                    for (j = 0; j < temp.children.length; j++) {
-                        this.listeners[temp.children[j].getAttribute("applet")] = {
-                            data: temp.children[j].getAttribute("data"),
-                            expr: firstExpr(temp.children[j])
+                    for (j = 0; j < child.children.length; j++) {
+                        this.listeners[child.children[j].getAttribute("applet")] = {
+                            data: child.children[j].getAttribute("data"),
+                            expr: firstExpr(child.children[j])
                         };
                     }
                     break;
@@ -3166,10 +3251,9 @@ function loadBonzaLibrary(url) {
                 for (var e in this.events) {
                     element.addEventListener(e, this.handlers[e]);
                 }
-                if (engine.evalExpr(this.initActions, this.local, output)) {
-                    var actions = output.result;
-                    for (i = 0; i < actions.length; i++) {
-                        var action = actions[i];
+                for (i = 0; i < this.initActions.length; i++) {
+                    if (engine.evalExpr(this.initActions[i], this.local, output)) {
+                        var action = output.result;
                         action(this, id);
                     }
                 }
@@ -3202,10 +3286,9 @@ function loadBonzaLibrary(url) {
                 if (engine.evalExpr(this.respState, this.local, output)) {
                     this.instances[id] = output.result;
                     this.local[this.statename] = output.result;
-                    if (engine.evalExpr(this.respActions, this.local, output)) {
-                        var actions = output.result;
-                        for (j = 0; j < actions.length; j++) {
-                            var action = actions[j];
+                    for (i = 0; i < this.respActions.length; i++) {
+                        if (engine.evalExpr(this.respActions[i], this.local, output)) {
+                            var action = output.result;
                             action(this, id);
                         }
                     }
