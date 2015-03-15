@@ -56,6 +56,24 @@ function loadBonzaLibrary(url) {
         return a[0];
     }
 
+    function display(value) {
+        var prop;
+        var result;
+
+        if (typeof value === "object") {
+            result = "";
+            for (prop in value) {
+                if (result !== "") {
+                    result += ", ";
+                }
+                result += prop + ": " + display(value[prop]);
+            }
+            return "{ " + result + " }";
+        } else {
+            return value;
+        }
+    }
+
     var core = {
         classname: function(name) {
             return "bonza-" + name;
@@ -1122,17 +1140,22 @@ function loadBonzaLibrary(url) {
                 }
             }
 
+            // console.log("evalFormula " + formula);
+
             try {
                 if (parseFormula()) {
                     if (result === true || result === false) { //Bonza has no booleans
                         return result;
                     }
                     output.result = result;
+                    console.log(formula + " -> " + result);
                     return true;
                 } else {
+                    console.log(formula + " -> failed");
                     return false;
                 }
             } catch (error) {
+                console.log(formula + " -> failed");
                 return false;
             }
         }
@@ -1230,6 +1253,8 @@ function loadBonzaLibrary(url) {
             var frmval = function(match, p1) {
                 if (evalFormula(p1, context, output)) {
                     return output.result;
+                } else {
+                    throw "Fail";
                 }
             };
 
@@ -1237,6 +1262,8 @@ function loadBonzaLibrary(url) {
                 if (expr.nodeType == 3) {
                     return evalFormula(expr.nodeValue.trim(), context, output);
                 }
+
+                // console.log("evalExpr " + expr.nodeName);
 
                 switch (expr.nodeName) {
                     case "invalid":
@@ -1305,6 +1332,27 @@ function loadBonzaLibrary(url) {
                                     output.result = undefined;
                                     return false;
                                 }
+                            }
+                        } else {
+                            output.result = undefined;
+                            return false;
+                        }
+                        output.result = array;
+                        break;
+                    case "range":
+                        temp = firstExpr(findChild(expr, "from"));
+                        if (evalExpr(temp, context, result)) {
+                            temp = result.result;
+                            temp2 = firstExpr(findChild(expr, "to"));
+                            if (evalExpr(temp2, context, result) && result.result >= temp) {
+                                temp2 = result.result;
+                                array.length = temp2 - temp;
+                                for (i = temp; i < temp2; i++) {
+                                    array[i - temp] = i;
+                                }
+                            } else {
+                                output.result = undefined;
+                                return false;
                             }
                         } else {
                             output.result = undefined;
@@ -1461,6 +1509,7 @@ function loadBonzaLibrary(url) {
                 }
                 return true;
             } catch (error) {
+                // console.log("-> fail");
                 return false;
             }
         }
@@ -1473,16 +1522,26 @@ function loadBonzaLibrary(url) {
             var stmt2;
             var result = {};
             try {
+                // console.log("evalStmt " + stmt.nodeName);
+
                 switch (stmt.nodeName) {
                     case "is":
-                        return evalExpr(firstExpr(stmt), context, result);
+                        if (evalExpr(firstExpr(stmt), context, result)) {
+                            console.log("is : success");
+                        } else {
+                            console.log("is : failed");
+                            return false;
+                        }
+                        break;
                     case "not":
                         return !evalStmt(stmt.children[0], context, result);
                     case "def":
                         name = stmt.getAttribute("var");
                         if (evalExpr(firstExpr(stmt), context, result)) {
                             output[name] = result.result;
+                            console.log("def " + name + " : success");
                         } else {
+                            console.log("def " + name + " : failed");
                             return false;
                         }
                         break;
@@ -1497,8 +1556,10 @@ function loadBonzaLibrary(url) {
                                     output[prop] = result[prop];
                                 }
                                 result = {};
+                                console.log("all : success");
                             } else {
                                 output = {};
+                                console.log("all : failed");
                                 return false;
                             }
                         }
@@ -1509,9 +1570,11 @@ function loadBonzaLibrary(url) {
                                 for (prop in result) {
                                     output[prop] = result[prop];
                                 }
+                                console.log("any : success");
                                 return true;
                             }
                         }
+                        console.log("any : success");
                         return false;
                     case "unwrap":
                         if (evalExpr(firstExpr(stmt), context, result)) {
@@ -1605,6 +1668,7 @@ function loadBonzaLibrary(url) {
         temp = getChildren(single(temp, "output type"));
         type = analyzeType(single(temp, "output type"), context);
         result.output = type;
+        local.output = type.type;
         if (type.errors.length > 0) {
             result.errors.push("Erroneous output type");
         }
@@ -1635,11 +1699,60 @@ function loadBonzaLibrary(url) {
             result.errors.push("Invalid or missing content");
         }
 
+        //analyze response now to find out input type
+        temp = single(findChildren(code, "respond"), "response");
+        temp2 = single(findChildren(temp, "input"), "input");
+        name = temp2.getAttribute("name");
+        if (name === null || name === "") {
+            result.errors.push("Response input name not specified");
+        } else {
+            result.respond.input.name = name;
+        }
+        temp2 = single(getChildren(temp2), "response input type");
+        type = analyzeType(temp2, context);
+        local.vars.push({
+            name: name,
+            type: type.type
+        });
+        local.input = type.type;
+        if (type.errors.length > 0) {
+            result.errors.push("Invalid response state type");
+        }
+        result.respond.input.type = type.type;
+        result.respond.input.errors = type.errors;
+
+        local.vars.push({
+            name: result.respond.input.name,
+            type: result.respond.input.type
+        });
+
+        temp2 = single(findChildren(temp, "state"), "response state");
+        temp2 = single(getChildren(temp2), "response state");
+        result.respond.state = analyzeExpr(temp2, local);
+        if (!covariant(result.respond.state.type, result.state.type)) {
+            result.errors.push("Response state does not conform state type");
+        }
+
+        try {
+            temp2 = single(findChildren(temp, "actions"), "response action list");
+            temp2 = getChildren(temp2);
+            for (i = 0; i < temp2.length; i++) {
+                result.respond.actions.push(analyzeExpr(temp2[i], local));
+                if (!covariant(result.respond.actions[i].type, {
+                    action: null
+                })) {
+                    result.errors.push("Expression of invalid type in action list");
+                }
+            }
+        } catch (error) {}
+
         temp = single(findChildren(code, "init"), "initialization");
 
         templocal = {
             vars: local.vars.slice(),
-            types: local.types.slice()
+            types: local.types.slice(),
+            input: local.input,
+            output: local.output
         };
 
         local.vars.push({
@@ -1669,53 +1782,8 @@ function loadBonzaLibrary(url) {
             temp2 = single(findChildren(temp, "actions"), "action list");
             temp2 = getChildren(temp2);
             for (i = 0; i < temp2.length; i++) {
-                result.init.actions.push(analyzeExpr(temp2[i], context));
+                result.init.actions.push(analyzeExpr(temp2[i], local));
                 if (!covariant(result.init.actions[i].type, {
-                    action: null
-                })) {
-                    result.errors.push("Expression of invalid type in action list");
-                }
-            }
-        } catch (error) {}
-
-        temp = single(findChildren(code, "respond"), "response");
-        temp2 = single(findChildren(temp, "input"), "input");
-        name = temp2.getAttribute("name");
-        if (name === null || name === "") {
-            result.errors.push("Response input name not specified");
-        } else {
-            result.respond.input.name = name;
-        }
-        temp2 = single(getChildren(temp2), "response input type");
-        type = analyzeType(temp2, context);
-        local.vars.push({
-            name: name,
-            type: type.type
-        });
-        if (type.errors.length > 0) {
-            result.errors.push("Invalid response state type");
-        }
-        result.respond.input.type = type.type;
-        result.respond.input.errors = type.errors;
-
-        local.vars.push({
-            name: result.respond.input.name,
-            type: result.respond.input.type
-        });
-
-        temp2 = single(findChildren(temp, "state"), "response state");
-        temp2 = single(getChildren(temp2), "response state");
-        result.respond.state = analyzeExpr(temp2, local);
-        if (!covariant(result.respond.state.type, result.state.type)) {
-            result.errors.push("Response state does not meet state type");
-        }
-
-        try {
-            temp2 = single(findChildren(temp, "actions"), "response action list");
-            temp2 = getChildren(temp2);
-            for (i = 0; i < temp2.length; i++) {
-                result.respond.actions.push(analyzeExpr(temp2[i], context));
-                if (!covariant(result.respond.actions[i].type, {
                     action: null
                 })) {
                     result.errors.push("Expression of invalid type in action list");
@@ -1949,7 +2017,7 @@ function loadBonzaLibrary(url) {
 
         function parseDot() {
             var prev;
-            var prop;
+            var prop = {};
 
             if (token !== null && token[0] === ".") {
                 prev = result;
@@ -1960,10 +2028,10 @@ function loadBonzaLibrary(url) {
                 if (parseProp()) {
                     if (findProp(prev, result, prop)) {
                         result = {
-                            prop: prop.prop
+                            prop: prop
                         };
                     } else {
-                        throw "Type " + typeStr(prev) + " does not contain property " + result;
+                        throw "Type " + typeStr(prev) + " does not contain property <code>" + result + "</code>";
                     }
                 } else {
                     throw "Property name is invalid or missing";
@@ -2147,7 +2215,7 @@ function loadBonzaLibrary(url) {
                     }
                 }
                 if (i == context.vars.length) {
-                    throw "Variable " + token[0] + " not found";
+                    throw "Variable <code>" + token[0] + "</code> not found";
                 }
                 token = scanner.exec(formula);
                 return true;
@@ -2210,7 +2278,7 @@ function loadBonzaLibrary(url) {
         return false;
     }
 
-    function analyzeExpr(expr, context, inputtype, outputtype) {
+    function analyzeExpr(expr, context) {
         var stmt;
         var where;
         var i;
@@ -2236,40 +2304,45 @@ function loadBonzaLibrary(url) {
         var frmpat = /\[%(.*?)%\]/g;
         var type;
         var formula;
+        var info;
 
         try {
             if (expr.nodeType == 3) {
-                type = analyzeFormula(expr.nodeValue.trim(), context);
-                if (type.errors.length > 0) {
+                formula = expr.nodeValue.trim();
+                info = analyzeFormula(formula, context);
+                if (info.errors.length > 0) {
                     result.errors.push("Invalid formula data type");
                 }
-                result.type = type.type;
+                result.type = info.type;
+                result.formula = formula;
                 return result;
-            }
+            } else
             switch (expr.nodeName) {
                 case "invalid":
-                    type = analyzeType(expr.children[0], context);
-                    if (type.errors.length > 0) {
+                    info = analyzeType(expr.children[0], context);
+                    if (info.errors.length > 0) {
                         result.errors.push("Invalid data type");
                     }
-                    result.type = type;
+                    result.type = info.type;
+                    result.invalid = null;
                     break;
                 case "text":
                     temp = expr.innerHTML.trim();
                     formula = frmpat.exec(temp);
                     while (formula !== null) {
-                        type = analyzeFormula(formula[1], context);
-                        if (type.errors.length > 0) {
-                            result.errors.push(type.errors[0]);
+                        info = analyzeFormula(formula[1], context);
+                        if (info.errors.length > 0) {
+                            result.errors.push(info.errors[0]);
                         }
-                        if (!(type.type.hasOwnProperty("string") || type.type.hasOwnProperty("integer") || type.type.hasOwnProperty("number"))) {
-                            result.errors.push("Formula of type " + typeStr(type.type) + " cannot be inserted in text");
+                        if (!(info.type.hasOwnProperty("string") || info.type.hasOwnProperty("integer") || info.type.hasOwnProperty("number"))) {
+                            result.errors.push("Formula of type " + typeStr(info.type) + " cannot be inserted in text");
                         }
                         formula = frmpat.exec(temp);
                     }
                     result.type = {
                         string: null
                     };
+                    result.text = temp;
                     break;
                 case "eval":
                     temp = getChildren(temp);
@@ -2277,33 +2350,36 @@ function loadBonzaLibrary(url) {
                         result.errors.push("More than one expression specified");
                     } else if (temp.length === 0) {
                         result.errors.push("Expression not specified");
-                    } else {}
-                    temp = analyzeExpr(temp[0], context);
-                    type = temp.type;
-                    if (type.errors.length > 0) {
+                    }
+                    info = analyzeExpr(temp[0], context);
+                    if (info.errors.length > 0) {
                         result.errors.push("Invalid data type");
                     }
-                    if (!type.hasOwnProperty("string")) {
-                        result.errors.push("Expression type is " + typeStr(type) + "; must be string");
+                    if (!info.type.hasOwnProperty("string")) {
+                        result.errors.push("Expression type is " + typeStr(info.type) + "; must be string");
                     }
                     result.type = {
                         dynamic: null
                     };
+                    result.eval = temp[0];
                     break;
                 case "list":
                     temp = getChildren(expr);
                     if (temp.length > 0) {
-                        type = analyzeType(temp[0], context);
+                        info = analyzeExpr(temp[0], context);
                         result.type = {
-                            array: type.type
+                            array: info.type
                         };
+                        result.list = [info];
                         for (i = 1; i < temp.length; i++) {
-                            type = analyzeType(temp[i], context);
-                            if (!covariant(type.type, result.type)) {
-                                result.errors.push("Element type is " + typeStr(type.type) + "; must be " + typeStr(result.type));
+                            info = analyzeExpr(temp[i], context);
+                            if (!covariant(info.type, result.type)) {
+                                result.errors.push("Element type is " + typeStr(info.type) + "; must be " + typeStr(result.type));
                             }
+                            result.list[i] = info;
                         }
                     } else {
+                        result.list = [];
                         result.errors.push("List must not be empty");
                     }
                     break;
@@ -2320,8 +2396,8 @@ function loadBonzaLibrary(url) {
                         } else if (temp.length === 0) {
                             result.errors.push("Array size not specified");
                         } else {
-                            temp = analyzeExpr(temp, context);
-                            if (!covariant(temp.type, {
+                            info = analyzeExpr(temp, context);
+                            if (!covariant(info.type, {
                                 integer: null
                             })) {
                                 result.errors.push("Array size must be integer");
@@ -2362,6 +2438,7 @@ function loadBonzaLibrary(url) {
                             };
                         }
                     }
+                    result.array = null;
                     break;
                 case "no":
                     temp = getChildren(expr);
@@ -2370,11 +2447,12 @@ function loadBonzaLibrary(url) {
                     } else if (temp.length === 0) {
                         result.errors.push("Item type not specified");
                     } else {
-                        type = analyzeType(temp[0], context);
+                        info = analyzeType(temp[0], context);
                         result.type = {
-                            array: type.type
+                            array: info.type
                         };
                     }
+                    result.no = null;
                     break;
                 case "calc":
                     where = getChildren(expr);
@@ -2449,6 +2527,10 @@ function loadBonzaLibrary(url) {
                             ret: ret.type
                         }
                     };
+                    result.func = {
+                        arg: argname,
+                        ret: ret
+                    };
                     break;
                 case "wrap":
                     temp = getChildren(stmt);
@@ -2461,6 +2543,7 @@ function loadBonzaLibrary(url) {
                         all: []
                     };
                     temp2 = analyzeStmt(temp[0], context);
+                    result.wrap = temp2;
                     if (temp2.errors.length > 0) {
                         result.errors.push("Erroneous statement after <wrap>");
                     }
@@ -2474,97 +2557,152 @@ function loadBonzaLibrary(url) {
                     }
                     break;
                 case "find":
-                    temp = firstExpr(findChild(expr, "in"));
-                    if (evalExpr(temp, context, output)) {
-                        array = output.result;
-                        temp = findChild(expr, "item");
-                        argname = temp.getAttribute("name");
-                        for (prop in context) {
-                            context2[prop] = context[prop];
-                        }
-                        for (i = 0; i < array.length; i++) {
-                            context2[argname] = array[i];
-                            if (evalStmt(temp.children[0], context2, output2)) {
-                                output.result = array[i];
-                                return true;
-                            }
-                        }
-                        return false;
+                    temp = single(findChildren(expr, "in"), "'in' clause");
+                    temp = single(getChildren(temp), "'in' expression");
+                    info = analyzeExpr(temp, context);
+                    if (!info.type.hasOwnProperty("array")) {
+                        result.errors.push("Expression after <in> is not of an array type");
                     }
-                    return false;
+                    if (info.errors.length > 0) {
+                        result.errors.push("Erroneous expression after <in>");
+                    }
+                    temp2 = single(findChildren(expr, "item"), "'item' expression");
+                    argname = temp.getAttribute("name");
+                    temp2 = single(getChildren(temp2), "'item' expression");
+                    context2.vars.push({
+                        name: argname,
+                        type: info.type.array
+                    });
+                    result.type = info.type.array;
+                    info = analyzeStmt(temp2, context2);
+                    if (info.errors.length > 0) {
+                        result.errors.push("Erroneous statement after <item>");
+                    }
+                    result.find = {
+                        in_: temp,
+                        item: {
+                            name: argname,
+                            stmt: info
+                        }
+                    };
+                    break;
                 case "select":
-                    temp = firstExpr(findChild(expr, "in"));
-                    if (evalExpr(temp, context, output)) {
-                        array = output.result;
-                        temp = findChild(expr, "item");
-                        argname = temp.getAttribute("name");
-                        for (prop in context) {
-                            context2[prop] = context[prop];
-                        }
-                        for (i = 0; i < array.length; i++) {
-                            context2[argname] = array[i];
-                            if (evalStmt(temp.children[0], context2, output2)) {
-                                array2.push(array[i]);
-                            }
-                        }
-                        output.result = array2;
-                        return true;
+                    temp = single(findChildren(expr, "in"), "'in' clause");
+                    temp = single(getChildren(temp), "'in' expression");
+                    info = analyzeExpr(temp, context);
+                    if (!info.type.hasOwnProperty("array")) {
+                        result.errors.push("Expression after <in> is not of an array type");
                     }
-                    return false;
+                    if (info.errors.length > 0) {
+                        result.errors.push("Erroneous expression after <in>");
+                    }
+                    temp = single(findChildren(expr, "item"), "'item' expression");
+                    argname = temp.getAttribute("name");
+                    temp = single(getChildren(temp), "'item' expression");
+                    context2.vars.push({
+                        name: argname,
+                        type: info.type.array
+                    });
+                    result.type = info.type;
+                    info = analyzeStmt(temp, context2);
+                    if (info.errors.length > 0) {
+                        result.errors.push("Erroneous statement after <item>");
+                    }
+                    result.select = {
+                        in_: temp,
+                        item: {
+                            name: argname,
+                            stmt: info
+                        }
+                    };
+                    break;
                 case "count":
-                    temp = firstExpr(findChild(expr, "in"));
-                    if (evalExpr(temp, context, output)) {
-                        array = output.result;
-                        temp = findChild(expr, "item");
-                        argname = temp.getAttribute("name");
-                        for (prop in context) {
-                            context2[prop] = context[prop];
-                        }
-                        var count = 0;
-                        for (i = 0; i < array.length; i++) {
-                            context2[argname] = array[i];
-                            if (evalStmt(temp.children[0], context2, output2)) {
-                                count++;
-                            }
-                        }
-                        output.result = count;
-                        return true;
+                    temp = single(findChildren(expr, "in"), "'in' clause");
+                    temp = single(getChildren(temp), "'in' expression");
+                    info = analyzeExpr(temp, context);
+                    if (!info.type.hasOwnProperty("array")) {
+                        result.errors.push("Expression after <in> is not of an array type");
                     }
-                    return false;
+                    if (info.errors.length > 0) {
+                        result.errors.push("Erroneous expression after <in>");
+                    }
+                    temp = single(findChildren(expr, "item"), "'item' expression");
+                    argname = temp.getAttribute("name");
+                    temp = single(getChildren(temp), "'item' expression");
+                    context2.vars.push({
+                        name: argname,
+                        type: info.type.array
+                    });
+                    result.type = {
+                        integer: null
+                    };
+                    info = analyzeStmt(temp, context2);
+                    if (info.errors.length > 0) {
+                        result.errors.push("Erroneous statement after <item>");
+                    }
+                    result.count = {
+                        in_: temp,
+                        item: {
+                            name: argname,
+                            stmt: info
+                        }
+                    };
+                    break;
                 case "redraw":
                     result.type = {
                         action: null
                     };
+                    result.redraw = null;
                     break;
                 case "delay":
                     temp = getChildren(expr);
-                    if (evalExpr(temp[0], context, result)) {
-                        action = result.result;
-                        if (evalExpr(firstExpr(temp[1]), context, result)) {
-                            output.result = actions.delay(action, result.result);
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
+                    info = analyzeExpr(temp[0], context);
+                    if (!covariant(info.type, {
+                        action: null
+                    })) {
+                        result.errors.push("Expression must be of the action type");
                     }
+                    temp = single(findChildren(expr, "by"), "delay interval");
+                    temp = single(getChildren(temp), "delay interval");
+                    temp2 = analyzeExpr(temp, context);
+                    if (!covariant(temp2.type, {
+                        interval: null
+                    })) {
+                        result.errors.push("Expression must be of the interval type");
+                    }
+                    result.type = {
+                        action: null
+                    };
+                    result.delay = {
+                        action: info,
+                        by: temp2
+                    };
                     break;
                 case "input":
-                    if (evalExpr(firstExpr(expr), context, result)) {
-                        output.result = actions.input(result.result);
-                    } else {
-                        return false;
+                    temp = single(getChildren(expr));
+                    info = analyzeExpr(temp, context);
+                    if (!covariant(info.type, context.input)) {
+                        result.errors.push("Expression must be of the applet's input type");
                     }
+                    result.type = {
+                        action: null
+                    };
+                    result.input = info;
                     break;
                 case "output":
-                    if (evalExpr(firstExpr(expr), context, result)) {
-                        output.result = actions.output(result.result);
-                    } else {
-                        return false;
+                    temp = single(getChildren(expr));
+                    info = analyzeExpr(temp, context);
+                    if (!covariant(info.type, context.output)) {
+                        result.errors.push("Expression must be of the applet's output type");
                     }
+                    result.type = {
+                        action: null
+                    };
+                    result.output = info;
                     break;
                 default:
-                    return false;
+                    result.errors.push("Expression not recognized: " + expr.nodeName);
+                    result.other = null;
             }
         } catch (error) {
             result.errors.push(error);
@@ -2723,8 +2861,12 @@ function loadBonzaLibrary(url) {
         var i;
 
         if (type.hasOwnProperty("prop")) {
-            result.prop = type.prop;
-            return true;
+            if (type.prop.name === prop) {
+                result.prop = type.prop;
+                return true;
+            } else {
+                return false;
+            }
         } else if (type.hasOwnProperty("all")) {
             for (i = 0; i < type.all.length; i++) {
                 if (findProp(type.all[i], prop, result)) {
@@ -2983,21 +3125,21 @@ function loadBonzaLibrary(url) {
         var newindent = "&nbsp;&nbsp;&nbsp;&nbsp;" + indent;
 
         if (type.hasOwnProperty("none")) {
-            return "none";
+            return "<strong>none</strong>";
         } else if (type.hasOwnProperty("integer")) {
-            return "integer";
+            return "<strong>integer</strong>";
         } else if (type.hasOwnProperty("number")) {
-            return "number";
+            return "<strong>number</strong>";
         } else if (type.hasOwnProperty("string")) {
-            return "string";
+            return "<strong>string</strong>";
         } else if (type.hasOwnProperty("time")) {
-            return "time";
+            return "<strong>time</strong>";
         } else if (type.hasOwnProperty("interval")) {
-            return "interval";
+            return "<strong>interval</strong>";
         } else if (type.hasOwnProperty("dynamic")) {
-            return "dynamic";
+            return "<strong>dynamic</strong>";
         } else if (type.hasOwnProperty("action")) {
-            return "action";
+            return "<strong>action</strong>";
         } else if (type.hasOwnProperty("array")) {
             return "[" + typeStr(type.array) + "]";
         } else if (type.hasOwnProperty("prop")) {
@@ -3021,7 +3163,7 @@ function loadBonzaLibrary(url) {
         } else if (type.hasOwnProperty("func")) {
             return formatType(type.func.arg, newindent) + " -> " + formatType(type.func.ret, newindent);
         } else {
-            return "unknown";
+            return "<strong>unknown</strong>";
         }
     }
 
@@ -3245,6 +3387,7 @@ function loadBonzaLibrary(url) {
             click: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
+                console.log("click " + id);
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.click, applet.local, output)) {
                     e.stopPropagation();
@@ -3276,6 +3419,7 @@ function loadBonzaLibrary(url) {
             change: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
+                console.log("change " + id);
                 applet.local[applet.statename] = instance;
                 applet.local[applet.eventname] = e.currentTarget.value;
                 if (engine.evalExpr(applet.events.change, applet.local, output)) {
@@ -3327,34 +3471,39 @@ function loadBonzaLibrary(url) {
         };
 
         this.create = function(id) {
+            console.log("create " + id);
             this.local[this.idname] = id;
             var element = document.getElementById(id);
-            this.local[this.contentname] = element.innerHTML;
-            if (engine.evalExpr(this.initState, this.local, output)) {
-                this.instances[id] = output.result;
-                this.local[this.statename] = output.result;
-                if (engine.evalExpr(this.content, this.local, output)) {
-                    element.innerHTML = output.result;
-                }
-                resume();
-                this.input[id] = [];
-                for (var e in this.events) {
-                    element.addEventListener(e, this.handlers[e]);
-                }
-                for (i = 0; i < this.initActions.length; i++) {
-                    if (engine.evalExpr(this.initActions[i], this.local, output)) {
-                        var action = output.result;
-                        action(this, id);
+            if (element !== null) {
+                this.local[this.contentname] = element.innerHTML;
+                if (engine.evalExpr(this.initState, this.local, output)) {
+                    this.instances[id] = output.result;
+                    this.local[this.statename] = output.result;
+                    if (engine.evalExpr(this.content, this.local, output)) {
+                        element.innerHTML = output.result;
+                        element.hidden = "";
+                    }
+                    resume();
+                    this.input[id] = [];
+                    for (var e in this.events) {
+                        element.addEventListener(e, this.handlers[e]);
+                    }
+                    for (i = 0; i < this.initActions.length; i++) {
+                        if (engine.evalExpr(this.initActions[i], this.local, output)) {
+                            var action = output.result;
+                            action(this, id);
+                        }
                     }
                 }
+                delete this.local[this.idname];
+                delete this.local[this.contentname];
             }
-            delete this.local[this.idname];
-            delete this.local[this.contentname];
         };
         this.exists = function(id) {
             return this.instances.hasOwnProperty(id);
         };
         this.redraw = function(id) {
+            // console.log("redraw " + id);
             this.local[this.statename] = this.instances[id];
             if (engine.evalExpr(this.content, this.local, output)) {
                 var element = document.getElementById(id);
@@ -3374,6 +3523,7 @@ function loadBonzaLibrary(url) {
             while (i < queue.length) {
                 this.local[this.inputname] = queue[i];
                 if (engine.evalExpr(this.respState, this.local, output)) {
+                    console.log("respond " + id);
                     this.instances[id] = output.result;
                     this.local[this.statename] = output.result;
                     for (i = 0; i < this.respActions.length; i++) {
@@ -3390,6 +3540,7 @@ function loadBonzaLibrary(url) {
         this.broadcast = function(msg) {
             var instance;
             this.local[this.inputname] = msg;
+            // console.log("broadcast " + id);
             for (var id in this.instances) {
                 instance = this.instances[id];
                 this.local[this.statename] = instance;
@@ -3398,6 +3549,7 @@ function loadBonzaLibrary(url) {
             }
         };
         this.destroy = function(id) {
+            console.log("destroy " + id);
             delete this.instances[id];
             delete this.input[id];
         };
@@ -3422,12 +3574,14 @@ function loadBonzaLibrary(url) {
         var actions = {
             redraw: function() {
                 return function(applet, id) {
+                    console.log("redraw " + applet.name + "@" + id);
                     applet.redraw(id);
                     //resume();
                 };
             },
             output: function(msg) {
                 return function(applet, id) {
+                    console.log("output " + applet.name + "@" + id);
                     for (var name in lib.applets) {
                         var target = lib.applets[name];
                         if (target.listeners.hasOwnProperty(applet.name)) { //target applet has a listener for current applet?
@@ -3440,6 +3594,7 @@ function loadBonzaLibrary(url) {
                                 var state = target.instances[id];
                                 local[target.statename] = state;
                                 if (engine.evalExpr(target.listeners[applet.name].expr, local, output)) {
+                                    console.log("accept " + target.name + "@" + id);
                                     target.respond(id, output.result);
                                 }
                             }
@@ -3449,6 +3604,7 @@ function loadBonzaLibrary(url) {
             },
             input: function(msg) {
                 return function(applet, id) {
+                    console.log("input " + applet.name + "@" + id);
                     applet.respond(id, msg);
                 };
             },

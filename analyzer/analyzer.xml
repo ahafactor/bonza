@@ -1,5 +1,72 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <library>
+	<typedef name="Type">
+		<any>
+			<prop name="none" />
+			<prop name="integer" />
+			<prop name="number" />
+			<prop name="string" />
+			<prop name="time" />
+			<prop name="interval" />
+			<prop name="action" />
+			<prop name="array">
+				<type name="Type"/>
+			</prop>
+			<prop name="prop">
+				<all>
+					<prop name="name">
+						<string/>
+					</prop>
+					<prop name="type">
+						<type name="Type"/>
+					</prop>
+				</all>
+			</prop>
+			<prop name="all">
+				<array>
+					<type name="Type"/>
+				</array>
+			</prop>
+			<prop name="any">
+				<array>
+					<type name="Type"/>
+				</array>
+			</prop>
+			<prop name="func">
+				<all>
+					<prop name="arg">
+						<type name="Type"/>
+					</prop>
+					<prop name="return">
+						<type name="Type"/>
+					</prop>
+				</all>
+			</prop>
+			<prop name="dynamic" />
+		</any>
+	</typedef>
+	<typedef name="ExprInfo">
+		<all>
+			<prop name="errors">
+				<array>
+					<string/>
+				</array>
+			</prop>
+			<prop name="type">
+				<type name="Type"/>
+			</prop>
+			<any>
+				<prop name="formula">
+					<string/>
+				</prop>
+				<prop name="invalid" />
+				<prop name="text">
+					<string/>
+				</prop>
+				<prop name="other" />
+			</any>
+		</all>
+	</typedef>
 	<common>
 		<def var="errors">
 			<!-- function that returns HTML for a list of errors -->
@@ -80,16 +147,12 @@
 								<text>
 									<table class="expandable">
 										<tr>
-											<td>
-												<span class="more-icon">
-													<image src="arrows1.png"/>
-												</span>
-											</td>
-											<td>
-												<span class="title">
-													[%state.title%]
-												</span>
-											</td>
+											<th>
+												<image src="plus.png"/>
+											</th>
+											<th class="panel-title">
+												[%state.title%]
+											</th>
 										</tr>
 									</table>
 								</text>
@@ -101,16 +164,12 @@
 								<text>
 									<table class="expandable">
 										<tr>
-											<td>
-												<span class="more-icon">
-													<image src="center15.png"/>
-												</span>
-											</td>
-											<td>
-												<span class="title">
-													[%state.title%]
-												</span>
-											</td>
+											<th>
+												<image src="minus.png"/>
+											</th>
+											<th class="panel-title">
+												[%state.title%]
+											</th>
 										</tr>
 										<tr>
 											<td></td>
@@ -129,11 +188,28 @@
 		<init id="id" content="content">
 			<state>
 				<calc>
-					{id: id, title: temp[0], classname: temp[1], content: temp[2], collapsed:}
+					{id: id, title: trim(title), classname: trim(classname), content: trim(rest2), collapsed:}
 					<where>
-						<def var="temp">
-							split({str: content, sep: "$"})
-						</def>
+						<all>
+							<def var="pos1">
+								indexOf({str: content, substr: "$"})
+							</def>
+							<def var="title">
+								substr({str: content, start: 0, end: pos1})
+							</def>
+							<def var="rest1">
+								substr({str: content, start: pos1 + 1, end: length(content)})
+							</def>
+							<def var="pos2">
+								indexOf({str: rest1, substr: "$"})
+							</def>
+							<def var="classname">
+								substr({str: rest1, start: 0, end: pos2})
+							</def>
+							<def var="rest2">
+								substr({str: rest1, start: pos2 + 1, end: length(rest1)})
+							</def>
+						</all>
 					</where>
 				</calc>
 			</state>
@@ -264,19 +340,32 @@
 		<content>
 			<calc>
 				<text>
-					[%errors(state.info.errors)%]
-					<div class="[%core.classname('expandable')%]" id="[%state.id%]-types-ver[%state.version%]">
-						<h3>Types</h3>$applet-info$
-						[%core.string.join({parts: types, sep: "<br/>"})%]
-					</div>
-					<div class="[%core.classname('expandable')%]" id="[%state.id%]-vars-ver[%state.version%]">
-						<h3>Global variables</h3>$applet-info$
-						[%core.string.join({parts: vars, sep: "<br/>"})%]
-					</div>
-					<div class="[%core.classname('expandable')%]" id="[%state.id%]-applets-ver[%state.version%]">
-						<h3>Applets</h3>$applet-info$
-						[%core.string.join({parts: applets, sep: "<br/>"})%]
-					</div>
+					<table class="analyzer-library">
+						<tr>
+							<td><h2>Library analysis results:</h2></td>
+						</tr>
+						<tr>
+							<td>[%errors(state.info.errors)%]</td>
+						</tr>
+						<tr>
+							<td class="[%core.classname('expandable')%]" id="[%state.id%]-types-ver[%state.version%]" hidden="hidden">
+								<h3>Types</h3>$applet-info$
+								[%core.string.join({parts: types, sep: "<br/>"})%]
+							</td>
+						</tr>
+						<tr>
+							<td class="[%core.classname('expandable')%]" id="[%state.id%]-vars-ver[%state.version%]" hidden="hidden">
+								<h3>Global variables</h3>$applet-info$
+								[%core.string.join({parts: vars, sep: "<br/>"})%]
+							</td>
+						</tr>
+						<tr>
+							<td class="[%core.classname('expandable')%]" id="[%state.id%]-applets-ver[%state.version%]" hidden="hidden">
+								<h3>Applets</h3>$applet-info$
+								[%core.string.join({parts: applets, sep: "<br/>"})%]
+							</td>
+						</tr>
+					</table>
 				</text>
 				<where>
 					<all>
@@ -285,7 +374,10 @@
 								<size>state.info.global.types#</size>
 								<item index="i">
 									<text>
-										<div>[%state.info.global.types[i].name%]: [%core.code.typeStr(state.info.global.types[i].type)%]</div>
+										<div class="[%core.classname('expandable')%]" id="[%state.id%]-type[%i%]-ver[%state.version%]" hidden="hidden">
+											[%state.info.global.types[i].name%]$applet-info$
+											[%core.code.typeStr(state.info.global.types[i].type)%]
+										</div>
 									</text>
 								</item>
 							</array>
@@ -295,7 +387,10 @@
 								<size>state.info.global.vars#</size>
 								<item index="i">
 									<text>
-										<div>[%state.info.global.vars[i].name%]: [%core.code.typeStr(state.info.global.vars[i].type)%]</div>
+										<div class="[%core.classname('expandable')%]" id="[%state.id%]-var[%i%]-ver[%state.version%]" hidden="hidden">
+											[%state.info.global.vars[i].name%]$applet-info$
+											[%core.code.typeStr(state.info.global.vars[i].type)%]
+										</div>
 									</text>
 								</item>
 							</array>
@@ -306,7 +401,7 @@
 								<item index="i">
 									<calc>
 										<text>
-											<div class="[%core.classname('expandable')%]" id="[%state.id%]-panel[%i%]-ver[%state.version%]">
+											<div class="[%core.classname('expandable')%]" id="[%state.id%]-applet[%i%]-ver[%state.version%]">
 												<span class="[%titleclass%]">[%state.info.applets[i].name%]</span>$
 												[%core.classname('appletinfo')%]$[%state.info.applets[i].name%]
 											</div>
@@ -404,7 +499,7 @@
 				</calc>
 			</from>
 			<!-- info on a particular applet is requested -->
-			<from applet="applet" data="name">{appletname: name}</from>
+			<from applet="appletinfo" data="appletname">{appletname: appletname.appletname}</from>
 		</accept>
 	</applet>
 	<applet name="appletinfo">
@@ -413,6 +508,9 @@
 		</output>
 		<state name="state">
 			<all>
+				<prop name="id">
+					<string/>
+				</prop>
 				<prop name="name">
 					<string/>
 				</prop>
@@ -437,16 +535,21 @@
 									<ul>
 										<li>output: [%core.code.typeStr(state.info.output.type)%]</li>
 										<li>state([%state.info.state.name%]): [%core.code.typeStr(state.info.state.type)%]</li>
-										<li>content: [%errors(state.info.content.errors)%]</li>
-										<li>init: 
-											<p>state type: [%core.code.typeStr(state.info.init.state.type)%]</p>
-											[%errors(state.info.init.state.errors)%]
+										<li>content: 
+											<div id="[%state.id%]-content" class="[%core.classname('expandable')%]">
+												content $ [%core.classname('expression')%] $[%state.id%]-content
+											</div>
+										</li>
+										<li>init:
+											<div id="[%state.id%]-initstate" class="[%core.classname('expandable')%]">
+												state $ [%core.classname('expression')%] $[%state.id%]-initstate
+											</div>
 											<p>actions: [%state.info.init.actions#%]</p>
+											[%join({parts: initactions, sep: ""})%]
 										</li>
 										<li>respond: 
 											<p>input([%state.info.respond.input.name%]): [%core.code.typeStr(state.info.respond.input.type)%] </p>
 											[%errors(state.info.respond.input.errors)%]
-											<p>state type: [%core.code.typeStr(state.info.respond.state.type)%]</p>
 											<p>actions: [%state.info.respond.actions#%]</p>
 										</li>
 									</ul>
@@ -456,12 +559,28 @@
 						<def var="content">""</def>
 					</any>
 				</where>
+				<where>
+					<all>
+						<def var="initactions">
+							<array>
+								<size>state.info.init.actions#</size>
+								<item index="i">
+									<text>
+										<div id="[%state.id%]-initactions[%i%]" class="[%core.classname('expandable')%]">
+											action #[%i + 1%] $ [%core.classname('expression')%] $[%state.id%]-initaction[%i%]
+										</div>
+									</text>
+								</item>
+							</array>
+						</def>
+					</all>
+				</where>
 			</calc>
 		</content>
 		<init id="id" content="text">
-			<state>{name: trim(text), noinfo:}</state>
+			<state>{id: id, name: trim(text), noinfo:}</state>
 			<actions>
-				<output>state.name</output>
+				<output>{appletname: state.name}</output>
 			</actions>
 		</init>
 		<respond>
@@ -471,6 +590,9 @@
 					<prop name="info">
 						<type name ="AppletInfo"/>
 					</prop>
+					<prop name="expr">
+						<string/>
+					</prop>
 				</any>
 			</input>
 			<state>
@@ -478,19 +600,76 @@
 					newstate
 					<where>
 						<any>
-							<all>
-								<is>input.refresh</is>
-								<def var="newstate">
-									state
-								</def>
-							</all>
-							<def var="newstate">{name: state.name, info: input.info}</def>
+							<def var="newstate">{id: state.id, name: state.name, info: input.info}</def>
+							<def var="newstate">state</def>
 						</any>
 					</where>
 				</calc>
 			</state>
 			<actions>
-				<redraw/>
+				<calc>
+					<output>{expr: {id: input.expr, info: info}}</output>
+					<where>
+						<any>
+							<all>
+								<is>input.expr = initstateid</is>
+								<def var="info">
+									state.info.init.state
+								</def>
+							</all>
+							<all>
+								<is>input.expr = contentid</is>
+								<def var="info">
+									state.info.content
+								</def>
+							</all>
+							<def var="info">
+								<calc>
+									state.info.init.actions[idx]
+									<where>
+										<def var="idx">
+											<find>
+												<in>
+													<range>
+														<from>0</from>
+														<to>state.info.init.actions#</to>
+													</range>
+												</in>
+												<item name="i">
+													<all>
+														<def var="id">
+															<text>[%state.id%]-initaction[%i%]</text>
+														</def>
+														<is>input.expr = id</is>
+													</all>
+												</item>
+											</find>
+										</def>
+									</where>
+								</calc>
+							</def>
+						</any>
+					</where>
+					<where>
+						<all>
+							<def var="initstateid">
+								<text>[%state.id%]-initstate</text>
+							</def>
+							<def var="contentid">
+								<text>[%state.id%]-content</text>
+							</def>
+						</all>
+					</where>
+				</calc>
+				<calc>
+					<redraw/>
+					<where>
+						<any>
+							<is>input.refresh</is>
+							<is>input.info</is>
+						</any>						
+					</where>
+				</calc>
 			</actions>
 		</respond>
 		<accept>
@@ -509,6 +688,9 @@
 						<is>action = "submit"</is>
 					</where>
 				</calc>
+			</from>
+			<from applet="expression" data="id">
+				{expr: id}
 			</from>
 		</accept>
 	</applet>
@@ -540,31 +722,93 @@
 			<click>{do:}</click>
 		</events>
 	</applet>
-<!-- 	<applet name="expression">
+	<applet name="expression">
 		<state name="state">
-			
+			<all>
+				<prop name="id">
+					<string/>
+				</prop>
+				<any>
+					<prop name="noinfo" />
+					<prop name="info">
+						<type name="ExprInfo"/>
+					</prop>
+				</any>
+			</all>
 		</state>
 		<content>
-			
+			<calc>
+				<text>
+					[%errors(state.info.errors)%]
+					[%content%]
+				</text>
+				<where>
+					<any>
+						<all>
+							<is>state.info</is>
+							<any>
+								<def var="content">
+									<text>
+										formula:
+										<code>[%state.info.formula%]</code>
+									</text>
+								</def>
+								<def var="content">
+									<calc>
+										"redraw"
+										<where>
+											<is>state.info.redraw</is>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
+									<calc>
+										"invalid"
+										<where>
+											<is>state.info.invalid</is>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
+									"***other***"
+								</def>
+							</any>
+						</all>
+						<def var="content">
+							""
+						</def>
+					</any>
+				</where>
+			</calc>
 		</content>
 		<init id="id" content="content">
 			<state>
-				
+				{id: trim(content), noinfo:}
 			</state>
 			<actions>
-				
+				<output>state.id</output>
 			</actions>
 		</init>
 		<respond>
 			<input name="input">
-				
+				<type name="ExprInfo"/>
 			</input>
 			<state>
-				
+				{id: state.id, info: input}
 			</state>
 			<actions>
-				
+				<redraw/>
 			</actions>
 		</respond>
+		<accept>
+			<from applet="appletinfo" data="expr">
+				<calc>
+					expr.expr.info
+					<where>
+						<is>expr.expr.id = state.id</is>
+					</where>
+				</calc>
+			</from>
+		</accept>
 	</applet>
- --></library>
+</library>

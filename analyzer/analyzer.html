@@ -10,20 +10,103 @@
 	</script>
 	<link rel="stylesheet" href="analyzer.css" />
 	<script src="../bonza-loader.js"></script>
+<script>
+var xt="",h3OK=1;
+function checkErrorXML(x)
+{
+xt="";
+h3OK=1;
+checkXML(x);
+}
+
+function checkXML(n)
+{
+var l,i,nam;
+nam=n.nodeName;
+if (nam=="h3")
+	{
+	if (h3OK===0)
+		{
+		return;
+		}
+	h3OK=0;
+	}
+if (nam=="#text")
+	{
+	xt=xt + n.nodeValue + "\n";
+	}
+l=n.childNodes.length;
+for (i=0;i<l;i++)
+	{
+	checkXML(n.childNodes[i]);
+	}
+}
+
+function validateXML(txt)
+{
+	var xmlDoc;
+// code for IE
+if (window.ActiveXObject)
+  {
+  xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+  xmlDoc.async=false;
+  xmlDoc.loadXML(document.all(txt).value);
+  if(xmlDoc.parseError.errorCode!==0)
+    {
+    txt="Error Code: " + xmlDoc.parseError.errorCode + "\n";
+    txt=txt+"Error Reason: " + xmlDoc.parseError.reason;
+    txt=txt+"Error Line: " + xmlDoc.parseError.line;
+    alert(txt);
+    }
+  else
+    {
+    alert("No errors found");
+    }
+  }
+// code for Mozilla, Firefox, Opera, etc.
+else if (document.implementation.createDocument)
+  {
+  try
+  {
+  var text=document.getElementById(txt).value;
+  var parser=new DOMParser();
+  xmlDoc=parser.parseFromString(text,"application/xml");
+  }
+  catch(err)
+  {
+  alert(err.message);
+  }
+
+if (xmlDoc.getElementsByTagName("parsererror").length>0)
+   {
+   checkErrorXML(xmlDoc.getElementsByTagName("parsererror")[0]);
+   alert(xt);
+   }
+ else
+   {
+   alert("No errors found");
+   }
+ }
+else
+ {
+ alert('Your browser cannot handle XML validation');
+ }
+}
+</script>
+
 </head>
 
 <body onload="loadBonzaLibrary('analyzer.xml')">
 	<h1>Bonza Framework Library Analyzer</h1>
 	<hr/>
-	<form>
-		<textarea class="bonza-source" id="source" cols="160" rows="20"></textarea>
+	<form class="center-form">
+		<textarea class="bonza-source" id="source" rows="20"></textarea>
 		<br/>
 		<button id="submit" class="bonza-action">Analyze</button>
 	</form>
 	<br/>
-	<div id="source-lib" class="bonza-library"></div>
 	<hr/>
-	<div>Icons made by <a href="http://www.flaticon.com/authors/elegant-themes" title="Elegant Themes">Elegant Themes</a>, <a href="http://www.flaticon.com/authors/yannick" title="Yannick">Yannick</a>, <a href="http://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>             is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a></div>
+	<div id="source-lib" class="bonza-library"></div>
 </body>
 
 </html>

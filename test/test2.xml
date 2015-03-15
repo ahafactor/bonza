@@ -31,10 +31,14 @@
 			</all>
 		</state>
 		<content>
-			<text><script>alert('Hello, World!');</script></text>
+			state.text		
 		</content>
 		<init id="id" content="text">
 			<state>{id: id, text: text}</state>
+			<actions>
+				<input>{test:}</input>
+				<redraw/>
+			</actions>
 		</init>
 		<respond>
 			<input name="input">
