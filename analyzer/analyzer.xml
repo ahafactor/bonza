@@ -10,7 +10,7 @@
 			<prop name="interval" />
 			<prop name="action" />
 			<prop name="array">
-				<type name="Type"/>
+				<dynamic/>
 			</prop>
 			<prop name="prop">
 				<all>
@@ -18,27 +18,27 @@
 						<string/>
 					</prop>
 					<prop name="type">
-						<type name="Type"/>
+						<dynamic/>
 					</prop>
 				</all>
 			</prop>
 			<prop name="all">
 				<array>
-					<type name="Type"/>
+					<dynamic/>
 				</array>
 			</prop>
 			<prop name="any">
 				<array>
-					<type name="Type"/>
+					<dynamic/>
 				</array>
 			</prop>
 			<prop name="func">
 				<all>
 					<prop name="arg">
-						<type name="Type"/>
+						<dynamic/>
 					</prop>
 					<prop name="return">
-						<type name="Type"/>
+						<dynamic/>
 					</prop>
 				</all>
 			</prop>
@@ -545,7 +545,7 @@
 												state $ [%core.classname('expression')%] $[%state.id%]-initstate
 											</div>
 											<p>actions: [%state.info.init.actions#%]</p>
-											[%join({parts: initactions, sep: ""})%]
+											[%join({parts: initactions, sep: "<br/>"})%]
 										</li>
 										<li>respond: 
 											<p>input([%state.info.respond.input.name%]): [%core.code.typeStr(state.info.respond.input.type)%] </p>

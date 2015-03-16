@@ -225,6 +225,9 @@ function loadBonzaLibrary(url) {
         },
     };
 
+    /*
+        Metatype for core
+    */
     var coremathtype = {
         all: [{
             prop: {
@@ -457,27 +460,36 @@ function loadBonzaLibrary(url) {
                 type: {
                     func: {
                         arg: {
-                            any: [{
+                            all: [{
                                 prop: {
-                                    name: "prec",
+                                    name: "num",
                                     type: {
-                                        integer: null
+                                        number: null
                                     }
                                 }
                             }, {
-                                prop: {
-                                    name: "exp",
-                                    type: {
-                                        integer: null
+                                any: [{
+                                    prop: {
+                                        name: "prec",
+                                        type: {
+                                            integer: null
+                                        }
                                     }
-                                }
-                            }, {
-                                prop: {
-                                    name: "dec",
-                                    type: {
-                                        integer: null
+                                }, {
+                                    prop: {
+                                        name: "exp",
+                                        type: {
+                                            integer: null
+                                        }
                                     }
-                                }
+                                }, {
+                                    prop: {
+                                        name: "dec",
+                                        type: {
+                                            integer: null
+                                        }
+                                    }
+                                }]
                             }]
                         },
                         ret: {
@@ -553,9 +565,7 @@ function loadBonzaLibrary(url) {
                                 prop: {
                                     name: "sep",
                                     type: {
-                                        array: {
-                                            string: null
-                                        }
+                                        string: null
                                     }
                                 }
                             }]
@@ -647,9 +657,7 @@ function loadBonzaLibrary(url) {
                             }]
                         },
                         ret: {
-                            array: {
-                                string: null
-                            }
+                            string: null
                         }
                     }
                 }
@@ -677,9 +685,7 @@ function loadBonzaLibrary(url) {
                             }]
                         },
                         ret: {
-                            array: {
-                                string: null
-                            }
+                            string: null
                         }
                     }
                 }
@@ -741,6 +747,10 @@ function loadBonzaLibrary(url) {
     };
 
     var resume;
+
+    /* 
+        Run-time expression processing
+     */
 
     function ExprEngine(actions) {
 
@@ -1233,6 +1243,8 @@ function loadBonzaLibrary(url) {
             var stmt;
             var where;
             var i;
+            var j;
+            var l;
             var result = {};
             var context2 = {};
             var output2 = {};
@@ -1362,6 +1374,24 @@ function loadBonzaLibrary(url) {
                         break;
                     case "no":
                         output.result = [];
+                        break;
+                    case "join":
+                        temp = getChildren(expr);
+                        l = 0;
+                        for (i = 0; i < temp.length; i++) {
+                            if (evalExpr(temp[i], context, output)) {
+                                temp[i] = output.result;
+                                l += output.result.length;
+                            }
+                        }
+                        array.length = l;
+                        l = 0;
+                        for (i = 0; i < temp.length; i++) {
+                            for (j = 0; j < temp[i].length; j++) {
+                                array[l] = temp[i][j];
+                                l++;
+                            }
+                        }
                         break;
                     case "calc":
                         where = getChildren(expr);
@@ -1922,7 +1952,7 @@ function loadBonzaLibrary(url) {
                 }
                 token = scanner.exec(formula);
                 level--;
-                if (obj.all.length === 0) {
+                if (obj.all.length === 1) {
                     result = obj.all[0];
                 } else {
                     result = obj;
@@ -2316,7 +2346,7 @@ function loadBonzaLibrary(url) {
                 result.type = info.type;
                 result.formula = formula;
                 return result;
-            } else
+            }
             switch (expr.nodeName) {
                 case "invalid":
                     info = analyzeType(expr.children[0], context);
@@ -3149,13 +3179,13 @@ function loadBonzaLibrary(url) {
                 return type.prop.name + ': ' + formatType(type.prop.type, newindent);
             }
         } else if (type.hasOwnProperty("all")) {
-            temp = "<br/>" + indent + "{ <br/>";
+            temp = "{ <br/>";
             for (i = 0; i < type.all.length - 1; i++) {
                 temp = temp.concat(newindent, formatType(type.all[i], newindent), ", <br/>");
             }
             return temp + newindent + formatType(type.all[type.all.length - 1], newindent) + "<br/>" + indent + "}";
         } else if (type.hasOwnProperty("any")) {
-            temp = "<br/>" + indent + "{ <br/>";
+            temp = "{ <br/>";
             for (i = 0; i < type.any.length - 1; i++) {
                 temp = temp.concat(newindent, formatType(type.any[i], newindent), " | <br/>");
             }
