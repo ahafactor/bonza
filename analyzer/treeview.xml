@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<library>
+	<typedef name="tree">
+		
+	</typedef>
+	<common>
+		<def var="node">
+			"node"
+		</def>
+	</common>
+	<applet name="treenode">
+		<!-- an expandable panel -->
+		<output>
+			<!-- id of the node being expanded -->
+			<string/>
+		</output>
+		<state name="state">
+			<all>
+				<prop name="id">
+					<string/>
+				</prop>
+				<prop name="title">
+					<string/>
+				</prop>
+				<prop name="classname">
+					<string/>
+				</prop>
+				<prop name="content">
+					<string/>
+				</prop>
+				<any>
+					<prop name="collapsed" />
+					<prop name="expanded" />
+				</any>
+			</all>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.collapsed</is>
+							<def var="content">
+								<text>
+									<table class="expandable">
+										<tr>
+											<th>
+												<image src="plus.png"/>
+											</th>
+											<th class="panel-title">
+												[%state.title%]
+											</th>
+										</tr>
+									</table>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.expanded</is>
+							<def var="content">
+								<text>
+									<table class="expandable">
+										<tr>
+											<th>
+												<image src="minus.png"/>
+											</th>
+											<th class="panel-title">
+												[%state.title%]
+											</th>
+										</tr>
+										<tr>
+											<td></td>
+											<td>
+												<div class="[%state.classname%]" id="[%state.id%]-content">[%state.content%]</div>
+											</td>
+										</tr>
+									</table>
+								</text>
+							</def>
+						</all>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init id="id" content="content">
+			<state>
+				<calc>
+					{id: id, title: trim(title), classname: trim(classname), content: trim(rest2), collapsed:}
+					<where>
+						<all>
+							<def var="pos1">
+								indexOf({str: content, substr: "$"})
+							</def>
+							<def var="title">
+								substr({str: content, start: 0, end: pos1})
+							</def>
+							<def var="rest1">
+								substr({str: content, start: pos1 + 1, end: length(content)})
+							</def>
+							<def var="pos2">
+								indexOf({str: rest1, substr: "$"})
+							</def>
+							<def var="classname">
+								substr({str: rest1, start: 0, end: pos2})
+							</def>
+							<def var="rest2">
+								substr({str: rest1, start: pos2 + 1, end: length(rest1)})
+							</def>
+						</all>
+					</where>
+				</calc>
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<prop name="toggle" />
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>state.collapsed</is>
+								<def var="newstate">
+									{id: state.id, title: state.title, classname: state.classname, content: state.content, expanded:}
+								</def>
+							</all>
+							<all>
+								<is>state.expanded</is>
+								<def var="newstate">
+									{id: state.id, title: state.title, classname: state.classname, content: state.content, collapsed:}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<redraw/>
+			</actions>
+		</respond>
+		<events data="data">
+			<click>{toggle:}</click>
+		</events>
+	</applet>
+	<applet name="treeview">
+		<state name="state">
+			
+		</state>
+		<content>
+			
+		</content>
+		<init id="id" content="content">
+			<state>
+				
+			</state>
+			<actions>
+				
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				
+			</input>
+			<state>
+				
+			</state>
+			<actions>
+				
+			</actions>
+		</respond>
+	</applet>
+</library>

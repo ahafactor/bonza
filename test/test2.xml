@@ -1,6 +1,6 @@
 <library>
 	<type name="test">
-		<string/>
+		<dictionary><string/></dictionary>
 	</type>
 	<common>
 		<def var="myfunc">
@@ -31,7 +31,7 @@
 			</all>
 		</state>
 		<content>
-			state.text		
+			<invalid><string/></invalid>
 		</content>
 		<init id="id" content="text">
 			<state>{id: id, text: text}</state>
@@ -73,7 +73,13 @@
 			<text><script>alert('Hello, World!');</script></text>
 		</content>
 		<init id="id" content="text">
-			<state>{id: id, text: text}</state>
+			<state>
+				<list>
+					<calc>1</calc>
+					<calc>2</calc>
+					<calc>3</calc>
+				</list>							
+			</state>
 		</init>
 		<respond>
 			<input name="input">

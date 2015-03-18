@@ -12,6 +12,9 @@
 			<prop name="array">
 				<dynamic/>
 			</prop>
+			<prop name="dictionary">
+				<dynamic/>
+			</prop>
 			<prop name="prop">
 				<all>
 					<prop name="name">
@@ -105,6 +108,47 @@
 											</def>
 										</where>
 									</calc>
+								</def>
+							</any>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+		<def var="subexpr">
+			<!-- function that returns the dictionary of subexpressions of an expression -->
+			<func>
+				<arg name="arg">
+					<all>
+						<prop name="id">
+							<string/>
+						</prop>
+						<prop name="info">
+							<type name="ExprInfo"/>
+						</prop>
+					</all>
+				</arg>
+				<return>
+					<calc>
+						d
+						<where>
+							<any>
+								<all>
+									<is>arg.info.list</is>
+									<def var="d">
+										<dictionary>
+											<size>arg.info.list#</size>
+											<entry index="i">
+												<text>[%arg.id%]-listitem[%i%]</text>
+												<value>arg.info.list[i]</value>
+											</entry>
+										</dictionary>
+									</def>
+								</all>
+								<def var="d">
+									<noentries>
+										<type name="ExprInfo"/>
+									</noentries>
 								</def>
 							</any>
 						</where>
@@ -348,19 +392,19 @@
 							<td>[%errors(state.info.errors)%]</td>
 						</tr>
 						<tr>
-							<td class="[%core.classname('expandable')%]" id="[%state.id%]-types-ver[%state.version%]" hidden="hidden">
+							<td class="[%core.classname('expandable')%]" id="[%state.id%]-ver[%state.version%]-types">
 								<h3>Types</h3>$applet-info$
 								[%core.string.join({parts: types, sep: "<br/>"})%]
 							</td>
 						</tr>
 						<tr>
-							<td class="[%core.classname('expandable')%]" id="[%state.id%]-vars-ver[%state.version%]" hidden="hidden">
+							<td class="[%core.classname('expandable')%]" id="[%state.id%]-ver[%state.version%]-vars">
 								<h3>Global variables</h3>$applet-info$
 								[%core.string.join({parts: vars, sep: "<br/>"})%]
 							</td>
 						</tr>
 						<tr>
-							<td class="[%core.classname('expandable')%]" id="[%state.id%]-applets-ver[%state.version%]" hidden="hidden">
+							<td class="[%core.classname('expandable')%]" id="[%state.id%]-ver[%state.version%]-applets">
 								<h3>Applets</h3>$applet-info$
 								[%core.string.join({parts: applets, sep: "<br/>"})%]
 							</td>
@@ -374,7 +418,7 @@
 								<size>state.info.global.types#</size>
 								<item index="i">
 									<text>
-										<div class="[%core.classname('expandable')%]" id="[%state.id%]-type[%i%]-ver[%state.version%]" hidden="hidden">
+										<div class="[%core.classname('expandable')%]" id="[%state.id%]-ver[%state.version%]-type[%i%]">
 											[%state.info.global.types[i].name%]$applet-info$
 											[%core.code.typeStr(state.info.global.types[i].type)%]
 										</div>
@@ -387,7 +431,7 @@
 								<size>state.info.global.vars#</size>
 								<item index="i">
 									<text>
-										<div class="[%core.classname('expandable')%]" id="[%state.id%]-var[%i%]-ver[%state.version%]" hidden="hidden">
+										<div class="[%core.classname('expandable')%]" id="[%state.id%]-ver[%state.version%]-var[%i%]">
 											[%state.info.global.vars[i].name%]$applet-info$
 											[%core.code.typeStr(state.info.global.vars[i].type)%]
 										</div>
@@ -401,7 +445,7 @@
 								<item index="i">
 									<calc>
 										<text>
-											<div class="[%core.classname('expandable')%]" id="[%state.id%]-applet[%i%]-ver[%state.version%]">
+											<div class="[%core.classname('expandable')%]" id="[%state.id%]-ver[%state.version%]-applet[%i%]">
 												<span class="[%titleclass%]">[%state.info.applets[i].name%]</span>$
 												[%core.classname('appletinfo')%]$[%state.info.applets[i].name%]
 											</div>
@@ -409,7 +453,7 @@
 										<where>
 											<any>
 												<all>
-													<is>state.info.applets[i].errors# `gt` 0</is>
+													<is>state.info.applets[i].errors# 'gt' 0</is>
 													<def var="titleclass">
 														"error applet-name"
 													</def>
@@ -499,7 +543,7 @@
 				</calc>
 			</from>
 			<!-- info on a particular applet is requested -->
-			<from applet="appletinfo" data="appletname">{appletname: appletname.appletname}</from>
+			<from applet="appletinfo" data="data">{appletname: data.appletname}</from>
 		</accept>
 	</applet>
 	<applet name="appletinfo">
@@ -515,9 +559,16 @@
 					<string/>
 				</prop>
 				<any>
-					<prop name="info">
-						<type name="AppletInfo"/>
-					</prop>
+					<all>
+						<prop name="info">
+							<type name="AppletInfo"/>
+						</prop>
+						<prop name="exprinfo">
+							<dictionary>
+								<type name="ExprInfo"/>
+							</dictionary>
+						</prop>
+					</all>
 					<prop name="noinfo"/>
 				</any>
 			</all>
@@ -535,7 +586,7 @@
 									<ul>
 										<li>output: [%core.code.typeStr(state.info.output.type)%]</li>
 										<li>state([%state.info.state.name%]): [%core.code.typeStr(state.info.state.type)%]</li>
-										<li>content: 
+										<li><br/> 
 											<div id="[%state.id%]-content" class="[%core.classname('expandable')%]">
 												content $ [%core.classname('expression')%] $[%state.id%]-content
 											</div>
@@ -590,7 +641,7 @@
 					<prop name="info">
 						<type name ="AppletInfo"/>
 					</prop>
-					<prop name="expr">
+					<prop name="exprid">
 						<string/>
 					</prop>
 				</any>
@@ -600,67 +651,41 @@
 					newstate
 					<where>
 						<any>
-							<def var="newstate">{id: state.id, name: state.name, info: input.info}</def>
+							<def var="newstate">
+								<calc>
+									{id: state.id, name: state.name, info: input.info, exprinfo: exprinfo}
+									<where>
+										<def var="exprinfo">
+											<merge>
+												<entries>
+													<entry>
+														<text>[%state.id%]-content</text>
+														<value>input.info.content</value>
+													</entry>
+													<entry>
+														<text>[%state.id%]-initstate</text>
+														<value>input.info.init.state</value>
+													</entry>
+												</entries>
+												<dictionary>
+													<size>input.info.init.actions#</size>
+													<entry index="i">
+														<text>[%state.id%]-initaction[%i%]</text>
+														<value>input.info.init.actions[i]</value>
+													</entry>
+												</dictionary>
+											</merge>
+										</def>
+									</where>
+								</calc>
+							</def>
 							<def var="newstate">state</def>
 						</any>
 					</where>
 				</calc>
 			</state>
 			<actions>
-				<calc>
-					<output>{expr: {id: input.expr, info: info}}</output>
-					<where>
-						<any>
-							<all>
-								<is>input.expr = initstateid</is>
-								<def var="info">
-									state.info.init.state
-								</def>
-							</all>
-							<all>
-								<is>input.expr = contentid</is>
-								<def var="info">
-									state.info.content
-								</def>
-							</all>
-							<def var="info">
-								<calc>
-									state.info.init.actions[idx]
-									<where>
-										<def var="idx">
-											<find>
-												<in>
-													<range>
-														<from>0</from>
-														<to>state.info.init.actions#</to>
-													</range>
-												</in>
-												<item name="i">
-													<all>
-														<def var="id">
-															<text>[%state.id%]-initaction[%i%]</text>
-														</def>
-														<is>input.expr = id</is>
-													</all>
-												</item>
-											</find>
-										</def>
-									</where>
-								</calc>
-							</def>
-						</any>
-					</where>
-					<where>
-						<all>
-							<def var="initstateid">
-								<text>[%state.id%]-initstate</text>
-							</def>
-							<def var="contentid">
-								<text>[%state.id%]-content</text>
-							</def>
-						</all>
-					</where>
-				</calc>
+				<output>{reply: {id: input.exprid, info: state.exprinfo@(input.exprid)}}</output>
 				<calc>
 					<redraw/>
 					<where>
@@ -689,8 +714,8 @@
 					</where>
 				</calc>
 			</from>
-			<from applet="expression" data="id">
-				{expr: id}
+			<from applet="expression" data="data">
+				{exprid: data.request}
 			</from>
 		</accept>
 	</applet>
@@ -723,6 +748,9 @@
 		</events>
 	</applet>
 	<applet name="expression">
+		<output>
+			
+		</output>
 		<state name="state">
 			<all>
 				<prop name="id">
@@ -734,14 +762,21 @@
 						<type name="ExprInfo"/>
 					</prop>
 				</any>
+				<prop name="subexpr">
+					<dictionary>
+						<type name="ExprInfo"/>
+					</dictionary>
+				</prop>
 			</all>
 		</state>
 		<content>
 			<calc>
-				<text>
+				content
+				<!-- <text>
 					[%errors(state.info.errors)%]
-					[%content%]
-				</text>
+					[%content%]<br/>
+					type: [%core.code.typeStr(state.info.type)%]
+				</text> -->
 				<where>
 					<any>
 						<all>
@@ -754,6 +789,35 @@
 									</text>
 								</def>
 								<def var="content">
+									<text>
+										<div id="[%state.id%]-text" class="[%core.classname('expandable')%]">
+											text $ applet-info $<code>"[%state.info.text%]"</code>
+										</div>
+									</text>
+								</def>
+								<def var="content">
+									<calc>
+										<text>
+											list:
+											[%join({parts: items, sep: ""})%]
+										</text>
+										<where>
+											<def var="items">
+												<array>
+													<size>state.info.list#</size>
+													<item index="i">
+														<text>
+															<div id="[%state.id%]-listitem[%i%]" class="[%core.classname('expandable')%]">
+																item #[%i + 1%] $ [%core.classname('expression')%] $[%state.id%]-listitem[%i%]
+															</div>
+														</text>
+													</item>
+												</array>
+											</def>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
 									<calc>
 										"redraw"
 										<where>
@@ -763,7 +827,9 @@
 								</def>
 								<def var="content">
 									<calc>
-										"invalid"
+										<text>
+											invalid [%core.code.typeStr(state.info.type)%]
+										</text>
 										<where>
 											<is>state.info.invalid</is>
 										</where>
@@ -786,26 +852,82 @@
 				{id: trim(content), noinfo:}
 			</state>
 			<actions>
-				<output>state.id</output>
+				<output>{request: state.id}</output>
 			</actions>
 		</init>
 		<respond>
 			<input name="input">
-				<type name="ExprInfo"/>
+				<any>
+					<prop name="exprinfo">
+						<type name="ExprInfo"/>
+					</prop>
+					<prop name="exprid">
+						<string/>
+					</prop>
+				</any>
 			</input>
 			<state>
-				{id: state.id, info: input}
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>input.exprinfo</is>
+								<def var="newstate">
+									{id: state.id, info: input.exprinfo, subexpr: subexpr({id: state.id, info: input.exprinfo})}
+								</def>
+							</all>
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>
 			</state>
 			<actions>
-				<redraw/>
+				<calc>
+					<output>
+						{reply: {id: input.exprid, info: state.subexpr@(input.exprid)}}
+					</output>
+					<where>
+						<is>input.exprid</is>
+					</where>
+				</calc>
+				<calc>
+					<redraw/>
+					<where>
+						<is>input.exprinfo</is>
+					</where>
+				</calc>
 			</actions>
 		</respond>
 		<accept>
-			<from applet="appletinfo" data="expr">
+			<from applet="appletinfo" data="data">
 				<calc>
-					expr.expr.info
+					{exprinfo: data.reply.info}
 					<where>
-						<is>expr.expr.id = state.id</is>
+						<is>data.reply.id = state.id</is>
+					</where>
+				</calc>
+			</from>
+			<from applet="expression" data="data">
+				<calc>
+					input
+					<where>
+						<any>
+							<all>
+								<is>data.reply.id = state.id</is>
+								<def var="input">
+									{exprinfo: data.reply.info}
+								</def>
+							</all>
+							<all>
+								<is>state.subexpr@(data.request)</is>
+								<def var="input">
+									{exprid: data.request}
+								</def>
+							</all>
+						</any>
 					</where>
 				</calc>
 			</from>
