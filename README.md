@@ -10,7 +10,7 @@ Applet placeholders are distinguished by using special class names, containing t
 
 Applet libraries are defined using an XML-based declarative language.
 
-Every applet definition has a well-defined structure, consisting of the following parts: state, content, initialization, response and optional output, events and input sections. An applet has a distinct MVC architecture, where state is Model, content is View and Controller is divided into several parts. 
+An applet definition has a well-defined structure, consisting of the following parts: state, content, initialization, response and optional output, events and input sections. An applet has a distinct MVC architecture, where state is Model, content is View and Controller is divided into several parts. 
 
 Applets in a library can communicate by broadcasting messages (output) and subscribing to other applets' output.
 
