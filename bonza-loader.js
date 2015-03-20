@@ -1479,7 +1479,7 @@ function loadBonzaLibrary(url) {
                         l = 0;
                         for (i = 0; i < temp.length; i++) {
                             if (evalExpr(temp[i], context, output)) {
-                                for(prop in output.result){
+                                for (prop in output.result) {
                                     obj[prop] = output.result[prop];
                                 }
                             }
@@ -3265,7 +3265,7 @@ function loadBonzaLibrary(url) {
                 case "like":
                     temp = single(getChildren(code));
                     info = analyzeExpr(temp, context);
-                    if(info.errors.length > 0){
+                    if (info.errors.length > 0) {
                         throw "Erroneous expression";
                     }
                     result.type = info.type;
@@ -3484,6 +3484,12 @@ function loadBonzaLibrary(url) {
         var j;
 
         this.name = xml.getAttribute("name");
+        var idfunc = xml.getAttribute("idfunc");
+        if (idfunc === null) {
+            idfunc = "id";
+        }
+        this.idfuncname = idfunc;
+        this.idfunc = {};
         this.events = {};
         this.listeners = {};
 
@@ -3498,7 +3504,6 @@ function loadBonzaLibrary(url) {
                     this.content = firstExpr(child);
                     break;
                 case "init":
-                    this.idname = child.getAttribute("id");
                     this.contentname = child.getAttribute("content");
                     this.initState = firstExpr(findChild(child, "state"));
                     temp = findChildren(child, "actions");
@@ -3566,7 +3571,7 @@ function loadBonzaLibrary(url) {
                 var instance = applet.instances[id];
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.focus, applet.local, output)) {
-                    //e.stopPropagation();
+                    e.stopPropagation();
                     e.preventDefault();
                     applet.respond(id, output.result);
                 }
@@ -3577,7 +3582,7 @@ function loadBonzaLibrary(url) {
                 applet.local[applet.statename] = instance;
                 applet.local[applet.eventname] = e.currentTarget.value;
                 if (engine.evalExpr(applet.events.blur, applet.local, output)) {
-                    //e.stopPropagation();
+                    e.stopPropagation();
                     e.preventDefault();
                     applet.respond(id, output.result);
                 }
@@ -3589,8 +3594,8 @@ function loadBonzaLibrary(url) {
                 applet.local[applet.statename] = instance;
                 applet.local[applet.eventname] = e.currentTarget.value;
                 if (engine.evalExpr(applet.events.change, applet.local, output)) {
-                    //e.stopPropagation();
-                    //e.preventDefault();
+                    e.stopPropagation();
+                    e.preventDefault();
                     applet.respond(id, output.result);
                 }
             },
@@ -3599,7 +3604,7 @@ function loadBonzaLibrary(url) {
                 var instance = applet.instances[id];
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mouseover, applet.local, output)) {
-                    //e.stopPropagation();
+                    e.stopPropagation();
                     e.preventDefault();
                     applet.respond(id, output.result);
                 }
@@ -3609,7 +3614,7 @@ function loadBonzaLibrary(url) {
                 var instance = applet.instances[id];
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mouseout, applet.local, output)) {
-                    //e.stopPropagation();
+                    e.stopPropagation();
                     e.preventDefault();
                     applet.respond(id, output.result);
                 }
@@ -3619,7 +3624,7 @@ function loadBonzaLibrary(url) {
                 var instance = applet.instances[id];
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mousedown, applet.local, output)) {
-                    //e.stopPropagation();
+                    e.stopPropagation();
                     e.preventDefault();
                     applet.respond(id, output.result);
                 }
@@ -3629,7 +3634,7 @@ function loadBonzaLibrary(url) {
                 var instance = applet.instances[id];
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mouseup, applet.local, output)) {
-                    //e.stopPropagation();
+                    e.stopPropagation();
                     e.preventDefault();
                     applet.respond(id, output.result);
                 }
@@ -3638,7 +3643,10 @@ function loadBonzaLibrary(url) {
 
         this.create = function(id) {
             console.log("create " + id);
-            this.local[this.idname] = id;
+            this.idfunc[id] = function(ending) {
+                return id + "-" + ending;
+            };
+            this.local[this.idfuncname] = this.idfunc[id];
             var element = document.getElementById(id);
             if (element !== null) {
                 this.local[this.contentname] = element.innerHTML;
@@ -3661,7 +3669,6 @@ function loadBonzaLibrary(url) {
                         }
                     }
                 }
-                delete this.local[this.idname];
                 delete this.local[this.contentname];
             }
         };
@@ -3670,10 +3677,12 @@ function loadBonzaLibrary(url) {
         };
         this.redraw = function(id) {
             // console.log("redraw " + id);
-            this.local[this.statename] = this.instances[id];
+            // this.local[this.statename] = this.instances[id];
+            // this.local[this.idfuncname] = this.idfunc[id];
             if (engine.evalExpr(this.content, this.local, output)) {
                 var element = document.getElementById(id);
                 element.innerHTML = output.result;
+                element.hidden = "";
                 resume();
             }
         };
@@ -3684,7 +3693,8 @@ function loadBonzaLibrary(url) {
         this.run = function(id) {
             var instance = this.instances[id];
             var queue = this.input[id];
-            this.local[this.statename] = instance;
+            // this.local[this.statename] = instance;
+            // this.local[this.idfuncname] = this.idfunc[id];
             i = 0;
             while (i < queue.length) {
                 this.local[this.inputname] = queue[i];
@@ -3702,6 +3712,7 @@ function loadBonzaLibrary(url) {
                 i++;
             }
             this.input[id] = [];
+            delete this.local[this.inputname];
         };
         this.broadcast = function(msg) {
             var instance;
@@ -3709,14 +3720,16 @@ function loadBonzaLibrary(url) {
             // console.log("broadcast " + id);
             for (var id in this.instances) {
                 instance = this.instances[id];
-                this.local[this.statename] = instance;
+                // this.local[this.statename] = instance;
                 this.input[id].push(msg);
                 resume();
             }
+            delete this.local[this.inputname];
         };
         this.destroy = function(id) {
             console.log("destroy " + id);
             delete this.instances[id];
+            delete this.idfunc[id];
             delete this.input[id];
         };
     }
