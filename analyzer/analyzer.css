@@ -31,7 +31,7 @@ h1 {
 .panel-title {
 	text-align: left;
 }
-.analyzer-library {
+.bonza-library {
 	background-color: FloralWhite;
 	color: black;
 	border-style: solid;
@@ -42,16 +42,13 @@ h1 {
 	margin-right: auto;
 	width: 70%;
 }
-.center-form {
+.bonza-source {
 	margin-left: auto;
 	margin-right: auto;
 	width: 75%;
 	tab-size: 4;
 }
-.bonza-source {
-	width: 100%;
-}
-#submit {
+.bonza-action {
 	width: 80px;
 	text-align: center;	
 	float: left;

@@ -1,7 +1,7 @@
 <library>
-	<type name="test">
+	<typedef name="test">
 		<dictionary><string/></dictionary>
-	</type>
+	</typedef>
 	<common>
 		<def var="myfunc">
 			<func>
@@ -33,7 +33,7 @@
 		<content>
 			<invalid><string/></invalid>
 		</content>
-		<init id="id" content="text">
+		<init content="text">
 			<state>{id: id, text: text}</state>
 			<actions>
 				<input>{test:}</input>
@@ -72,7 +72,7 @@
 		<content>
 			<text><script>alert('Hello, World!');</script></text>
 		</content>
-		<init id="id" content="text">
+		<init content="text">
 			<state>
 				<list>
 					<calc>1</calc>

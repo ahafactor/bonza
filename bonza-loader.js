@@ -3410,7 +3410,7 @@ function loadBonzaLibrary(url) {
         var i;
         var j;
 
-        temp = findChildren(code, "type");
+        temp = findChildren(code, "typedef");
         for (i = 0; i < temp.length; i++) {
             try {
                 name = temp[i].getAttribute("name");
@@ -3504,7 +3504,10 @@ function loadBonzaLibrary(url) {
                     this.content = firstExpr(child);
                     break;
                 case "init":
-                    this.contentname = child.getAttribute("content");
+                    this.initargname = child.getAttribute("arg");
+                    if (this.initargname === null) {
+                        this.initargname = "arg";
+                    }
                     this.initState = firstExpr(findChild(child, "state"));
                     temp = findChildren(child, "actions");
                     if (temp.length === 1) {
@@ -3514,6 +3517,7 @@ function loadBonzaLibrary(url) {
                     }
                     break;
                 case "respond":
+                    // this.respcontentname = child.getAttribute("content");
                     this.inputname = findChild(child, "input").getAttribute("name");
                     this.respState = firstExpr(findChild(child, "state"));
                     temp = findChildren(child, "actions");
@@ -3532,7 +3536,8 @@ function loadBonzaLibrary(url) {
                 case "accept":
                     for (j = 0; j < child.children.length; j++) {
                         this.listeners[child.children[j].getAttribute("applet")] = {
-                            data: child.children[j].getAttribute("data"),
+                            id: child.getAttribute("sender"),
+                            data: child.getAttribute("data"),
                             expr: firstExpr(child.children[j])
                         };
                     }
@@ -3580,7 +3585,7 @@ function loadBonzaLibrary(url) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
                 applet.local[applet.statename] = instance;
-                applet.local[applet.eventname] = e.currentTarget.value;
+                // applet.local[applet.eventname] = e.currentTarget.value;
                 if (engine.evalExpr(applet.events.blur, applet.local, output)) {
                     e.stopPropagation();
                     e.preventDefault();
@@ -3641,21 +3646,24 @@ function loadBonzaLibrary(url) {
             }
         };
 
-        this.create = function(id) {
-            console.log("create " + id);
+        this.create = function(id, element) {
+            console.log("create " + applet.name + "::" + id);
             this.idfunc[id] = function(ending) {
                 return id + "-" + ending;
             };
             this.local[this.idfuncname] = this.idfunc[id];
-            var element = document.getElementById(id);
+            // var element = document.getElementById(id);
             if (element !== null) {
-                this.local[this.contentname] = element.innerHTML;
+                if (element.attributes["data-arg"]) {
+                    this.local[this.initargname] = element.attributes["data-arg"].value;
+                } else {
+                    this.local[this.initargname] = "";
+                }
                 if (engine.evalExpr(this.initState, this.local, output)) {
                     this.instances[id] = output.result;
                     this.local[this.statename] = output.result;
                     if (engine.evalExpr(this.content, this.local, output)) {
                         element.innerHTML = output.result;
-                        element.hidden = "";
                     }
                     resume();
                     this.input[id] = [];
@@ -3669,7 +3677,7 @@ function loadBonzaLibrary(url) {
                         }
                     }
                 }
-                delete this.local[this.contentname];
+                delete this.local[this.initargname];
             }
         };
         this.exists = function(id) {
@@ -3682,7 +3690,6 @@ function loadBonzaLibrary(url) {
             if (engine.evalExpr(this.content, this.local, output)) {
                 var element = document.getElementById(id);
                 element.innerHTML = output.result;
-                element.hidden = "";
                 resume();
             }
         };
@@ -3695,11 +3702,16 @@ function loadBonzaLibrary(url) {
             var queue = this.input[id];
             // this.local[this.statename] = instance;
             // this.local[this.idfuncname] = this.idfunc[id];
+            /*            var element = document.getElementById(id);
+            if (element !== null) {
+                this.local[this.respcontentname] = element.innerHTML;
+            }
+*/
             i = 0;
             while (i < queue.length) {
                 this.local[this.inputname] = queue[i];
                 if (engine.evalExpr(this.respState, this.local, output)) {
-                    console.log("respond " + id);
+                    console.log("respond " + applet.name + "::" + id);
                     this.instances[id] = output.result;
                     this.local[this.statename] = output.result;
                     for (i = 0; i < this.respActions.length; i++) {
@@ -3753,14 +3765,14 @@ function loadBonzaLibrary(url) {
         var actions = {
             redraw: function() {
                 return function(applet, id) {
-                    console.log("redraw " + applet.name + "@" + id);
+                    console.log("redraw " + applet.name + "::" + id);
                     applet.redraw(id);
                     //resume();
                 };
             },
             output: function(msg) {
                 return function(applet, id) {
-                    console.log("output " + applet.name + "@" + id);
+                    console.log("output " + applet.name + "::" + id);
                     for (var name in lib.applets) {
                         var target = lib.applets[name];
                         if (target.listeners.hasOwnProperty(applet.name)) { //target applet has a listener for current applet?
@@ -3768,13 +3780,14 @@ function loadBonzaLibrary(url) {
                             for (prop in target.local) {
                                 local[prop] = target.local[prop];
                             }
+                            local[target.listeners[applet.name].id] = id;
                             local[target.listeners[applet.name].data] = msg;
-                            for (id in target.instances) {
-                                var state = target.instances[id];
+                            for (var id2 in target.instances) {
+                                var state = target.instances[id2];
                                 local[target.statename] = state;
                                 if (engine.evalExpr(target.listeners[applet.name].expr, local, output)) {
-                                    console.log("accept " + target.name + "@" + id);
-                                    target.respond(id, output.result);
+                                    console.log("accept " + target.name + "@" + id2);
+                                    target.respond(id2, output.result);
                                 }
                             }
                         }
@@ -3783,7 +3796,7 @@ function loadBonzaLibrary(url) {
             },
             input: function(msg) {
                 return function(applet, id) {
-                    console.log("input " + applet.name + "@" + id);
+                    console.log("input " + applet.name + "::" + id);
                     applet.respond(id, msg);
                 };
             },
@@ -3870,7 +3883,7 @@ function loadBonzaLibrary(url) {
             var id;
             var ids;
             var i;
-            var pair;
+            // var param;
 
             this.active = false;
             ids = [];
@@ -3884,7 +3897,8 @@ function loadBonzaLibrary(url) {
                         if (!applet.exists(id)) {
                             ids.push({
                                 id: id,
-                                applet: applet
+                                applet: applet,
+                                element: element
                             });
                         }
                     }
@@ -3899,8 +3913,7 @@ function loadBonzaLibrary(url) {
                 }
             }
             for (i in ids) {
-                pair = ids[i];
-                pair.applet.create(pair.id);
+                ids[i].applet.create(ids[i].id, ids[i].element);
             }
         };
 
