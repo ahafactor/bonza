@@ -79,6 +79,8 @@ function loadBonzaLibrary(url) {
             return "bonza-" + name;
         },
         nbsp: "&nbsp;",
+        lt: "&lt;",
+        br: "<br/>",
         math: {
             sin: function(x) {
                 return Math.sin(x);
@@ -184,6 +186,14 @@ function loadBonzaLibrary(url) {
             },
             trim: function(str) {
                 return str.trim();
+            },
+            replace: function(arg) {
+                return arg.str.replace(arg.substr, arg.to);
+            },
+            normalize: function(str) {
+                var temp = str.replace(/</g, "&lt;");
+                temp = temp.replace(/\"/g, "\\\"");
+                return temp.replace(/\'/g, "\\\'");
             }
         },
         xml: {
@@ -3280,13 +3290,13 @@ function loadBonzaLibrary(url) {
     }
 
     function typeStr(type) {
-        return "<code>" + formatType(type, "") + "</code>";
+        return "<code><pre>" + formatType(type, "") + "</pre></code>";
     }
 
     function formatType(type, indent) {
         var temp;
         var i;
-        var newindent = "&nbsp;&nbsp;&nbsp;&nbsp;" + indent;
+        var newindent = "    " + indent;
 
         if (type.hasOwnProperty("none")) {
             return "<strong>none</strong>";

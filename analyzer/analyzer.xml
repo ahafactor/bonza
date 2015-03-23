@@ -134,7 +134,7 @@
 				<br/>
 				<button class="[%core.classname('action')%]" id="[%id('submit')%]" data-arg="Analyze">Analyze</button>
 				<br/>
-				<div class="[%core.classname('library')%]" id="[%id('library')%]" data-arg="[%id('library')%]">Paste Bonza source in text field and press Analyze</div>
+				<div class="[%core.classname('library')%]" id="[%id('library')%]" data-arg="[%id('library')%]">Paste Bonza source in text field above and press Analyze</div>
 			</text>
 		</content>
 		<init>
@@ -208,10 +208,10 @@
 				<prop name="title">
 					<string/>
 				</prop>
-				<prop name="appname">
+				<prop name="classname">
 					<string/>
 				</prop>
-				<prop name="content">
+				<prop name="id">
 					<string/>
 				</prop>
 				<any>
@@ -258,7 +258,7 @@
 										<tr>
 											<td></td>
 											<td>
-												<div class="[%core.classname(state.appname)%]" id="[%id('content')%]" data-arg="[%state.content%]">?</div>
+												[%state.expanded%]
 											</td>
 										</tr>
 									</table>
@@ -272,26 +272,17 @@
 		<init arg="arg">
 			<state>
 				<calc>
-					{title: trim(title), appname: trim(appname), content: trim(rest2), collapsed:}
+					{title: trim(title), id: trim(rest), collapsed:}
 					<where>
 						<all>
-							<def var="pos1">
-								indexOf({str: arg, substr: "$"})
+							<def var="pos">
+								indexOf({str: arg, substr: ";"})
 							</def>
 							<def var="title">
-								substr({str: arg, start: 0, end: pos1})
+								substr({str: arg, start: 0, end: pos})
 							</def>
-							<def var="rest1">
-								substr({str: arg, start: pos1 + 1, end: length(arg)})
-							</def>
-							<def var="pos2">
-								indexOf({str: rest1, substr: "$"})
-							</def>
-							<def var="appname">
-								substr({str: rest1, start: 0, end: pos2})
-							</def>
-							<def var="rest2">
-								substr({str: rest1, start: pos2 + 1, end: length(rest1)})
+							<def var="rest">
+								substr({str: arg, start: pos + 1, end: length(arg)})
 							</def>
 						</all>
 					</where>
@@ -300,7 +291,12 @@
 		</init>
 		<respond>
 			<input name="input">
-				<prop name="toggle" />
+				<any>
+					<prop name="toggle" />
+					<prop name="received">
+						<string/>
+					</prop>
+				</any>
 			</input>
 			<state>
 				<calc>
@@ -308,23 +304,36 @@
 					<where>
 						<any>
 							<all>
-								<is>state.collapsed</is>
+								<is>input.received</is>
 								<def var="newstate">
-									{title: state.title, appname: state.appname, content: state.content, expanded:}
+									{title: state.title, classname: state.classname, expanded: input.received}
 								</def>
 							</all>
 							<all>
 								<is>state.expanded</is>
+								<is>input.toggle</is>
 								<def var="newstate">
-									{title: state.title, appname: state.appname, content: state.content, collapsed:}
+									{title: state.title, classname: state.classname, collapsed:}
 								</def>
 							</all>
+							<def var="newstate">
+								state
+							</def>
 						</any>
 					</where>
 				</calc>
 			</state>
 			<actions>
 				<redraw/>
+				<calc>
+					<output>state.id</output>
+					<where>
+						<all>
+							<is>state.collapsed</is>
+							<is>input.toggle</is>
+						</all>
+					</where>
+				</calc>
 			</actions>
 		</respond>
 		<events>
@@ -388,7 +397,10 @@
 							<td>[%errors(state.info.errors)%]</td>
 						</tr>
 						<tr>
-							<td class="[%core.classname('expandable')%]" id="[%id('types')%]" data-arg="Types$text$[%core.string.join({parts: types, sep: ''})%]">
+							<td>
+								<div class="[%core.classname('expandable')%]" id="[%id('types')%]" data-arg="Types;[%id('types')%]">
+									.
+								</div>
 							</td>
 						</tr>
 <!--						<tr>
@@ -400,6 +412,9 @@
 							</td>
 						</tr>
 					-->					</table>
+					<div hidden="hidden" id="[%id('types')%]">
+						[%join({parts: types, sep: core.br})%]
+					</div>
 				</text>
 				<where>
 					<all>
