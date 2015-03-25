@@ -467,16 +467,11 @@
 		</accept>
 		<accept data="data">
 			<from applet="types">
-				<calc>
-					{types:}
-					<where>
-						<is>data.request</is>
-					</where>
-				</calc>
+				{types:}
 			</from>
 		</accept>
 	</applet>
-	<applet name="types">
+	<applet name="types" id="id">
 		<state name="state">
 			<dictionary>
 				<type name="Type"/>
@@ -493,7 +488,7 @@
 							<size>name#</size>
 							<item index="i">
 								<text>
-									<div class="[%core.classname('expandable')%]" id="[%id%]-type[%i%]" data-arg="[%name[i]%];type;[%name[i]%]">.</div>
+									<div class="[%core.classname('expandable')%]" id="[%id%]-type[%i%]" data-arg="[%name[i]%];type;[%id%]::[%name[i]%]">.</div>
 								</text>
 							</item>
 						</array>
@@ -554,7 +549,7 @@
 				</calc>
 				<calc>
 					<output>
-						{typename: input.request, typeinfo: state@(input.request)}
+						{id: id, typename: input.request, typeinfo: state@(input.request)}
 					</output>
 					<where>
 						<is>input.request</is>
@@ -567,13 +562,21 @@
 				{info: data.typeinfo}
 			</from>
 			<from applet="type">
-				{request: data.typename}
+				<calc>
+					{request: data.typename}
+					<where>
+						<is>data.id = id</is>
+					</where>
+				</calc>
 			</from>
 		</accept>
 	</applet>
 	<applet name="type">
 		<state name="state">
 			<all>
+				<prop name="id">
+					<string/>
+				</prop>
 				<prop name="typename">
 					<string/>
 				</prop>
@@ -593,10 +596,25 @@
 		</content>
 		<init arg="arg">
 			<state>
-				{typename: arg, noinfo:}
+				<calc>
+					{id: id, typename: name, noinfo:}
+					<where>
+						<all>
+							<def var="pos">
+								indexOf({str: arg, substr: "::"})
+							</def>
+							<def var="id">
+								substr({str: arg, start: 0, end: pos})
+							</def>
+							<def var="name">
+								substr({str: arg, start: pos + 2, end: length(arg)})
+							</def>
+						</all>
+					</where>
+				</calc>
 			</state>
 			<actions>
-				<output>{typename: state.typename}</output>
+				<output>{id: state.id, typename: state.typename}</output>
 			</actions>
 		</init>
 		<respond>
@@ -604,7 +622,7 @@
 				<type name="Type"/>
 			</input>
 			<state>
-				{typename: state.typename, typeinfo: input}
+				{id: state.id, typename: state.typename, typeinfo: input}
 			</state>
 		</respond>
 		<accept data="data">
@@ -612,7 +630,10 @@
 				<calc>
 					data.typeinfo
 					<where>
-						<is>data.typename = state.typename</is>
+						<all>
+							<is>data.id = state.id</is>
+							<is>data.typename = state.name</is>
+						</all>
 					</where>
 				</calc>
 			</from>

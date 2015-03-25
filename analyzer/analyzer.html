@@ -9,7 +9,7 @@
 		document.write('<base href="' + document.location + '" />');
 	</script>
 	<link rel="stylesheet" href="analyzer.css" />
-	<script src="../bonza-loader.js"></script>
+	<script src="../fabsite-engine.js"></script>
 <script>
 var xt="",h3OK=1;
 function checkErrorXML(x)
@@ -96,10 +96,10 @@ else
 
 </head>
 
-<body onload="loadBonzaLibrary('analyzer.xml')">
-	<h1>Bonza Framework Library Analyzer</h1>
+<body onload="runFabsiteLibrary('analyzer.xml')">
+	<h1>Fabsite Framework Library Analyzer</h1>
 	<hr/>
-	<div id="analyzer" class="bonza-analyzer" data-arg="">Loading...</div>
+	<div id="analyzer" class="fabsite-analyzer" data-arg="">Loading...</div>
 </body>
 
 </html>

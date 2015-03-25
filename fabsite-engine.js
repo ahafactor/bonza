@@ -1,11 +1,11 @@
 /*
- * =======  Bonza Framework  ========
+ * =======  Fabsite Engine  ========
  *     © Aha! Factor Pty Ltd, 2015
- * https://github.com/ahafactor/bonza
+ * https://github.com/ahafactor/fabsite
  * ==================================
  */
 
-function loadBonzaLibrary(url) {
+function runFabsiteLibrary(url) {
 
     function getChildren(node) {
         var i = 0;
@@ -76,7 +76,7 @@ function loadBonzaLibrary(url) {
 
     var core = {
         classname: function(name) {
-            return "bonza-" + name;
+            return "fabsite-" + name;
         },
         nbsp: "&nbsp;",
         lt: "&lt;",
@@ -1176,7 +1176,7 @@ function loadBonzaLibrary(url) {
 
             try {
                 if (parseFormula()) {
-                    if (result === true || result === false) { //Bonza has no booleans
+                    if (result === true || result === false) { //Fabsite has no booleans
                         return result;
                     }
                     output.result = result;
@@ -1777,6 +1777,7 @@ function loadBonzaLibrary(url) {
             errors: []
         };
         var name;
+        var id;
         var type;
         var temp;
         var temp2;
@@ -1784,17 +1785,32 @@ function loadBonzaLibrary(url) {
         var expr;
         var prop;
         var local = {
-            vars: context.vars.slice(),
-            types: context.types.slice()
+            vars: {},
+            types: {}
         };
         var templocal;
         var i;
+
+        for (prop in context.types) {
+            local.types[prop] = context.types[prop];
+        }
+        for (prop in context.vars) {
+            local.vars[prop] = context.vars[prop];
+        }
 
         name = code.getAttribute("name");
         if (name === null || name === "") {
             result.errors.push("Applet name not specified");
         } else {
             result.name = name;
+        }
+
+        id = code.getAttribute("id");
+        if (id !== null && id !== "") {
+            result.id = id;
+            local.vars[id] = {
+                string: null
+            };
         }
 
         temp = findChildren(code, "output");
@@ -1820,10 +1836,7 @@ function loadBonzaLibrary(url) {
         }
         result.state.type = type.type;
         result.state.errors = type.errors;
-        local.vars.push({
-            name: result.state.name,
-            type: result.state.type
-        });
+        local.vars[result.state.name] = result.state.type;
 
         temp = single(findChildren(code, "content"), "content");
         temp = single(getChildren(temp), "content");
@@ -1843,10 +1856,7 @@ function loadBonzaLibrary(url) {
         }
         temp2 = single(getChildren(temp2), "response input type");
         type = analyzeType(temp2, context);
-        local.vars.push({
-            name: name,
-            type: type.type
-        });
+        local.vars[name] = type.type;
         local.input = type.type;
         if (type.errors.length > 0) {
             result.errors.push("Invalid response state type");
@@ -1854,10 +1864,7 @@ function loadBonzaLibrary(url) {
         result.respond.input.type = type.type;
         result.respond.input.errors = type.errors;
 
-        local.vars.push({
-            name: result.respond.input.name,
-            type: result.respond.input.type
-        });
+        local.vars[result.respond.input.name] = result.respond.input.type;
 
         temp2 = single(findChildren(temp, "state"), "response state");
         temp2 = single(getChildren(temp2), "response state");
@@ -1881,27 +1888,13 @@ function loadBonzaLibrary(url) {
 
         temp = single(findChildren(code, "init"), "initialization");
 
-        templocal = {
+/*        templocal = {
             vars: local.vars.slice(),
             types: local.types.slice(),
             input: local.input,
             output: local.output
         };
-
-        local.vars.push({
-            name: temp.getAttribute("id"),
-            type: {
-                string: null
-            }
-        });
-
-        local.vars.push({
-            name: temp.getAttribute("content"),
-            type: {
-                string: null
-            }
-        });
-
+*/        
         temp2 = single(findChildren(temp, "state"));
         temp2 = single(getChildren(temp2));
         result.init.state = analyzeExpr(temp2, local);
@@ -1909,7 +1902,7 @@ function loadBonzaLibrary(url) {
             result.errors.push("Initial state does not conform state type");
         }
 
-        local = templocal;
+        // local = templocal;
 
         try {
             temp2 = single(findChildren(temp, "actions"), "action list");
@@ -2451,8 +2444,8 @@ function loadBonzaLibrary(url) {
             errors: []
         };
         var context2 = {
-            types: context.types.slice(),
-            vars: context.vars.slice()
+            types: {},
+            vars: {}
         };
         var prop;
         var temp;
@@ -2465,6 +2458,13 @@ function loadBonzaLibrary(url) {
         var type;
         var formula;
         var info;
+
+        for (prop in context.types) {
+            context2.types[prop] = context.types[prop];
+        }
+        for (prop in context.vars) {
+            context2.vars[prop] = context.vars[prop];
+        }
 
         try {
             if (expr.nodeType == 3) {
@@ -2886,7 +2886,7 @@ function loadBonzaLibrary(url) {
 
     function analyzeStmt(stmt, context) {
         var result = {
-            vars: [],
+            vars: {},
             errors: []
         };
         var expr;
@@ -2930,9 +2930,6 @@ function loadBonzaLibrary(url) {
             case "def":
                 try {
                     name = stmt.getAttribute("var");
-                    result.vars.push({
-                        name: name
-                    });
                     children = getChildren(stmt);
                     if (children.length === 0) {
                         result.errors.push("Missing expression");
@@ -2943,7 +2940,7 @@ function loadBonzaLibrary(url) {
                         if (expr.errors.length !== 0) {
                             result.errors.push("Invalid expression");
                         }
-                        result.vars[0].type = expr.type;
+                        result.vars[name] = expr.type;
                         result.def = expr;
                     }
                 } catch (error) {
@@ -2952,22 +2949,22 @@ function loadBonzaLibrary(url) {
                 break;
             case "all":
                 children = getChildren(stmt);
-                for (j = 0; j < context.types.length; j++) {
-                    context2.types.push(context.types[j]);
+                for (prop in context.types) {
+                    context2.types[prop] = context.types[prop];
                 }
-                for (j = 0; j < context.vars.length; j++) {
-                    vars[context.vars[j].name] = context.vars[j].type;
-                    context2.vars.push(context.vars[j]);
+                for (prop in context.vars) {
+                    context2.vars[prop] = context.vars[prop];
+                    vars[prop] = context.vars[prop];
                 }
                 result.all = [];
                 for (i = 0; i < children.length; i++) {
                     expr = analyzeStmt(children[i], context2);
-                    for (j = 0; j < expr.vars.length; j++) {
-                        if (vars.hasOwnProperty(expr.vars[j].name)) {
-                            result.errors.push("Variable redefined: " + expr.vars[j].name);
+                    for (prop in expr.vars) {
+                        if (vars.hasOwnProperty(prop)) {
+                            result.errors.push("Variable redefined: " + prop);
                         } else {
-                            vars[expr.vars[j].name] = expr.vars[j].type;
-                            context2.vars.push(context.vars[j]);
+                            vars[prop] = expr.vars[prop];
+                            context2.vars[prop] = expr.vars[prop];
                         }
                     }
                     result.all.push(expr);
@@ -2989,7 +2986,7 @@ function loadBonzaLibrary(url) {
                     for (j = 0; j < expr.vars.length; j++) {
                         vars[expr.vars[j].name] = {
                             type: expr.vars[j].type,
-                            count: 0
+                            count: 1
                         };
                     }
                     for (i = 1; i < children.length; i++) {
@@ -2998,7 +2995,7 @@ function loadBonzaLibrary(url) {
                             vars[expr.vars[j].name].count++;
                             if (vars.hasOwnProperty(expr.vars[j].name)) {
                                 if (isObjType(expr.vars[j].type)) {
-                                    vars[expr.vars[j].name] = combine(expr.vars[j].type, vars[expr.vars[j].name]);
+                                    vars[expr.vars[j].name] = combine(expr.vars[j].type, vars[expr.vars[j].name].type);
                                 } else {
                                     result.errors.push("Incompatible types for " + expr.vars[j].name);
                                 }
@@ -3008,10 +3005,7 @@ function loadBonzaLibrary(url) {
                     }
                     for (prop in vars) {
                         if (vars[prop].count == children.length) {
-                            result.vars.push({
-                                name: prop,
-                                type: vars[prop].type
-                            });
+                            result.vars[prop] = vars[prop].type;
                         }
                     }
                 }
@@ -3401,11 +3395,10 @@ function loadBonzaLibrary(url) {
     function analyzeLib(code) {
         var result = {
             global: {
-                vars: [{
-                    name: "core",
-                    type: coretype
-                }],
-                types: []
+                vars: {
+                    core: coretype
+                },
+                types: {}
             },
             errors: [],
             applets: []
@@ -3419,6 +3412,7 @@ function loadBonzaLibrary(url) {
         var name;
         var i;
         var j;
+        var prop;
 
         temp = findChildren(code, "typedef");
         for (i = 0; i < temp.length; i++) {
@@ -3432,10 +3426,7 @@ function loadBonzaLibrary(url) {
                     if (type.errors.length > 0) {
                         result.errors.push("Invalid type definition for " + name);
                     }
-                    result.global.types.push({
-                        name: name,
-                        type: type.type
-                    });
+                    result.global.types[name] = type.type;
 
                 }
             } catch (error) {
@@ -3454,8 +3445,8 @@ function loadBonzaLibrary(url) {
                     result.errors.push("Common section contains errors");
                     break;
                 } else {
-                    for (j = 0; j < stmt.vars.length; j++) {
-                        result.global.vars.push(stmt.vars[j]);
+                    for (prop in stmt.vars) {
+                        result.global.vars[prop] = stmt.vars[prop];
                     }
                 }
             }
@@ -3494,12 +3485,11 @@ function loadBonzaLibrary(url) {
         var j;
 
         this.name = xml.getAttribute("name");
-        var idfunc = xml.getAttribute("idfunc");
-        if (idfunc === null) {
-            idfunc = "id";
+        var id = xml.getAttribute("id");
+        if (id === null) {
+            id = "id";
         }
-        this.idfuncname = idfunc;
-        this.idfunc = {};
+        this.idname = id;
         this.events = {};
         this.listeners = {};
 
@@ -3546,7 +3536,7 @@ function loadBonzaLibrary(url) {
                 case "accept":
                     for (j = 0; j < child.children.length; j++) {
                         this.listeners[child.children[j].getAttribute("applet")] = {
-                            id: child.getAttribute("sender"),
+                            // id: child.getAttribute("sender"),
                             data: child.getAttribute("data"),
                             expr: firstExpr(child.children[j])
                         };
@@ -3658,10 +3648,10 @@ function loadBonzaLibrary(url) {
 
         this.create = function(id, element) {
             console.log("create " + applet.name + "::" + id);
-            this.idfunc[id] = function(ending) {
+            /*this.idfunc[id] = function(ending) {
                 return id + "-" + ending;
-            };
-            this.local[this.idfuncname] = this.idfunc[id];
+            };*/
+            this.local[this.idname] = id;
             // var element = document.getElementById(id);
             if (element !== null) {
                 if (element.attributes["data-arg"]) {
@@ -3751,7 +3741,7 @@ function loadBonzaLibrary(url) {
         this.destroy = function(id) {
             console.log("destroy " + id);
             delete this.instances[id];
-            delete this.idfunc[id];
+            // delete this.idfunc[id];
             delete this.input[id];
         };
     }
@@ -3790,7 +3780,7 @@ function loadBonzaLibrary(url) {
                             for (prop in target.local) {
                                 local[prop] = target.local[prop];
                             }
-                            local[target.listeners[applet.name].id] = id;
+                            // local[target.listeners[applet.name].id] = id;
                             local[target.listeners[applet.name].data] = msg;
                             for (var id2 in target.instances) {
                                 var state = target.instances[id2];
@@ -3899,7 +3889,7 @@ function loadBonzaLibrary(url) {
             ids = [];
             for (name in lib.applets) {
                 applet = lib.applets[name];
-                elements = document.getElementsByClassName("bonza-" + name);
+                elements = document.getElementsByClassName("fabsite-" + name);
                 for (i = 0; i < elements.length; i++) {
                     element = elements[i];
                     id = element.getAttribute("id");

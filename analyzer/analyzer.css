@@ -20,7 +20,7 @@ h1 {
 	border-width: 1px;
 	border-radius: 4px;
 }
-.bonza-expandable {
+.fabsite-expandable {
 	cursor: pointer;
 	background-color: white;
 	color: black;
@@ -31,7 +31,7 @@ h1 {
 .panel-title {
 	text-align: left;
 }
-.bonza-library {
+.fabsite-library {
 	background-color: FloralWhite;
 	color: black;
 	border-style: solid;
@@ -42,14 +42,44 @@ h1 {
 	margin-right: auto;
 	width: 70%;
 }
-.bonza-source {
+.fabsite-source {
 	margin-left: auto;
 	margin-right: auto;
 	width: 75%;
 	tab-size: 4;
 }
-.bonza-action {
+.fabsite-action {
 	width: 80px;
 	text-align: center;	
 	float: left;
+}
+table td {
+    position:relative;
+}
+.tooltip {
+    width:400px;
+    height:300px;
+    padding:20px;
+    border:1px solid #ccc;
+    box-shadow: 0 0 3px rgba(0,0,0,.3);
+    -webkit-box-shadow: 0 0 3px rgba(0,0,0,.3);
+    border-radius:3px;
+    -webkit-border-radius:3px;
+    position:absolute;
+    top:5px;
+    left:50px;
+    display:none;
+}
+.tooltip {
+    z-index:100;
+}
+.link {
+    display:block;
+    width:9%;
+}
+.link:hover + .tooltip {
+    display:block;
+}
+.tooltip:hover {
+    display:block;
 }
