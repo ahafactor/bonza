@@ -56,19 +56,33 @@ function runFabsiteLibrary(url) {
         return a[0];
     }
 
-    function display(value) {
+    function format(value) {
         var prop;
         var result;
 
         if (typeof value === "object") {
             result = "";
             for (prop in value) {
+                if (result.length > 1000) {
+                    result += ", ... ";
+                    break;
+                }
                 if (result !== "") {
                     result += ", ";
                 }
-                result += prop + ": " + display(value[prop]);
+                result += prop + ": " + format(value[prop]);
             }
-            return "{ " + result + " }";
+            if (result === "") {
+                return "";
+            } else {
+                return "{" + result + "}";
+            }
+        } else if (typeof value === "string") {
+            if (value.length > 300) {
+                return '"' + value.substr(0, 300) + ' ... "';
+            } else {
+                return '"' + value + '"';
+            }
         } else {
             return value;
         }
@@ -1177,10 +1191,15 @@ function runFabsiteLibrary(url) {
             try {
                 if (parseFormula()) {
                     if (result === true || result === false) { //Fabsite has no booleans
+                        if (result) {
+                            console.log(formula + " -> success");
+                        } else {
+                            console.log(formula + " -> failed");
+                        }
                         return result;
                     }
                     output.result = result;
-                    console.log(formula + " -> " + result);
+                    console.log(formula + " -> " + format(result));
                     return true;
                 } else {
                     console.log(formula + " -> failed");
@@ -1310,6 +1329,7 @@ function runFabsiteLibrary(url) {
                     case "text":
                         temp = expr.innerHTML.trim();
                         output.result = temp.replace(frmpat, frmval);
+                        console.log(temp + " -> " + format(output.result));
                         break;
                     case "eval":
                         if (evalExpr(firstExpr(expr), context, result)) {
@@ -1642,7 +1662,7 @@ function runFabsiteLibrary(url) {
                 }
                 return true;
             } catch (error) {
-                // console.log("-> fail");
+                console.log(expr.nodeName + " -> fail");
                 return false;
             }
         }
@@ -1798,82 +1818,82 @@ function runFabsiteLibrary(url) {
             local.vars[prop] = context.vars[prop];
         }
 
-        name = code.getAttribute("name");
-        if (name === null || name === "") {
-            result.errors.push("Applet name not specified");
-        } else {
-            result.name = name;
-        }
-
-        id = code.getAttribute("id");
-        if (id !== null && id !== "") {
-            result.id = id;
-            local.vars[id] = {
-                string: null
-            };
-        }
-
-        temp = findChildren(code, "output");
-        temp = getChildren(single(temp, "output type"));
-        type = analyzeType(single(temp, "output type"), context);
-        result.output = type;
-        local.output = type.type;
-        if (type.errors.length > 0) {
-            result.errors.push("Erroneous output type");
-        }
-
-        temp = single(findChildren(code, "state"), "state");
-        name = temp.getAttribute("name");
-        if (name === null || name === "") {
-            result.errors.push("Missing state name");
-        } else {
-            result.state.name = name;
-        }
-        temp = getChildren(temp);
-        type = analyzeType(single(temp, "state"), context);
-        if (type.errors.length > 0) {
-            result.errors.push("Invalid state definition");
-        }
-        result.state.type = type.type;
-        result.state.errors = type.errors;
-        local.vars[result.state.name] = result.state.type;
-
-        temp = single(findChildren(code, "content"), "content");
-        temp = single(getChildren(temp), "content");
-        result.content = analyzeExpr(temp, local);
-        if (result.content.errors.length > 0) {
-            result.errors.push("Invalid or missing content");
-        }
-
-        //analyze response now to find out input type
-        temp = single(findChildren(code, "respond"), "response");
-        temp2 = single(findChildren(temp, "input"), "input");
-        name = temp2.getAttribute("name");
-        if (name === null || name === "") {
-            result.errors.push("Response input name not specified");
-        } else {
-            result.respond.input.name = name;
-        }
-        temp2 = single(getChildren(temp2), "response input type");
-        type = analyzeType(temp2, context);
-        local.vars[name] = type.type;
-        local.input = type.type;
-        if (type.errors.length > 0) {
-            result.errors.push("Invalid response state type");
-        }
-        result.respond.input.type = type.type;
-        result.respond.input.errors = type.errors;
-
-        local.vars[result.respond.input.name] = result.respond.input.type;
-
-        temp2 = single(findChildren(temp, "state"), "response state");
-        temp2 = single(getChildren(temp2), "response state");
-        result.respond.state = analyzeExpr(temp2, local);
-        if (!covariant(result.respond.state.type, result.state.type)) {
-            result.errors.push("Response state does not conform state type");
-        }
-
         try {
+            name = code.getAttribute("name");
+            if (name === null || name === "") {
+                throw "Applet name not specified";
+            } else {
+                result.name = name;
+            }
+
+            id = code.getAttribute("id");
+            if (id !== null && id !== "") {
+                result.id = id;
+                local.vars[id] = {
+                    string: null
+                };
+            }
+
+            temp = findChildren(code, "output");
+            temp = getChildren(single(temp, "output type"));
+            type = analyzeType(single(temp, "output type"), context);
+            result.output = type;
+            local.output = type.type;
+            if (type.errors.length > 0) {
+                result.errors.push("Erroneous output type");
+            }
+
+            temp = single(findChildren(code, "state"), "state");
+            name = temp.getAttribute("name");
+            if (name === null || name === "") {
+                throw "Missing state name";
+            } else {
+                result.state.name = name;
+            }
+            temp = getChildren(temp);
+            type = analyzeType(single(temp, "state"), context);
+            if (type.errors.length > 0) {
+                result.errors.push("Invalid state definition");
+            }
+            result.state.type = type.type;
+            result.state.errors = type.errors;
+            local.vars[result.state.name] = result.state.type;
+
+            temp = single(findChildren(code, "content"), "content");
+            temp = single(getChildren(temp), "content");
+            result.content = analyzeExpr(temp, local);
+            if (result.content.errors.length > 0) {
+                result.errors.push("Invalid or missing content");
+            }
+
+            //analyze response now to find out input type
+            temp = single(findChildren(code, "respond"), "response");
+            temp2 = single(findChildren(temp, "input"), "input");
+            name = temp2.getAttribute("name");
+            if (name === null || name === "") {
+                throw "Response input name not specified";
+            } else {
+                result.respond.input.name = name;
+            }
+            temp2 = single(getChildren(temp2), "response input type");
+            type = analyzeType(temp2, context);
+            local.vars[name] = type.type;
+            local.input = type.type;
+            if (type.errors.length > 0) {
+                result.errors.push("Invalid response state type");
+            }
+            result.respond.input.type = type.type;
+            result.respond.input.errors = type.errors;
+
+            local.vars[result.respond.input.name] = result.respond.input.type;
+
+            temp2 = single(findChildren(temp, "state"), "response state");
+            temp2 = single(getChildren(temp2), "response state");
+            result.respond.state = analyzeExpr(temp2, local);
+            if (!covariant(result.respond.state.type, result.state.type)) {
+                result.errors.push("Response state does not conform state type");
+            }
+
             temp2 = single(findChildren(temp, "actions"), "response action list");
             temp2 = getChildren(temp2);
             for (i = 0; i < temp2.length; i++) {
@@ -1884,27 +1904,16 @@ function runFabsiteLibrary(url) {
                     result.errors.push("Expression of invalid type in action list");
                 }
             }
-        } catch (error) {}
 
-        temp = single(findChildren(code, "init"), "initialization");
+            temp = single(findChildren(code, "init"), "initialization");
 
-/*        templocal = {
-            vars: local.vars.slice(),
-            types: local.types.slice(),
-            input: local.input,
-            output: local.output
-        };
-*/        
-        temp2 = single(findChildren(temp, "state"));
-        temp2 = single(getChildren(temp2));
-        result.init.state = analyzeExpr(temp2, local);
-        if (!covariant(result.init.state.type, result.state.type)) {
-            result.errors.push("Initial state does not conform state type");
-        }
+            temp2 = single(findChildren(temp, "state"));
+            temp2 = single(getChildren(temp2));
+            result.init.state = analyzeExpr(temp2, local);
+            if (!covariant(result.init.state.type, result.state.type)) {
+                result.errors.push("Initial state does not conform state type");
+            }
 
-        // local = templocal;
-
-        try {
             temp2 = single(findChildren(temp, "actions"), "action list");
             temp2 = getChildren(temp2);
             for (i = 0; i < temp2.length; i++) {
@@ -1915,7 +1924,9 @@ function runFabsiteLibrary(url) {
                     result.errors.push("Expression of invalid type in action list");
                 }
             }
-        } catch (error) {}
+        } catch (error) {
+            result.errors.push(error);
+        }
 
         return result;
 
@@ -3309,9 +3320,9 @@ function runFabsiteLibrary(url) {
         } else if (type.hasOwnProperty("action")) {
             return "<strong>action</strong>";
         } else if (type.hasOwnProperty("array")) {
-            return "[" + typeStr(type.array) + "]";
+            return "[" + formatType(type.array, "") + "]";
         } else if (type.hasOwnProperty("dictionary")) {
-            return "{" + typeStr(type.dictionary) + "}";
+            return "{" + formatType(type.dictionary, "") + "}";
         } else if (type.hasOwnProperty("prop")) {
             if (type.prop.type.hasOwnProperty("none")) {
                 return type.prop.name + ': ';
@@ -3648,9 +3659,6 @@ function runFabsiteLibrary(url) {
 
         this.create = function(id, element) {
             console.log("create " + applet.name + "::" + id);
-            /*this.idfunc[id] = function(ending) {
-                return id + "-" + ending;
-            };*/
             this.local[this.idname] = id;
             // var element = document.getElementById(id);
             if (element !== null) {
@@ -3684,9 +3692,9 @@ function runFabsiteLibrary(url) {
             return this.instances.hasOwnProperty(id);
         };
         this.redraw = function(id) {
-            // console.log("redraw " + id);
-            // this.local[this.statename] = this.instances[id];
-            // this.local[this.idfuncname] = this.idfunc[id];
+            // console.log("redraw " + applet.name + "::" + id);
+            this.local[this.idname] = id;
+            this.local[this.statename] = this.instances[id];
             if (engine.evalExpr(this.content, this.local, output)) {
                 var element = document.getElementById(id);
                 element.innerHTML = output.result;
@@ -3700,8 +3708,8 @@ function runFabsiteLibrary(url) {
         this.run = function(id) {
             var instance = this.instances[id];
             var queue = this.input[id];
-            // this.local[this.statename] = instance;
-            // this.local[this.idfuncname] = this.idfunc[id];
+            this.local[this.idname] = id;
+            this.local[this.statename] = instance;
             /*            var element = document.getElementById(id);
             if (element !== null) {
                 this.local[this.respcontentname] = element.innerHTML;
@@ -3732,7 +3740,7 @@ function runFabsiteLibrary(url) {
             // console.log("broadcast " + id);
             for (var id in this.instances) {
                 instance = this.instances[id];
-                // this.local[this.statename] = instance;
+                this.local[this.statename] = instance;
                 this.input[id].push(msg);
                 resume();
             }
@@ -3741,7 +3749,6 @@ function runFabsiteLibrary(url) {
         this.destroy = function(id) {
             console.log("destroy " + id);
             delete this.instances[id];
-            // delete this.idfunc[id];
             delete this.input[id];
         };
     }
@@ -3786,7 +3793,7 @@ function runFabsiteLibrary(url) {
                                 var state = target.instances[id2];
                                 local[target.statename] = state;
                                 if (engine.evalExpr(target.listeners[applet.name].expr, local, output)) {
-                                    console.log("accept " + target.name + "@" + id2);
+                                    console.log("accept " + target.name + "::" + id2);
                                     target.respond(id2, output.result);
                                 }
                             }

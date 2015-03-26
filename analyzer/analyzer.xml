@@ -48,6 +48,16 @@
 			<prop name="dynamic" />
 		</any>
 	</typedef>
+	<typedef name="TypeInfo">
+		<prop name="errors">
+			<array>
+				<string/>
+			</array>
+		</prop>
+		<prop name="type">
+			<type name="Type"/>
+		</prop>
+	</typedef>
 	<typedef name="ExprInfo">
 		<all>
 			<prop name="errors">
@@ -117,7 +127,7 @@
 		</def>
 		<unwrap>core.string</unwrap>
 	</common>
-	<applet name="analyzer">
+	<applet name="analyzer" id="id">
 		<state name="state">
 			<all>
 				<prop name="source">
@@ -134,7 +144,7 @@
 				<br/>
 				<button class="[%core.classname('action')%]" id="[%id%]-submit" data-arg="Analyze">Analyze</button>
 				<br/>
-				<div class="[%core.classname('library')%]" id="[%id%]-library" data-arg="[%id%]-library">Paste Fabsite source in text field above and press Analyze</div>
+				<div class="[%core.classname('library')%]" id="[%id%]-library" data-arg="[%id%]-library">Paste Fabsite XML source in the text field above and press Analyze</div>
 			</text>
 		</content>
 		<init>
@@ -196,7 +206,7 @@
 			</from>
 		</accept>
 	</applet>
-	<applet name="expandable">
+	<applet name="expandable" id="id">
 		<!-- an expandable panel -->
 		<state name="state">
 			<all>
@@ -296,9 +306,7 @@
 		</init>
 		<respond>
 			<input name="input">
-				<any>
-					<prop name="toggle" />
-				</any>
+				<prop name="toggle" />
 			</input>
 			<state>
 				<calc>
@@ -358,7 +366,7 @@
 			<change>data</change>
 		</events>
 	</applet>
-	<applet name="library">
+	<applet name="library" id="id">
 		<output>
 			<like>{name: "", info: core.code.analyzeApplet(core.xml.parseText(""))}</like>
 		</output>
@@ -384,7 +392,12 @@
 						</tr>
 						<tr>
 							<td>
-								<div class="[%core.classname('expandable')%]" id="[%id%]-types" data-arg="Types;types;types">.</div>
+								<div class="[%core.classname('expandable')%]" id="[%id%]-types" data-arg="Types;types;">.</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div class="[%core.classname('expandable')%]" id="[%id%]-vars" data-arg="Global variables;vars;">.</div>
 							</td>
 						</tr>
 					</table>
@@ -441,9 +454,15 @@
 					</where>
 				</calc>
 				<calc>
-					<output>{typeinfo: state.info.global.types}</output>
+					<output>{types: state.info.global.types}</output>
 					<where>
 						<is>input.types</is>
+					</where>
+				</calc>
+				<calc>
+					<output>{vars: state.info.global.vars}</output>
+					<where>
+						<is>input.vars</is>
 					</where>
 				</calc>
 				<calc>
@@ -464,8 +483,6 @@
 			<from applet="appletinfo">
 				{appletname: data.appletname}
 			</from>
-		</accept>
-		<accept data="data">
 			<from applet="types">
 				<calc>
 					{types:}
@@ -474,9 +491,17 @@
 					</where>
 				</calc>
 			</from>
+			<from applet="vars">
+				<calc>
+					{vars:}
+					<where>
+						<is>data.request</is>
+					</where>
+				</calc>
+			</from>
 		</accept>
 	</applet>
-	<applet name="types">
+	<applet name="types" id="id">
 		<state name="state">
 			<dictionary>
 				<type name="Type"/>
@@ -493,7 +518,7 @@
 							<size>name#</size>
 							<item index="i">
 								<text>
-									<div class="[%core.classname('expandable')%]" id="[%id%]-type[%i%]" data-arg="[%name[i]%];type;[%name[i]%]">.</div>
+									<div class="[%core.classname('expandable')%]" id="[%id%]-type-[%name[i]%]" data-arg="[%name[i]%];type;type-[%name[i]%]">.</div>
 								</text>
 							</item>
 						</array>
@@ -520,7 +545,7 @@
 		<respond>
 			<input name="input">
 				<any>
-					<prop name="info">
+					<prop name="types">
 						<dictionary>
 							<type name="Type"/>
 						</dictionary>
@@ -536,7 +561,7 @@
 					<where>
 						<any>
 							<def var="newstate">
-								input.info
+								input.types
 							</def>
 							<def var="newstate">
 								state
@@ -549,12 +574,12 @@
 				<calc>
 					<redraw/>
 					<where>
-						<is>input.info</is>
+						<is>input.types</is>
 					</where>
 				</calc>
 				<calc>
 					<output>
-						{typename: input.request, typeinfo: state@(input.request)}
+						{typename: input.request, type: state@(input.request)}
 					</output>
 					<where>
 						<is>input.request</is>
@@ -564,21 +589,136 @@
 		</respond>
 		<accept data="data">
 			<from applet="library">
-				{info: data.typeinfo}
+				{types: data.types}
 			</from>
 			<from applet="type">
-				{request: data.typename}
+				<calc>
+					{request: typename}
+					<where>
+						<all>
+							<is>substr({str: data.typename, start: 0, length: 5}) = "type-"</is>
+							<def var="typename">
+								substr({str: data.typename, start: 5, end: length(data.typename)})
+							</def>
+						</all>
+					</where>
+				</calc>
 			</from>
 		</accept>
 	</applet>
-	<applet name="type">
+	<applet name="vars" id="id">
+		<state name="state">
+			<dictionary>
+				<type name="Type"/>
+			</dictionary>
+		</state>
+		<content>
+			<calc>
+				<text>
+					[%join({parts: vars, sep: '<br/>'})%]
+				</text>
+				<where>
+					<def var="vars">
+						<array>
+							<size>name#</size>
+							<item index="i">
+								<text>
+									<div class="[%core.classname('expandable')%]" id="[%id%]-var-[%name[i]%]" data-arg="[%name[i]%];type;var-[%name[i]%]">.</div>
+								</text>
+							</item>
+						</array>
+					</def>
+				</where>
+				<where>
+					<def var="name">
+						<keys>state</keys>
+					</def>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				<noentries>
+					<type name="Type"/>
+				</noentries>
+			</state>
+			<actions>
+				<!-- request info from library -->
+				<output>{request:}</output>
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="vars">
+						<dictionary>
+							<type name="Type"/>
+						</dictionary>
+					</prop>
+					<prop name="request">
+						<string/>
+					</prop>					
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<def var="newstate">
+								input.vars
+							</def>
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<calc>
+					<redraw/>
+					<where>
+						<is>input.vars</is>
+					</where>
+				</calc>
+				<calc>
+					<output>
+						{varname: input.request, type: state@(input.request)}
+					</output>
+					<where>
+						<is>input.request</is>
+					</where>
+				</calc>
+			</actions>
+		</respond>
+		<accept data="data">
+			<from applet="library">
+				{vars: data.vars}
+			</from>
+			<from applet="type">
+				<calc>
+					{request: varname}
+					<where>
+						<all>
+							<is>substr({str: data.typename, start: 0, length: 4}) = "var-"</is>
+							<def var="varname">
+								substr({str: data.typename, start: 4, end: length(data.typename)})
+							</def>
+						</all>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="type" id="id">
 		<state name="state">
 			<all>
 				<prop name="typename">
 					<string/>
 				</prop>
 				<any>
-					<prop name="typeinfo">
+					<prop name="type">
 						<type name="Type"/>
 					</prop>
 					<prop name="noinfo" />
@@ -586,10 +726,14 @@
 			</all>
 		</state>
 		<content>
-			<text>
-				[%errors(state.typeinfo.errors)%]
-				[%core.code.typeStr(state.typeinfo.type)%]
-			</text>
+			<calc>
+				<text>
+					[%core.code.typeStr(state.type)%]
+				</text>
+				<where>
+					<is>state.type</is>
+				</where>
+			</calc>
 		</content>
 		<init arg="arg">
 			<state>
@@ -604,21 +748,42 @@
 				<type name="Type"/>
 			</input>
 			<state>
-				{typename: state.typename, typeinfo: input}
+				{typename: state.typename, type: input}
 			</state>
+			<actions>
+				<redraw/>
+			</actions>
 		</respond>
 		<accept data="data">
 			<from applet="types">
 				<calc>
-					data.typeinfo
+					data.type
 					<where>
-						<is>data.typename = state.typename</is>
+						<is>state.typename = name</is>
+					</where>
+					<where>
+						<def var="name">
+							<text>type-[%data.typename%]</text>
+						</def>
+					</where>
+				</calc>
+			</from>
+			<from applet="vars">
+				<calc>
+					data.type
+					<where>
+						<is>state.typename = name</is>
+					</where>
+					<where>
+						<def var="name">
+							<text>var-[%data.varname%]</text>
+						</def>
 					</where>
 				</calc>
 			</from>
 		</accept>
 	</applet>
-	<applet name="action">
+	<applet name="action" id="id">
 		<output>
 			<prop name="do"/>
 		</output>
