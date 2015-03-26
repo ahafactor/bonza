@@ -383,13 +383,9 @@
 		<content>
 			<calc>
 				<text>
+					<h2>Library analysis results:</h2>
+					[%errors(state.info.errors)%]
 					<table>
-						<tr>
-							<td><h2>Library analysis results:</h2></td>
-						</tr>
-						<tr>
-							<td>[%errors(state.info.errors)%]</td>
-						</tr>
 						<tr>
 							<td>
 								<div class="[%core.classname('expandable')%]" id="[%id%]-types" data-arg="Types;types;">.</div>
@@ -398,6 +394,11 @@
 						<tr>
 							<td>
 								<div class="[%core.classname('expandable')%]" id="[%id%]-vars" data-arg="Global variables;vars;">.</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div class="[%core.classname('expandable')%]" id="[%id%]-applets" data-arg="Applets;applets;">.</div>
 							</td>
 						</tr>
 					</table>
@@ -436,21 +437,9 @@
 			</state>
 			<actions>
 				<calc>
-					<!-- when applet name is provided, send the applet's info -->
-					<output>{name: input.appletname, info: applet}</output>
+					<output>{applets: state.info.applets}</output>
 					<where>
-						<is>input.appletname</is>
-						<def var="applet">
-							<find>
-								<in>state.info.applets</in>
-								<item name="item">
-									<is>item.name = input.appletname</is>
-								</item>
-							</find>
-						</def>
-					</where>
-					<where>
-						<is>input.appletname</is>
+						<is>input.applets</is>
 					</where>
 				</calc>
 				<calc>
@@ -479,10 +468,6 @@
 				<!-- library info received from analyzer -->
 				{info: data.info}
 			</from>
-			<!-- info on a particular applet is requested -->
-			<from applet="appletinfo">
-				{appletname: data.appletname}
-			</from>
 			<from applet="types">
 				<calc>
 					{types:}
@@ -494,6 +479,14 @@
 			<from applet="vars">
 				<calc>
 					{vars:}
+					<where>
+						<is>data.request</is>
+					</where>
+				</calc>
+			</from>
+			<from applet="applets">
+				<calc>
+					{applets:}
 					<where>
 						<is>data.request</is>
 					</where>
@@ -711,6 +704,101 @@
 			</from>
 		</accept>
 	</applet>
+	<applet name="applets" id="id">
+		<state name="state">
+			<dictionary>
+				<type name="AppletInfo"/>
+			</dictionary>
+		</state>
+		<content>
+			<calc>
+				<text>
+					[%join({parts: applets, sep: '<br/>'})%]
+				</text>
+				<where>
+					<def var="applets">
+						<array>
+							<size>name#</size>
+							<item index="i">
+								<text>
+									<div class="[%core.classname('expandable')%]" id="[%id%]-applet-[%name[i]%]" data-arg="[%name[i]%];appletinfo;[%name[i]%]">.</div>
+								</text>
+							</item>
+						</array>
+					</def>
+				</where>
+				<where>
+					<def var="name">
+						<keys>state</keys>
+					</def>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				<noentries>
+					<type name="AppletInfo"/>
+				</noentries>
+			</state>
+			<actions>
+				<!-- request info from library -->
+				<output>{request:}</output>
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="applets">
+						<dictionary>
+							<type name="AppletInfo"/>
+						</dictionary>
+					</prop>
+					<prop name="request">
+						<string/>
+					</prop>					
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<def var="newstate">
+								input.applets
+							</def>
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<calc>
+					<redraw/>
+					<where>
+						<is>input.applets</is>
+					</where>
+				</calc>
+				<calc>
+					<output>
+						{name: input.request, info: state@(input.request)}
+					</output>
+					<where>
+						<is>input.request</is>
+					</where>
+				</calc>
+			</actions>
+		</respond>
+		<accept data="data">
+			<from applet="library">
+				{applets: data.applets}
+			</from>
+			<from applet="appletinfo">
+				{request: data.appletname}
+			</from>
+		</accept>
+	</applet>
 	<applet name="type" id="id">
 		<state name="state">
 			<all>
@@ -783,30 +871,181 @@
 			</from>
 		</accept>
 	</applet>
-	<applet name="action" id="id">
+	<applet name="appletinfo">
 		<output>
-			<prop name="do"/>
+			<like>{name: "", code: core.xml.parseText("")}</like>
 		</output>
 		<state name="state">
-			<string/>
+			<all>
+				<prop name="name">
+					<string/>
+				</prop>
+				<any>
+					<all>
+						<prop name="info">
+							<type name="AppletInfo"/>
+						</prop>
+						<prop name="exprinfo">
+							<dictionary>
+								<type name="ExprInfo"/>
+							</dictionary>
+						</prop>
+					</all>
+					<prop name="noinfo"/>
+				</any>
+			</all>
 		</state>
 		<content>
-			state
-		</content>
-		<init arg="arg">
-			<state>arg</state>
-		</init>
-		<respond>
-			<input name="do">
-				<prop name="do"/>
-			</input>
-			<state>state</state>
-			<actions>
-				<output>state</output>
-			</actions>
-		</respond>
-		<events>
-			<click>{do:}</click>
-		</events>
-	</applet>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.info</is>
+							<def var="content">
+								<text>
+									[%errors(state.info.errors)%]
+									<ul>
+										<li>output: [%core.code.typeStr(state.info.output.type)%]</li>
+										<li>state([%state.info.state.name%]): [%core.code.typeStr(state.info.state.type)%]</li>
+										<li><br/> 
+										<div id="[%id%]-content" class="[%core.classname('expandable')%]" data-arg="content;expression;">.</div>
+									</li>
+									<li>init:
+										<div id="[%id%]-initstate" class="[%core.classname('expandable')%]" data-arg="state;expression;">.</div>
+									</li>
+								</ul>
+							</text>
+						</def>
+					</all>
+					<def var="content">""</def>
+				</any>
+			</where>
+			<!-- <where>
+				<all>
+					<def var="initactions">
+						<array>
+							<size>state.info.init.actions#</size>
+							<item index="i">
+								<text>
+									<div id="[%id('initaction')%]-[%i%]" class="[%core.classname('expandable')%]">
+										action #[%i + 1%]$ expression $[%id('initaction')%]-[%i%]
+									</div>
+								</text>
+							</item>
+						</array>
+					</def>
+				</all>
+			</where> -->
+		</calc>
+	</content>
+	<init arg="name">
+		<state>{name: name, noinfo:}</state>
+		<actions>
+			<output>{appletname: name}</output>
+		</actions>
+	</init>
+	<respond>
+		<input name="input">
+			<any>
+				<prop name="refresh" />
+				<prop name="info">
+					<type name ="AppletInfo"/>
+				</prop>
+				<prop name="exprid">
+					<string/>
+				</prop>
+			</any>
+		</input>
+		<state>
+			<calc>
+				newstate
+				<where>
+					<any>
+						<def var="newstate">
+							<calc>
+								{name: state.name, info: input.info, exprinfo: exprinfo}
+								<where>
+									<def var="exprinfo">
+										<merge>
+											<entries>
+												<entry>
+													"content"
+													<value>input.info.content</value>
+												</entry>
+												<entry>
+													"initstate"
+													<value>input.info.init.state</value>
+												</entry>
+											</entries>
+											<!-- <dictionary>
+												<size>input.info.init.actions#</size>
+												<entry index="i">
+													<text>[%id("initaction")%]-[%i%]</text>
+													<value>input.info.init.actions[i]</value>
+												</entry>
+											</dictionary> -->
+										</merge>
+									</def>
+								</where>
+							</calc>
+						</def>
+						<def var="newstate">state</def>
+					</any>
+				</where>
+			</calc>
+		</state>
+		<actions>
+			<output>{reply: {id: input.exprid, info: state.exprinfo@(input.exprid)}}</output>
+			<calc>
+				<redraw/>
+				<where>
+					<any>
+						<is>input.refresh</is>
+						<is>input.info</is>
+					</any>						
+				</where>
+			</calc>
+		</actions>
+	</respond>
+	<accept data="data">
+		<from applet="applets">
+			<calc>
+				{info: data.info}
+				<where>
+					<is>data.name = state.name</is>
+				</where>
+			</calc>
+		</from>
+		<from applet="expression">
+			{exprid: sender}
+		</from>
+	</accept>
+</applet>
+<applet name="action" id="id">
+	<output>
+		<prop name="do"/>
+	</output>
+	<state name="state">
+		<string/>
+	</state>
+	<content>
+		state
+	</content>
+	<init arg="arg">
+		<state>arg</state>
+	</init>
+	<respond>
+		<input name="do">
+			<prop name="do"/>
+		</input>
+		<state>state</state>
+		<actions>
+			<output>state</output>
+		</actions>
+	</respond>
+	<events>
+		<click>{do:}</click>
+	</events>
+</applet>
 </library>

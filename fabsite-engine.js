@@ -56,12 +56,18 @@ function runFabsiteLibrary(url) {
         return a[0];
     }
 
+    var flevel = 0;
+
     function format(value) {
         var prop;
         var result;
 
         if (typeof value === "object") {
             result = "";
+            if (flevel > 3) {
+                return "{ ... }";
+            }
+            flevel++;
             for (prop in value) {
                 if (result.length > 1000) {
                     result += ", ... ";
@@ -72,6 +78,7 @@ function runFabsiteLibrary(url) {
                 }
                 result += prop + ": " + format(value[prop]);
             }
+            flevel--;
             if (result === "") {
                 return "";
             } else {
@@ -2448,7 +2455,7 @@ function runFabsiteLibrary(url) {
         var i;
         var j;
         var result = {
-            code: expr,
+            // code: expr,
             type: {
                 none: null
             },
@@ -3405,14 +3412,14 @@ function runFabsiteLibrary(url) {
 
     function analyzeLib(code) {
         var result = {
+            applets: {},
             global: {
                 vars: {
                     core: coretype
                 },
                 types: {}
             },
-            errors: [],
-            applets: []
+            errors: []
         };
         var type;
         var temp;
@@ -3469,12 +3476,16 @@ function runFabsiteLibrary(url) {
             if (applet.errors.length > 0) {
                 if (applet.hasOwnProperty("name")) {
                     name = applet.name;
+                    if (result.applets.hasOwnProperty(name)) {
+                        result.errors.push("Duplicate applet name: " + name);
+                    } else {
+                        result.applets[name] = applet;
+                    }
                 } else {
-                    name = "unnamed";
+                    result.errors.push("Missing applet name");
                 }
                 result.errors.push("Invalid applet definition: " + name);
             }
-            result.applets.push(applet);
 
         }
 
