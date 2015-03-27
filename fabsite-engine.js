@@ -1898,7 +1898,7 @@ function runFabsiteLibrary(url) {
             temp2 = single(getChildren(temp2), "response state");
             result.respond.state = analyzeExpr(temp2, local);
             if (!covariant(result.respond.state.type, result.state.type)) {
-                result.errors.push("Response state does not conform state type");
+                result.errors.push("Response state does not match state type");
             }
 
             temp2 = single(findChildren(temp, "actions"), "response action list");
@@ -1918,7 +1918,7 @@ function runFabsiteLibrary(url) {
             temp2 = single(getChildren(temp2));
             result.init.state = analyzeExpr(temp2, local);
             if (!covariant(result.init.state.type, result.state.type)) {
-                result.errors.push("Initial state does not conform state type");
+                result.errors.push("Initial state does not match state type");
             }
 
             temp2 = single(findChildren(temp, "actions"), "action list");
@@ -2379,13 +2379,9 @@ function runFabsiteLibrary(url) {
 
         function parseVar() {
             if (token !== null && token[0] === token[3]) {
-                for (var i = 0; i < context.vars.length; i++) {
-                    if (context.vars[i].name == token[0]) {
-                        result = context.vars[i].type;
-                        break;
-                    }
-                }
-                if (i == context.vars.length) {
+                if (context.vars.hasOwnProperty(token[0])) {
+                    result = context.vars[token[0]];
+                } else {
                     throw "Variable <code>" + token[0] + "</code> not found";
                 }
                 token = scanner.exec(formula);
@@ -2852,7 +2848,7 @@ function runFabsiteLibrary(url) {
                     if (!covariant(info.type, {
                         action: null
                     })) {
-                        result.errors.push("Expression must be of the action type");
+                        result.errors.push("Expression after <delay> must be of the action type");
                     }
                     temp = single(findChildren(expr, "by"), "delay interval");
                     temp = single(getChildren(temp), "delay interval");
@@ -2860,7 +2856,7 @@ function runFabsiteLibrary(url) {
                     if (!covariant(temp2.type, {
                         interval: null
                     })) {
-                        result.errors.push("Expression must be of the interval type");
+                        result.errors.push("Expression after <by> must be of the interval type");
                     }
                     result.type = {
                         action: null
@@ -2871,10 +2867,10 @@ function runFabsiteLibrary(url) {
                     };
                     break;
                 case "input":
-                    temp = single(getChildren(expr));
+                    temp = single(getChildren(expr), "expression in <input>");
                     info = analyzeExpr(temp, context);
                     if (!covariant(info.type, context.input)) {
-                        result.errors.push("Expression must be of the applet's input type");
+                        result.errors.push("Expression in <input> must be of the applet's input type");
                     }
                     result.type = {
                         action: null
@@ -2882,10 +2878,10 @@ function runFabsiteLibrary(url) {
                     result.input = info;
                     break;
                 case "output":
-                    temp = single(getChildren(expr));
+                    temp = single(getChildren(expr), "expression in <output>");
                     info = analyzeExpr(temp, context);
                     if (!covariant(info.type, context.output)) {
-                        result.errors.push("Expression must be of the applet's output type");
+                        result.errors.push("Expression in <output> must be of the applet's output type");
                     }
                     result.type = {
                         action: null
@@ -2920,13 +2916,13 @@ function runFabsiteLibrary(url) {
             case "is":
                 children = getChildren(stmt);
                 if (children.length === 0) {
-                    result.errors.push("Missing expression");
+                    result.errors.push("Missing expression in <is>");
                 } else if (children.length > 1) {
-                    result.errors.push("More than one expression specified");
+                    result.errors.push("More than one expression specified in <is>");
                 } else {
                     expr = analyzeExpr(firstExpr(stmt), context);
                     if (expr.errors.length !== 0) {
-                        result.errors.push("Invalid expression");
+                        result.errors.push("Invalid expression in <is>");
                     }
                     result.is = expr;
                 }
@@ -2934,34 +2930,34 @@ function runFabsiteLibrary(url) {
             case "not":
                 children = getChildren(stmt);
                 if (children.length === 0) {
-                    result.errors.push("Missing statement");
+                    result.errors.push("Missing statement in <not>");
                 } else if (children.length > 1) {
-                    result.errors.push("More than one statement specified");
+                    result.errors.push("More than one statement specified in <not>");
                 } else {
                     expr = analyzeStmt(stmt.children[0], context);
                     if (expr.errors.length !== 0) {
-                        result.errors.push("Invalid statement");
+                        result.errors.push("Invalid statement in <not>");
                     }
                     result.not = expr;
                 }
                 break;
             case "def":
-                try {
-                    name = stmt.getAttribute("var");
+                name = stmt.getAttribute("var");
+                if (name !== null) {
                     children = getChildren(stmt);
                     if (children.length === 0) {
-                        result.errors.push("Missing expression");
+                        result.errors.push("Missing expression in <def>");
                     } else if (children.length > 1) {
-                        result.errors.push("More than one expression specified");
+                        result.errors.push("More than one expression specified in <def>");
                     } else {
                         expr = analyzeExpr(firstExpr(stmt), context);
                         if (expr.errors.length !== 0) {
-                            result.errors.push("Invalid expression");
+                            result.errors.push("Invalid expression in <def>");
                         }
                         result.vars[name] = expr.type;
                         result.def = expr;
                     }
-                } catch (error) {
+                } else {
                     result.errors.push("Missing variable");
                 }
                 break;
@@ -3028,8 +3024,23 @@ function runFabsiteLibrary(url) {
                     }
                 }
                 break;
-                //case "unwrap":
-                //break;
+            case "unwrap":
+                expr = analyzeExpr(single(getChildren(stmt), "expression in <unwrap>"), context);
+                if (expr.type.all) {
+                    for (j = 0; j < expr.type.all.length; j++) {
+                        if (expr.type.all[j].hasOwnProperty("prop")) {
+                            prop = expr.type.all[j].prop.name;
+                            if (context.vars.hasOwnProperty(prop)) {
+                                result.errors.push("Variable redefined: " + prop);
+                            } else {
+                                context.vars[prop] = expr.type.all[j].prop.type;
+                            }
+                        }
+                    }
+                } else {
+                    throw "Expression after <unwrap> must be of <all> type";
+                }
+                break;
             default:
                 result.errors.push("Unknown statement: " + stmt.nodeName);
                 result.other = null;
@@ -3274,13 +3285,9 @@ function runFabsiteLibrary(url) {
                     if (name === null || name === "") {
                         throw "Missing type name";
                     }
-                    for (i = 0; i < context.types.length; i++) {
-                        if (context.types[i].name == name) {
-                            result.type = context.types[i].type;
-                            break;
-                        }
-                    }
-                    if (i == context.types.length) {
+                    if (context.types.hasOwnProperty(name)) {
+                        result.type = context.types[name];
+                    } else {
                         throw "Unknown user-defined data type: " + name;
                     }
                     break;
@@ -3431,62 +3438,63 @@ function runFabsiteLibrary(url) {
         var i;
         var j;
         var prop;
+        var children = getChildren(code);
 
-        temp = findChildren(code, "typedef");
-        for (i = 0; i < temp.length; i++) {
-            try {
-                name = temp[i].getAttribute("name");
-                temp2 = temp[i].children;
-                if (temp2.length != 1) {
-                    result.errors.push("Invalid type definition for " + name);
-                } else {
-                    type = analyzeType(temp2[0], result.global);
-                    if (type.errors.length > 0) {
-                        result.errors.push("Invalid type definition for " + name);
-                    }
-                    result.global.types[name] = type.type;
+        for (j = 0; j < children.length; j++) {
+            temp = children[j];
 
-                }
-            } catch (error) {
-                result.errors.push("Type definition has no name attribute");
-            }
-        }
+            switch (temp.nodeName) {
+                case "typedef":
+                    name = temp.getAttribute("name");
+                    if (name !== null) {
+                        temp2 = getChildren(temp);
+                        if (temp2.length != 1) {
+                            result.errors.push("Invalid type definition for " + name);
+                        } else {
+                            type = analyzeType(temp2[0], result.global);
+                            if (type.errors.length > 0) {
+                                result.errors.push("Erroneous type definition for " + name);
+                            }
+                            result.global.types[name] = type.type;
 
-        temp = findChildren(code, "common");
-        if (temp.length > 1) {
-            result.errors.push("More than one common section specified");
-            result.common = [];
-        } else if (temp.length == 1) {
-            for (i = 0; i < temp[0].children.length; i++) {
-                stmt = analyzeStmt(temp[0].children[i], result.global);
-                if (stmt.errors.length > 0) {
-                    result.errors.push("Common section contains errors");
-                    break;
-                } else {
-                    for (prop in stmt.vars) {
-                        result.global.vars[prop] = stmt.vars[prop];
-                    }
-                }
-            }
-        }
-
-        temp = findChildren(code, "applet");
-        for (i = 0; i < temp.length; i++) {
-            applet = analyzeApplet(temp[i], result.global);
-            if (applet.errors.length > 0) {
-                if (applet.hasOwnProperty("name")) {
-                    name = applet.name;
-                    if (result.applets.hasOwnProperty(name)) {
-                        result.errors.push("Duplicate applet name: " + name);
+                        }
                     } else {
-                        result.applets[name] = applet;
+                        result.errors.push("Type definition has no name attribute");
                     }
-                } else {
-                    result.errors.push("Missing applet name");
-                }
-                result.errors.push("Invalid applet definition: " + name);
+                    break;
+                case "common":
+                    temp2 = getChildren(temp);
+                    for (i = 0; i < temp2.length; i++) {
+                        stmt = analyzeStmt(temp2[i], result.global);
+                        if (stmt.errors.length > 0) {
+                            result.errors.push("Common section contains errors");
+                            break;
+                        } else {
+                            for (prop in stmt.vars) {
+                                result.global.vars[prop] = stmt.vars[prop];
+                            }
+                        }
+                    }
+                    break;
+                case "applet":
+                    applet = analyzeApplet(temp, result.global);
+                    if (applet.errors.length > 0) {
+                        if (applet.hasOwnProperty("name")) {
+                            name = applet.name;
+                            if (result.applets.hasOwnProperty(name)) {
+                                result.errors.push("Duplicate applet name: " + name);
+                            } else {
+                                result.applets[name] = applet;
+                            }
+                        } else {
+                            result.errors.push("Missing applet name");
+                        }
+                        result.errors.push("Invalid applet definition: " + name);
+                    }
+                    break;
+                default:
+                    result.errors.push("Invalid element: " + temp.nodeName);
             }
-
         }
 
         return result;

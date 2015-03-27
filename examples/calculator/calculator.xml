@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <library>
-	<doc>
-		<title>Calculator Demo</title>
-		<author>Roman Movchan, Melbourne, Australia</author>
-	</doc>
-	<type name="Command">
+	<!-- <title>Calculator Demo</title> -->
+	<!-- <author>Roman Movchan, Melbourne, Australia</author> -->
+	<typedef name="Command">
 		<any>
 			<prop name="equal"/>
 			<prop name="clear"/>
@@ -16,7 +14,7 @@
 				<string/>
 			</prop>
 		</any>
-	</type>
+	</typedef>
 	<common>
 		<unwrap>core</unwrap>
 		<unwrap>string</unwrap>
@@ -24,7 +22,7 @@
 		<unwrap>math</unwrap>
 		<def var="maxlen">19</def>
 	</common>
-	<applet name="calculator">
+	<applet name="calculator" id="id">
 		<output>
 			<string />
 		</output>
@@ -54,74 +52,72 @@
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="clear">C</div>
+							<div class="[%classname('button')%]" id="clear" data-arg="clear;C">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="divide">[%nbsp%]/[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="divide" data-arg="divide;[%nbsp%]/[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="multiply">[%nbsp%]x[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="multiply" data-arg="multiply;[%nbsp%]x[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="minus">[%nbsp%]-[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="minus" data-arg="minus;[%nbsp%]-[%nbsp%]">?</div>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="7">[%nbsp%]7[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d7" data-arg="d7;[%nbsp%]7[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="8">[%nbsp%]8[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d8" data-arg="d8;[%nbsp%]8[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="9">[%nbsp%]9[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d9" data-arg="d9;[%nbsp%]9[%nbsp%]">?</div>
 						</td>
 						<td rowspan="2">
-							<div class="[%classname('button')%]" id="plus"><br/>[%nbsp%]+[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="plus" data-arg="plus;[%br%][%nbsp%]+[%nbsp%][%br%]"></div>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="4">[%nbsp%]4[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d4" data-arg="d4;[%nbsp%]4[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="5">[%nbsp%]5[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d5" data-arg="d5;[%nbsp%]5[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="6">[%nbsp%]6[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d6" data-arg="d6;[%nbsp%]6[%nbsp%]">?</div>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="1">[%nbsp%]1[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d1" data-arg="d1;[%nbsp%]1[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="2">[%nbsp%]2[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d2" data-arg="d2;[%nbsp%]2[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="3">[%nbsp%]3[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d3" data-arg="d3;[%nbsp%]3[%nbsp%]">?</div>
 						</td>
 						<td rowspan="2">
-							<div class="[%classname('button')%]" id="equal"><br/>[%nbsp%]=[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="equal" data-arg="equal;[%br%][%nbsp%]=[%nbsp%][%br%]">?</div>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">
-							<div class="[%classname('button')%]" id="0">[%nbsp%]0[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="d0" data-arg="d0;[%nbsp%]0[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="period">[%nbsp%].[%nbsp%]</div>
+							<div class="[%classname('button')%]" id="period" data-arg="period;[%nbsp%].[%nbsp%]">?</div>
 						</td>
 					</tr>
 				</table>
 			</text>
 		</content>
-		<init id="id">
+		<init arg="arg">
 			<state>{ value: "0", result: 0, command: {clear:}, op: {clear:} }</state>
 			<actions>
-				<list>
-					<output>state.value</output>
-				</list>
+				<output>state.value</output>
 			</actions>
 		</init>
 		<respond>
@@ -151,7 +147,7 @@
 													<def var="newvalue">input.char</def>
 												</all>
 												<all>
-													<is>length(state.value) `lt` maxlen</is>
+													<is>length(state.value) 'lt' maxlen</is>
 													<def var="newvalue">
 														<text>[%state.value%][%input.char%]</text>
 													</def>
@@ -230,7 +226,7 @@
 													<def var="str">numToStr(result)</def>
 													<any>
 														<all>
-															<is>length(str) `gt` maxlen</is>
+															<is>length(str) 'gt' maxlen</is>
 															<def var="displayResult">formatNum({num: result, exp: 3})</def>
 														</all>
 														<def var="displayResult">numToStr(result)</def>
@@ -247,13 +243,11 @@
 				</calc>
 			</state>
 			<actions>
-				<list>
-					<output>state.value</output>
-				</list>
+				<output>state.value</output>
 			</actions>
 		</respond>
-		<accept>
-			<from applet="button" data="id">
+		<accept data="id">
+			<from applet="button">
 				<calc>
 					input
 					<where>
@@ -286,14 +280,14 @@
 								<is>id = "period"</is>
 								<def var="input">{char: "."}</def>
 							</all>
-							<def var="input">{char: id}</def>
+							<def var="input">{char: substr({str: id, start: 1, length: 1})}</def>
 						</any>
 					</where>
 				</calc>
 			</from>
 		</accept>
 	</applet>
-	<applet name="display">
+	<applet name="display" id="id">
 		<state name="state">
 			<string/>
 		</state>
@@ -309,21 +303,22 @@
 			</input>
 			<state>input</state>
 			<actions>
-				<list>
-					<redraw/>
-				</list>
+				<redraw/>
 			</actions>
 		</respond>
-		<accept>
-			<from applet="calculator" data="value">value</from>
+		<accept data="data">
+			<from applet="calculator">data</from>
 		</accept>
 	</applet>
-	<applet name="button">
+	<applet name="button" id="id">
 		<output>
 			<string/>
 		</output>
 		<state name="state">
 			<all>
+				<prop name="id">
+					<string/>
+				</prop>
 				<prop name="text">
 					<string/>
 				</prop>
@@ -349,8 +344,25 @@
 				</where>
 			</calc>
 		</content>
-		<init id="id" content="text">
-			<state>{id: id, text: text, up:}</state>
+		<init arg="arg">
+			<state>
+				<calc>
+					{id: id, text: text, up:}
+					<where>
+						<all>
+							<def var="pos">
+								indexOf({str: arg, substr: ";"})
+							</def>
+							<def var="id">
+								substr({str: arg, start: 0, end: pos})
+							</def>
+							<def var="text">
+								substr({str: arg, start: pos + 1, end: length(arg)})
+							</def>
+						</all>
+					</where>
+				</calc>
+			</state>
 		</init>
 		<respond>
 			<input name="input">
@@ -378,30 +390,26 @@
 			</state>
 			<actions>
 				<calc>
-					actions
+					<output>state.id</output>
 					<where>
-						<any>
-							<all>
-								<is>state.down</is>
-								<def var="actions">
-									<list>
-										<redraw/>
-										<output>state.id</output>
-										<delay>
-											<input>{up:}</input>
-											<by>100*core.time.msec</by>
-										</delay>
-									</list>
-								</def>
-							</all>
-							<def var="actions">
-								<list>
-									<redraw/>
-								</list>
-							</def>
-						</any>
+						<is>state.down</is>
 					</where>
 				</calc>
+				<calc>
+					action
+					<where>
+						<all>
+							<is>state.down</is>
+							<def var="action">
+								<delay>
+									<input>{up:}</input>
+									<by>100*core.time.msec</by>
+								</delay>
+							</def>
+						</all>
+					</where>
+				</calc>
+				<redraw/>
 			</actions>
 		</respond>
 		<events>

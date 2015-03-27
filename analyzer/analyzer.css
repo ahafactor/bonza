@@ -1,7 +1,7 @@
 body {
-	background-color: orange;
-	background-image: url("Abstract_technical_background.jpg");
-	color: black;
+	background-color: DarkTurquoise;
+/*	background-image: url("Abstract_technical_background.jpg");
+*/	color: black;
 }
 h1 {
 	text-align: center;
@@ -22,14 +22,39 @@ h1 {
 }
 .fabsite-expandable {
 	cursor: pointer;
-	background-color: white;
 	color: black;
 	width: 100%;
 	border-style: solid;
 	border-width: 1px;
 	border-radius: 4px;
+	background-color: white;
+}
+.fabsite-expandable:hover {
+	background-color: GhostWhite;
 }
 .expandable {
+}
+.expand-icon {
+	border-color: black;
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 50%;
+	background-color: DarkTurquoise;
+	color: white;
+	font-family: Courier;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+.collapse-icon {
+	border-color: black;
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 50%;
+	background-color: Orange;
+	color: white;
+	font-family: Courier;
+	padding-left: 4px;
+	padding-right: 4px;
 }
 .panel-title {
 	text-align: left;

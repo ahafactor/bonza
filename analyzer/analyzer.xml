@@ -237,7 +237,7 @@
 									<table class="expandable">
 										<tr>
 											<th>
-												<image src="plus.png"/>
+												<div class="expand-icon">+</div>
 											</th>
 											<th class="panel-title">
 												[%state.title%]
@@ -254,7 +254,7 @@
 									<table class="expandable">
 										<tr>
 											<th>
-												<image src="minus.png"/>
+												<div class="collapse-icon">-</div>
 											</th>
 											<th class="panel-title">
 												[%state.title%]
@@ -909,10 +909,11 @@
 										<li>output: [%core.code.typeStr(state.info.output.type)%]</li>
 										<li>state([%state.info.state.name%]): [%core.code.typeStr(state.info.state.type)%]</li>
 										<li><br/> 
-										<div id="[%id%]-content" class="[%core.classname('expandable')%]" data-arg="content;expression;">.</div>
+										<div id="[%id%]-content" class="[%core.classname('expandable')%]" data-arg="content;expression;[%id%]-content">.</div>
 									</li>
 									<li>init:
-										<div id="[%id%]-initstate" class="[%core.classname('expandable')%]" data-arg="state;expression;">.</div>
+										<div id="[%id%]-initstate" class="[%core.classname('expandable')%]" data-arg="state;expression;[%id%]-initstate">.</div>
+										<div id="[%id%]-initactions" class="[%core.classname('expandable')%]" data-arg="actions;actions;[%id%]-initactions">.</div>
 									</li>
 								</ul>
 							</text>
@@ -1048,4 +1049,202 @@
 		<click>{do:}</click>
 	</events>
 </applet>
+<applet name="expression" id="id">
+	<output>
+		<all>
+			<prop name="id">
+				<string/>
+			</prop>
+			<prop name="info">
+				<type name="ExprInfo"/>
+			</prop>
+		</all>
+	</output>
+	<state name="state">
+		<all>
+			<prop name="id">
+				<string/>
+			</prop>
+			<any>
+				<prop name="noinfo" />
+				<all>
+					<prop name="info">
+						<type name="ExprInfo"/>
+					</prop>
+					<prop name="subexpr">
+						<dictionary>
+							<type name="ExprInfo"/>
+						</dictionary>
+					</prop>
+				</all>
+			</any>
+		</all>
+	</state>
+	<content>
+		<calc>
+			content
+				<!-- <text>
+					[%errors(state.info.errors)%]
+					[%content%]<br/>
+					type: [%core.code.typeStr(state.info.type)%]
+				</text> -->
+				<where>
+					<any>
+						<all>
+							<is>state.info</is>
+							<any>
+								<def var="content">
+									<text>
+										formula:
+										<code>[%state.info.formula%]</code>
+									</text>
+								</def>
+								<def var="content">
+									<text>
+										text:
+										<code>"[%state.info.text%]"</code>
+									</text>
+								</def>
+								<def var="content">
+									<calc>
+										"redraw"
+										<where>
+											<is>state.info.redraw</is>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
+									<calc>
+										<text>
+											invalid [%core.code.typeStr(state.info.type)%]
+										</text>
+										<where>
+											<is>state.info.invalid</is>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
+									"*** other ***"
+								</def>
+							</any>
+						</all>
+						<def var="content">
+							""
+						</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="exprid">
+			<state>
+				{id: exprid, noinfo:}
+			</state>
+			<actions>
+				<output>{request: exprid}</output>
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="exprinfo">
+						<type name="ExprInfo"/>
+					</prop>
+					<prop name="exprid">
+						<string/>
+					</prop>
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<!-- received expression info ? -->
+							<all>
+								<is>input.exprinfo</is>
+								<def var="newstate">
+									<calc>
+										{id: state.id, info: input.exprinfo, subexpr: subexpr}
+										<where>
+											<any>
+												<all>
+													<!-- is expression a list ? -->
+													<is>input.exprinfo.list</is>
+													<def var="subexpr">
+														<dictionary>
+															<size>input.exprinfo.list#</size>
+															<entry index="i">
+																<text>[%id('listitem')%]-[%i%]</text>
+																<value>input.exprinfo.list[i]</value>
+															</entry>
+														</dictionary>
+													</def>
+												</all>
+												<def var="subexpr">
+													<noentries>
+														<type name="ExprInfo"/>
+													</noentries>
+												</def>
+											</any>
+										</where>
+									</calc>
+								</def>
+							</all>
+							<!-- otherwise, no state change -->
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<calc>
+					<output>
+						{reply: {id: input.exprid, info: state.subexpr@(input.exprid)}}
+					</output>
+					<where>
+						<is>input.exprid</is>
+					</where>
+				</calc>
+				<calc>
+					<redraw/>
+					<where>
+						<is>input.exprinfo</is>
+					</where>
+				</calc>
+			</actions>
+		</respond>
+		<accept data="data">
+			<from applet="appletinfo">
+				<calc>
+					{exprinfo: data.reply.info}
+					<where>
+						<is>data.reply.id = state.id</is>
+					</where>
+				</calc>
+			</from>
+			<from applet="expression">
+				<calc>
+					input
+					<where>
+						<any>
+							<all>
+								<is>data.reply.id = state.id</is>
+								<def var="input">
+									{exprinfo: data.reply.info}
+								</def>
+							</all>
+							<all>
+								<is>state.subexpr@(data.request)</is>
+								<def var="input">
+									{exprid: data.request}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
 </library>
