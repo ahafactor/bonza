@@ -1,8 +1,8 @@
 /*
- * =======  Fabsite Engine  ========
+ * =========  FabSite Engine  =========
  *     © Aha! Factor Pty Ltd, 2015
  * https://github.com/ahafactor/fabsite
- * ==================================
+ * ====================================
  */
 
 function runFabsiteLibrary(url) {
@@ -740,6 +740,13 @@ function runFabsiteLibrary(url) {
         }, {
             prop: {
                 name: "nbsp",
+                type: {
+                    string: null
+                }
+            }
+        }, {
+            prop: {
+                name: "br",
                 type: {
                     string: null
                 }
@@ -2097,10 +2104,10 @@ function runFabsiteLibrary(url) {
                 if (!prev.hasOwnProperty("func")) {
                     throw typeStr(prev) + " is not a function";
                 }
-                if (!covariant(arg, prev.arg)) {
-                    throw typeStr(arg) + " is not compatible with " + typeStr(prev.arg);
+                if (!covariant(arg, prev.func.arg)) {
+                    throw typeStr(arg) + " is not compatible with " + typeStr(prev.func.arg);
                 }
-                result = prev.ret;
+                result = prev.func.ret;
                 if (token === null || token[0] !== ")") {
                     throw "No closing parenthesis";
                 }
@@ -3772,6 +3779,23 @@ function runFabsiteLibrary(url) {
         };
     }
 
+    function getLib(url, parent) {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var xml = xmlhttp.responseXML;
+                var lib = new Library(xml.children[0]);
+                if (parent === null) {
+                    lib.run();
+                } else {
+                    parent.doimport(lib);
+                }
+            }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+    }
+
     function Library(xml) {
         this.applets = {};
         var temp;
@@ -3910,6 +3934,7 @@ function runFabsiteLibrary(url) {
             var ids;
             var i;
             // var param;
+            var url;
 
             this.active = false;
             ids = [];
@@ -3963,6 +3988,16 @@ function runFabsiteLibrary(url) {
             this.applets[name] = applet;
         }
 
+        this.doimport = function(childlib){
+
+        };
+
+        temp = findChildren(xml, "import");
+        for (i = 0; i < temp.length; i++) {
+            url = temp[i].getAttribute("library");
+            getLib(url, this);
+        }
+
         code.self = xml;
         this.context.core.code = code;
 
@@ -3976,14 +4011,5 @@ function runFabsiteLibrary(url) {
         this.run = run;
     }
 
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var xml = xmlhttp.responseXML;
-            var lib = new Library(xml.children[0]);
-            lib.run();
-        }
-    };
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
+    getLib(url, null);
 }

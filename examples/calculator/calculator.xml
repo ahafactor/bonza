@@ -66,13 +66,13 @@
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="d7" data-arg="d7;[%nbsp%]7[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d7" data-arg="7;[%nbsp%]7[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d8" data-arg="d8;[%nbsp%]8[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d8" data-arg="8;[%nbsp%]8[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d9" data-arg="d9;[%nbsp%]9[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d9" data-arg="9;[%nbsp%]9[%nbsp%]">?</div>
 						</td>
 						<td rowspan="2">
 							<div class="[%classname('button')%]" id="plus" data-arg="plus;[%br%][%nbsp%]+[%nbsp%][%br%]"></div>
@@ -80,24 +80,24 @@
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="d4" data-arg="d4;[%nbsp%]4[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d4" data-arg="4;[%nbsp%]4[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d5" data-arg="d5;[%nbsp%]5[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d5" data-arg="5;[%nbsp%]5[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d6" data-arg="d6;[%nbsp%]6[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d6" data-arg="6;[%nbsp%]6[%nbsp%]">?</div>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="d1" data-arg="d1;[%nbsp%]1[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d1" data-arg="1;[%nbsp%]1[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d2" data-arg="d2;[%nbsp%]2[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d2" data-arg="2;[%nbsp%]2[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d3" data-arg="d3;[%nbsp%]3[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d3" data-arg="3;[%nbsp%]3[%nbsp%]">?</div>
 						</td>
 						<td rowspan="2">
 							<div class="[%classname('button')%]" id="equal" data-arg="equal;[%br%][%nbsp%]=[%nbsp%][%br%]">?</div>
@@ -105,7 +105,7 @@
 					</tr>
 					<tr>
 						<td colspan="2">
-							<div class="[%classname('button')%]" id="d0" data-arg="d0;[%nbsp%]0[%nbsp%]">?</div>
+							<div class="[%classname('button')%]" id="d0" data-arg="0;[%nbsp%]0[%nbsp%]">?</div>
 						</td>
 						<td>
 							<div class="[%classname('button')%]" id="period" data-arg="period;[%nbsp%].[%nbsp%]">?</div>
@@ -114,7 +114,7 @@
 				</table>
 			</text>
 		</content>
-		<init arg="arg">
+		<init>
 			<state>{ value: "0", result: 0, command: {clear:}, op: {clear:} }</state>
 			<actions>
 				<output>state.value</output>
@@ -280,7 +280,7 @@
 								<is>id = "period"</is>
 								<def var="input">{char: "."}</def>
 							</all>
-							<def var="input">{char: substr({str: id, start: 1, length: 1})}</def>
+							<def var="input">{char: id}</def>
 						</any>
 					</where>
 				</calc>
@@ -294,7 +294,7 @@
 		<content>
 			<text><div class="display">[%state%]</div></text>
 		</content>
-		<init id="id">
+		<init>
 			<state>"0"</state>
 		</init>
 		<respond>
