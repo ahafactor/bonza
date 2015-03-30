@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <library>
-	<!-- <title>Calculator Demo</title> -->
-	<!-- <author>Roman Movchan, Melbourne, Australia</author> -->
+	<!-- Calculator Demo -->
+	<!-- Author: Roman Movchan, Melbourne, Australia -->
 	<typedef name="Command">
 		<any>
 			<prop name="equal"/>

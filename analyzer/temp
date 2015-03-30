@@ -42,4 +42,364 @@
 				</where>
 			</calc>
 		<div>Icons made by <a href="http://www.flaticon.com/authors/elegant-themes" title="Elegant Themes">Elegant Themes</a>, <a href="http://www.flaticon.com/authors/yannick" title="Yannick">Yannick</a>, <a href="http://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>             is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a></div>
-					
+	<applet name="expression">
+	<output>
+		<all>
+			<prop name="id">
+				<string/>
+			</prop>
+			<prop name="info">
+				<type name="ExprInfo"/>
+			</prop>
+		</all>
+	</output>
+	<state name="state">
+		<all>
+			<prop name="id">
+				<string/>
+			</prop>
+			<any>
+				<prop name="noinfo" />
+				<all>
+					<prop name="info">
+						<type name="ExprInfo"/>
+					</prop>
+					<prop name="subexpr">
+						<dictionary>
+							<type name="ExprInfo"/>
+						</dictionary>
+					</prop>
+				</all>
+			</any>
+		</all>
+	</state>
+	<content>
+		<calc>
+			content
+				<!-- <text>
+					[%errors(state.info.errors)%]
+					[%content%]<br/>
+					type: [%core.code.typeStr(state.info.type)%]
+				</text> -->
+				<where>
+					<any>
+						<all>
+							<is>state.info</is>
+							<any>
+								<def var="content">
+									<text>
+										formula:
+										<code>[%state.info.formula%]</code>
+									</text>
+								</def>
+								<def var="content">
+									<text>
+										<div id="[%id('text')%]" class="[%core.classname('expandable')%]">
+											text $ text $<code>"[%state.info.text%]"</code>
+										</div>
+									</text>
+								</def>
+								<def var="content">
+									<calc>
+										<text>
+											list:
+											[%join({parts: items, sep: ""})%]
+										</text>
+										<where>
+											<def var="items">
+												<array>
+													<size>state.info.list#</size>
+													<item index="i">
+														<text>
+															<div id="[%id('listitem')%]-[%i%]" class="[%core.classname('expandable')%]">
+																item #[%i + 1%] $ expression $[%id('listitem')%]-[%i%]
+															</div>
+														</text>
+													</item>
+												</array>
+											</def>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
+									<calc>
+										"redraw"
+										<where>
+											<is>state.info.redraw</is>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
+									<calc>
+										<text>
+											invalid [%core.code.typeStr(state.info.type)%]
+										</text>
+										<where>
+											<is>state.info.invalid</is>
+										</where>
+									</calc>
+								</def>
+								<def var="content">
+									"***other***"
+								</def>
+							</any>
+						</all>
+						<def var="content">
+							""
+						</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="exprid">
+			<state>
+				{id: exprid, noinfo:}
+			</state>
+			<actions>
+				<output>{request: exprid}</output>
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="exprinfo">
+						<type name="ExprInfo"/>
+					</prop>
+					<prop name="exprid">
+						<string/>
+					</prop>
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<!-- received expression info ? -->
+							<all>
+								<is>input.exprinfo</is>
+								<def var="newstate">
+									<calc>
+										{id: state.id, info: input.exprinfo, subexpr: subexpr}
+										<where>
+											<any>
+												<all>
+													<!-- is expression a list ? -->
+													<is>input.exprinfo.list</is>
+													<def var="subexpr">
+														<dictionary>
+															<size>input.exprinfo.list#</size>
+															<entry index="i">
+																<text>[%id('listitem')%]-[%i%]</text>
+																<value>input.exprinfo.list[i]</value>
+															</entry>
+														</dictionary>
+													</def>
+												</all>
+												<def var="subexpr">
+													<noentries>
+														<type name="ExprInfo"/>
+													</noentries>
+												</def>
+											</any>
+										</where>
+									</calc>
+								</def>
+							</all>
+							<!-- otherwise, no state change -->
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<calc>
+					<output>
+						{reply: {id: input.exprid, info: state.subexpr@(input.exprid)}}
+					</output>
+					<where>
+						<is>input.exprid</is>
+					</where>
+				</calc>
+				<calc>
+					<redraw/>
+					<where>
+						<is>input.exprinfo</is>
+					</where>
+				</calc>
+			</actions>
+		</respond>
+		<accept sender="sender" data="data">
+			<from applet="appletinfo">
+				<calc>
+					{exprinfo: data.reply.info}
+					<where>
+						<is>data.reply.id = state.id</is>
+					</where>
+				</calc>
+			</from>
+			<from applet="expression">
+				<calc>
+					input
+					<where>
+						<any>
+							<all>
+								<is>data.reply.id = state.id</is>
+								<def var="input">
+									{exprinfo: data.reply.info}
+								</def>
+							</all>
+							<all>
+								<is>state.subexpr@(data.request)</is>
+								<def var="input">
+									{exprid: data.request}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+<!-- 				<where>
+					<all>
+						<is>state.info</is>
+						<def var="vars">
+							<array>
+								<size>state.info.global.vars#</size>
+								<item index="i">
+									<text>
+										<div class="[%core.classname('expandable')%]" id="[%id('var')%]-[%i%]">
+											[%state.info.global.vars[i].name%]$text$
+											[%core.code.typeStr(state.info.global.vars[i].type)%]
+										</div>
+									</text>
+								</item>
+							</array>
+						</def>
+						<def var="applets">
+							<array>
+								<size>state.info.applets#</size>
+								<item index="i">
+									<calc>
+										<text>
+											<div class="[%core.classname('expandable')%]" id="[%id('applet')%]-[%i%]">
+												<span class="[%titleclass%]">[%state.info.applets[i].name%]</span>$
+												appletinfo$[%state.info.applets[i].name%]
+											</div>
+										</text>
+										<where>
+											<any>
+												<all>
+													<is>state.info.applets[i].errors# 'gt' 0</is>
+													<def var="titleclass">
+														"error applet-name"
+													</def>
+												</all>
+												<def var="titleclass">
+													"applet-name"
+												</def>
+											</any>
+										</where>
+									</calc>
+								</item>
+							</array>
+						</def>
+					</all>
+				</where>
+			-->
+<!--						<tr>
+							<td class="[%core.classname('expandable')%]" id="[%id('vars')%]" data-arg="<h3>Global variables</h3>$text$[%core.string.join({parts: vars, sep: '<br/>'})%]">
+							</td>
+						</tr>
+						<tr>
+							<td class="[%core.classname('expandable')%]" id="[%id('applets')%]" data-arg="<h3>Applets</h3>$text$[%core.string.join({parts: applets, sep: '<br/>'})%]">
+							</td>
+						</tr>
+					-->
+<script>
+var xt="",h3OK=1;
+function checkErrorXML(x)
+{
+xt="";
+h3OK=1;
+checkXML(x);
+}
+
+function checkXML(n)
+{
+var l,i,nam;
+nam=n.nodeName;
+if (nam=="h3")
+	{
+	if (h3OK===0)
+		{
+		return;
+		}
+	h3OK=0;
+	}
+if (nam=="#text")
+	{
+	xt=xt + n.nodeValue + "\n";
+	}
+l=n.childNodes.length;
+for (i=0;i<l;i++)
+	{
+	checkXML(n.childNodes[i]);
+	}
+}
+
+function validateXML(txt)
+{
+	var xmlDoc;
+// code for IE
+if (window.ActiveXObject)
+  {
+  xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+  xmlDoc.async=false;
+  xmlDoc.loadXML(document.all(txt).value);
+  if(xmlDoc.parseError.errorCode!==0)
+    {
+    txt="Error Code: " + xmlDoc.parseError.errorCode + "\n";
+    txt=txt+"Error Reason: " + xmlDoc.parseError.reason;
+    txt=txt+"Error Line: " + xmlDoc.parseError.line;
+    alert(txt);
+    }
+  else
+    {
+    alert("No errors found");
+    }
+  }
+// code for Mozilla, Firefox, Opera, etc.
+else if (document.implementation.createDocument)
+  {
+  try
+  {
+  var text=document.getElementById(txt).value;
+  var parser=new DOMParser();
+  xmlDoc=parser.parseFromString(text,"application/xml");
+  }
+  catch(err)
+  {
+  alert(err.message);
+  }
+
+if (xmlDoc.getElementsByTagName("parsererror").length>0)
+   {
+   checkErrorXML(xmlDoc.getElementsByTagName("parsererror")[0]);
+   alert(xt);
+   }
+ else
+   {
+   alert("No errors found");
+   }
+ }
+else
+ {
+ alert('Your browser cannot handle XML validation');
+ }
+}
+</script>
+										

@@ -767,7 +767,7 @@
 							<type name="ExprInfo"/>
 						</array>
 					</prop>
-					<prop name="request">
+					<prop name="exprid">
 						<string/>
 					</prop>					
 				</any>
@@ -820,6 +820,14 @@
 			</actions>
 		</respond>
 		<accept data="data">
+			<from applet="appletinfo">
+				<calc>
+					{actions: data.actions}
+					<where>
+						<is>data.id = state.parentid</is>
+					</where>
+				</calc>
+			</from>
 			<from applet="expression">
 				{exprid: data.request}
 			</from>
