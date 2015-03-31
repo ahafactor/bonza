@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <library>
-	<!-- Calculator Demo -->
+	<!--             Calculator Demo                 -->
 	<!-- Author: Roman Movchan, Melbourne, Australia -->
 	<typedef name="Command">
 		<any>
@@ -47,68 +47,68 @@
 				<table class="calculator">
 					<tr>
 						<td colspan="4">
-							<div class="[%classname('display')%]" id="display"/>
+							<div class="[%appletclass('display')%]" id="display"/>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="clear" data-arg="clear;C">?</div>
+							<div class="[%appletclass('button')%]" id="clear" data-arg="clear;C">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="divide" data-arg="divide;[%nbsp%]/[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="divide" data-arg="divide;[%nbsp%]/[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="multiply" data-arg="multiply;[%nbsp%]x[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="multiply" data-arg="multiply;[%nbsp%]x[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="minus" data-arg="minus;[%nbsp%]-[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="minus" data-arg="minus;[%nbsp%]-[%nbsp%]">?</div>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="d7" data-arg="7;[%nbsp%]7[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d7" data-arg="7;[%nbsp%]7[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d8" data-arg="8;[%nbsp%]8[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d8" data-arg="8;[%nbsp%]8[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d9" data-arg="9;[%nbsp%]9[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d9" data-arg="9;[%nbsp%]9[%nbsp%]">?</div>
 						</td>
 						<td rowspan="2">
-							<div class="[%classname('button')%]" id="plus" data-arg="plus;[%br%][%nbsp%]+[%nbsp%][%br%]"></div>
+							<div class="[%appletclass('button')%]" id="plus" data-arg="plus;[%br%][%nbsp%]+[%nbsp%][%br%]"></div>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="d4" data-arg="4;[%nbsp%]4[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d4" data-arg="4;[%nbsp%]4[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d5" data-arg="5;[%nbsp%]5[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d5" data-arg="5;[%nbsp%]5[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d6" data-arg="6;[%nbsp%]6[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d6" data-arg="6;[%nbsp%]6[%nbsp%]">?</div>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<div class="[%classname('button')%]" id="d1" data-arg="1;[%nbsp%]1[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d1" data-arg="1;[%nbsp%]1[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d2" data-arg="2;[%nbsp%]2[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d2" data-arg="2;[%nbsp%]2[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="d3" data-arg="3;[%nbsp%]3[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d3" data-arg="3;[%nbsp%]3[%nbsp%]">?</div>
 						</td>
 						<td rowspan="2">
-							<div class="[%classname('button')%]" id="equal" data-arg="equal;[%br%][%nbsp%]=[%nbsp%][%br%]">?</div>
+							<div class="[%appletclass('button')%]" id="equal" data-arg="equal;[%br%][%nbsp%]=[%nbsp%][%br%]">?</div>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">
-							<div class="[%classname('button')%]" id="d0" data-arg="0;[%nbsp%]0[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="d0" data-arg="0;[%nbsp%]0[%nbsp%]">?</div>
 						</td>
 						<td>
-							<div class="[%classname('button')%]" id="period" data-arg="period;[%nbsp%].[%nbsp%]">?</div>
+							<div class="[%appletclass('button')%]" id="period" data-arg="period;[%nbsp%].[%nbsp%]">?</div>
 						</td>
 					</tr>
 				</table>

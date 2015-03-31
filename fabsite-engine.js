@@ -96,7 +96,7 @@ function runFabsiteLibrary(url) {
     }
 
     var core = {
-        classname: function(name) {
+        appletclass: function(name) {
             return "fabsite-" + name;
         },
         nbsp: "&nbsp;",
@@ -732,7 +732,7 @@ function runFabsiteLibrary(url) {
     var coretype = {
         all: [{
             prop: {
-                name: "classname",
+                name: "appletclass",
                 type: {
                     func: {
                         arg: {
@@ -1377,8 +1377,10 @@ function runFabsiteLibrary(url) {
                                 vars: []
                             });
                             output.result = cast(result.result, info.type);
+                            console.log("cast : " + format(output.result));
                         } else {
                             output.result = undefined;
+                            console.log("cast : failed");
                             return false;
                         }
                         break;
@@ -1388,8 +1390,10 @@ function runFabsiteLibrary(url) {
                         for (i = 0; i < array.length; i++) {
                             if (evalExpr(temp[i], context, result)) {
                                 array[i] = result.result;
+                                console.log("list : " + format(result.result));
                             } else {
                                 output.result = undefined;
+                                console.log("list : failed");
                                 return false;
                             }
                         }
@@ -1406,14 +1410,17 @@ function runFabsiteLibrary(url) {
                                     obj[temp2] = result.result;
                                 } else {
                                     output.result = undefined;
+                                    console.log("entries : failed");
                                     return false;
                                 }
                             } else {
                                 output.result = undefined;
+                                console.log("entries : failed");
                                 return false;
                             }
                         }
                         output.result = obj;
+                        console.log("entries : " + format(obj));
                         break;
                     case "array":
                         temp = firstExpr(findChild(expr, "size"));
@@ -1430,14 +1437,17 @@ function runFabsiteLibrary(url) {
                                     array[i] = result.result;
                                 } else {
                                     output.result = undefined;
+                                    console.log("array : failed");
                                     return false;
                                 }
                             }
                         } else {
                             output.result = undefined;
+                            console.log("array : failed");
                             return false;
                         }
                         output.result = array;
+                        console.log("array : " + format(array));
                         break;
                     case "dictionary":
                         temp = firstExpr(findChild(expr, "size"));
@@ -1457,18 +1467,22 @@ function runFabsiteLibrary(url) {
                                         obj[temp2] = result.result; //value
                                     } else {
                                         output.result = undefined;
+                                        console.log("dictionary : failed");
                                         return false;
                                     }
                                 } else {
                                     output.result = undefined;
+                                    console.log("dictionary : failed");
                                     return false;
                                 }
                             }
                         } else {
                             output.result = undefined;
+                            console.log("dictionary : failed");
                             return false;
                         }
                         output.result = obj;
+                        console.log("dictionary : " + format(obj));
                         break;
                     case "keys":
                         if (evalExpr(firstExpr(expr), context, result)) {
@@ -1476,7 +1490,9 @@ function runFabsiteLibrary(url) {
                                 array.push(prop);
                             }
                             output.result = array;
+                            console.log("keys : " + format(array));
                         } else {
+                            console.log("keys : failed");
                             return false;
                         }
                         break;
@@ -1604,11 +1620,14 @@ function runFabsiteLibrary(url) {
                                 context2[argname] = array[i];
                                 if (evalStmt(temp.children[0], context2, output2)) {
                                     output.result = array[i];
+                                    console.log("find : " + format(output.result));
                                     return true;
                                 }
                             }
+                            console.log("find : failed");
                             return false;
                         }
+                        console.log("find : failed");
                         return false;
                     case "select":
                         temp = firstExpr(findChild(expr, "in"));
@@ -1626,6 +1645,7 @@ function runFabsiteLibrary(url) {
                                 }
                             }
                             output.result = array2;
+                            console.log("select : " + array2.length);
                             return true;
                         }
                         return false;
@@ -1646,6 +1666,7 @@ function runFabsiteLibrary(url) {
                                 }
                             }
                             output.result = count;
+                            console.log("count : " + count);
                             return true;
                         }
                         return false;
@@ -1684,7 +1705,7 @@ function runFabsiteLibrary(url) {
                 }
                 return true;
             } catch (error) {
-                console.log(expr.nodeName + " -> fail");
+                console.log(expr.nodeName + " -> failed");
                 return false;
             }
         }
@@ -1696,6 +1717,7 @@ function runFabsiteLibrary(url) {
             var context2 = {};
             var stmt2;
             var result = {};
+            var temp;
 
             function list() {
                 var result = "";
@@ -1717,7 +1739,15 @@ function runFabsiteLibrary(url) {
                         }
                         break;
                     case "not":
-                        return !evalStmt(stmt.children[0], context, result);
+                        temp = evalStmt(stmt.children[0], context, result);
+                        if (temp) {
+                            console.log("not : failed");
+                            return false;
+                        } else {
+                            console.log("not : success");
+                            return true;
+                        }
+                        break;
                     case "def":
                         name = stmt.getAttribute("var");
                         if (evalExpr(firstExpr(stmt), context, result)) {
@@ -1757,13 +1787,16 @@ function runFabsiteLibrary(url) {
                                 return true;
                             }
                         }
-                        console.log("any : success");
+                        console.log("any : failed");
                         return false;
                     case "unwrap":
                         if (evalExpr(firstExpr(stmt), context, result)) {
                             for (prop in result.result) {
                                 output[prop] = result.result[prop];
                             }
+                            console.log("unwrap " + list() + ": success");
+                        } else {
+                            console.log("unwrap : failed");
                         }
                         break;
                     default:
@@ -1794,6 +1827,12 @@ function runFabsiteLibrary(url) {
             },
             state: {
                 name: "unknown",
+                type: {
+                    other: null
+                },
+                errors: []
+            },
+            content: {
                 type: {
                     other: null
                 },
@@ -1865,12 +1904,14 @@ function runFabsiteLibrary(url) {
             }
 
             temp = findChildren(code, "output");
-            temp = getChildren(single(temp, "output type"));
-            type = analyzeType(single(temp, "output type"), context);
-            result.output = type;
-            local.output = type.type;
-            if (type.errors.length > 0) {
-                result.errors.push("Erroneous output type");
+            if (temp.length > 0) {
+                temp = getChildren(single(temp, "output type"));
+                type = analyzeType(single(temp, "output type"), context);
+                result.output = type;
+                local.output = type.type;
+                if (type.errors.length > 0) {
+                    result.errors.push("Erroneous output type");
+                }
             }
 
             temp = single(findChildren(code, "state"), "state");
@@ -3623,7 +3664,6 @@ function runFabsiteLibrary(url) {
         };
 
         this.create = function(id, element) {
-            console.log("create " + applet.name + "::" + id);
             this.local[this.idname] = id;
             // var element = document.getElementById(id);
             if (element !== null) {
@@ -3632,6 +3672,7 @@ function runFabsiteLibrary(url) {
                 } else {
                     this.local[this.initargname] = "";
                 }
+                console.log("create " + applet.name + "::" + id + " : " + this.local[this.initargname]);
                 if (engine.evalExpr(this.initState, this.local, output)) {
                     this.instances[id] = output.result;
                     this.local[this.statename] = output.result;
@@ -3759,7 +3800,7 @@ function runFabsiteLibrary(url) {
             },
             output: function(msg) {
                 return function(applet, id) {
-                    console.log("output " + applet.name + "::" + id);
+                    console.log("output " + applet.name + "::" + id + " : " + format(msg));
                     for (var i = 0; i < applet.targets.length; i++) {
                         var target = applet.targets[i];
                         if (target.listeners.hasOwnProperty(applet.name)) { //target applet has a listener for current applet?
@@ -3870,6 +3911,7 @@ function runFabsiteLibrary(url) {
         var p;
         var oldname;
         var newname;
+        var liburl;
 
         temp = findChildren(xml, "common");
         if (temp.length > 0) {
@@ -3902,8 +3944,33 @@ function runFabsiteLibrary(url) {
         code.self = xml;
         this.context.core.code = code;
 
+        doimport = function(url, childlib) {
+            for (prop in varmap[url]) {
+                console.log("import " + prop + " as " + varmap[url][prop] + " : " + format(childlib.context[prop]));
+                lib.context[varmap[url][prop]] = childlib.context[prop];
+            }
+            for (name in lib.applets) {
+                var target = lib.applets[name];
+                for (prop in childlib.applets) {
+                    if (target.listeners.hasOwnProperty(appmap[url][prop])) {
+                        applet = childlib.applets[prop];
+                        applet.targets.push(target);
+                    }
+                }
+            }
+            for (prop in appmap[url]) {
+                console.log("import applet " + prop + " as " + appmap[url][prop]);
+                lib.applets[appmap[url][prop]] = childlib.applets[prop];
+            }
+
+            if (pending === 0) {
+                resume();
+            }
+        };
+
         temp = findChildren(xml, "import");
         for (i = 0; i < temp.length; i++) {
+            liburl = temp[i].getAttribute("library");
             vars = findChildren(temp[i], "var");
             tempmap = {};
             for (j = 0; j < vars.length; j++) {
@@ -3918,7 +3985,7 @@ function runFabsiteLibrary(url) {
                 }
                 tempmap[oldname] = newname;
             }
-            varmap[url] = tempmap;
+            varmap[liburl] = tempmap;
             applets = findChildren(temp[i], "applet");
             tempmap = {};
             for (j = 0; j < applets.length; j++) {
@@ -3933,37 +4000,11 @@ function runFabsiteLibrary(url) {
                 }
                 tempmap[oldname] = newname;
             }
-            appmap[url] = tempmap;
-        }
-        doimport = function(url, childlib) {
-            for (prop in varmap[url]) {
-                this.context[varmap[url][prop]] = childlib.context[prop];
-            }
-            for (name in this.applets) {
-                var target = this.applets[name];
-                for (prop in childlib.applets) {
-                    if (target.listeners.hasOwnProperty(appmap[url][prop])) {
-                        applet = childlib.applets[prop];
-                        applet.targets.push(target);
-                    }
-                }
-            }
-            for (prop in appmap[url]) {
-                this.applets[appmap[url][prop]] = childlib.applets[prop];
-            }
-
-            if (pending === 0) {
-                resume();
-            }
-        };
-
-        for (i = 0; i < temp.length; i++) {
-            url = temp[i].getAttribute("library");
-            getLib(url, doimport);
+            appmap[liburl] = tempmap;
+            getLib(liburl, doimport);
         }
     }
 
-    var active = false;
     var activelib;
     var runlib = function(url, lib) {
         var name;
@@ -3975,7 +4016,7 @@ function runFabsiteLibrary(url) {
         var i;
         activelib = lib;
         if (pending === 0) {
-            console.log("RUN at "+ (new Date()).toTimeString().slice(0, 8));
+            console.log("RUN at " + (new Date()).toTimeString().slice(0, 8));
             ids = [];
             for (name in lib.applets) {
                 applet = lib.applets[name];
@@ -4005,17 +4046,18 @@ function runFabsiteLibrary(url) {
             for (i in ids) {
                 ids[i].applet.create(ids[i].id, ids[i].element);
             }
-            active = false;
         }
     };
+    var active = false;
     var run = function() {
+        active = false;
         runlib(url, activelib);
     };
 
     resume = function() {
         if (!active) {
-            setTimeout(run, 0);
             active = true;
+            setTimeout(run, 0);
         }
     };
 

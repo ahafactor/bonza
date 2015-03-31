@@ -127,6 +127,9 @@
 		</def>
 		<unwrap>core.string</unwrap>
 	</common>
+	<import library="essentials.xml">
+		<applet name="expandable"/>
+	</import>
 	<applet name="analyzer" id="id">
 		<state name="state">
 			<all>
@@ -140,11 +143,11 @@
 		</state>
 		<content>
 			<text>
-				<textarea class="[%core.classname('source')%]" id="[%id%]-source" rows="20" cols="120"><br/></textarea>
+				<textarea class="[%core.appletclass('source')%]" id="[%id%]-source" rows="20" cols="120"><br/></textarea>
 				<br/>
-				<button class="[%core.classname('button')%]" id="[%id%]-submit" data-arg="Analyze">Analyze</button>
+				<button class="[%core.appletclass('button')%]" id="[%id%]-submit" data-arg="Analyze">Analyze</button>
 				<br/>
-				<div class="[%core.classname('library')%]" id="[%id%]-library" data-arg="[%id%]-library">Paste Fabsite XML source in the text field above and press Analyze</div>
+				<div class="[%core.appletclass('library')%]" id="[%id%]-library" data-arg="[%id%]-library">Paste Fabsite XML source in the text field above and press Analyze</div>
 			</text>
 		</content>
 		<init>
@@ -206,137 +209,6 @@
 			</from>
 		</accept>
 	</applet>
-	<applet name="expandable" id="id">
-		<!-- an expandable panel -->
-		<state name="state">
-			<all>
-				<prop name="title">
-					<string/>
-				</prop>
-				<prop name="appname">
-					<string/>
-				</prop>
-				<prop name="arg">
-					<string/>
-				</prop>
-				<any>
-					<prop name="collapsed" />
-					<prop name="expanded" />
-				</any>
-			</all>
-		</state>
-		<content>
-			<calc>
-				content
-				<where>
-					<any>
-						<all>
-							<is>state.collapsed</is>
-							<def var="content">
-								<text>
-									<table class="expandable">
-										<tr>
-											<th>
-												<div class="expand-icon">+</div>
-											</th>
-											<th class="panel-title">
-												[%state.title%]
-											</th>
-										</tr>
-									</table>
-								</text>
-							</def>
-						</all>
-						<all>
-							<is>state.expanded</is>
-							<def var="content">
-								<text>
-									<table class="expandable">
-										<tr>
-											<th>
-												<div class="collapse-icon">-</div>
-											</th>
-											<th class="panel-title">
-												[%state.title%]
-											</th>
-										</tr>
-										<tr>
-											<td></td>
-											<td>
-												<div class="[%core.classname(state.appname)%]" id="[%id%]-content" data-arg="[%state.arg%]">.</div>
-											</td>
-										</tr>
-									</table>
-								</text>
-							</def>
-						</all>
-					</any>
-				</where>
-			</calc>
-		</content>
-		<init arg="arg">
-			<!-- argument format: <title>;<applet-name>;<applet-argument> -->
-			<state>
-				<calc>
-					{title: trim(title), appname: trim(appname), arg: trim(rest2), collapsed:}
-					<where>
-						<all>
-							<def var="pos1">
-								indexOf({str: arg, substr: ";"})
-							</def>
-							<def var="title">
-								substr({str: arg, start: 0, end: pos1})
-							</def>
-							<def var="rest1">
-								substr({str: arg, start: pos1 + 1, end: length(arg)})
-							</def>
-							<def var="pos2">
-								indexOf({str: rest1, substr: ";"})
-							</def>
-							<def var="appname">
-								substr({str: rest1, start: 0, end: pos2})
-							</def>
-							<def var="rest2">
-								substr({str: rest1, start: pos2 + 1, end: length(rest1)})
-							</def>
-						</all>
-					</where>
-				</calc>
-			</state>
-		</init>
-		<respond>
-			<input name="input">
-				<prop name="toggle" />
-			</input>
-			<state>
-				<calc>
-					newstate
-					<where>
-						<any>
-							<all>
-								<is>state.collapsed</is>
-								<def var="newstate">
-									{title: state.title, appname: state.appname, arg: state.arg, expanded:}
-								</def>
-							</all>
-							<all>
-								<is>state.expanded</is>
-								<def var="newstate">
-									{title: state.title, appname: state.appname, arg: state.arg, collapsed:}
-								</def>
-							</all>
-						</any>
-					</where>
-				</calc>
-			</state>
-			<actions>
-				<redraw/>
-			</actions>
-		</respond>
-		<events>
-			<click>{toggle:}</click>
-		</events>
-	</applet>
 	<applet name="source">
 		<!-- applet that passes the source of a library (is attached to a text editor) -->
 		<output>
@@ -388,17 +260,17 @@
 					<table>
 						<tr>
 							<td>
-								<div class="[%core.classname('expandable')%]" id="[%id%]-types" data-arg="Types;types;">.</div>
+								<div class="[%core.appletclass('expandable')%]" id="[%id%]-types" data-arg="Types;types;">.</div>
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<div class="[%core.classname('expandable')%]" id="[%id%]-vars" data-arg="Global variables;vars;">.</div>
+								<div class="[%core.appletclass('expandable')%]" id="[%id%]-vars" data-arg="Global variables;vars;">.</div>
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<div class="[%core.classname('expandable')%]" id="[%id%]-applets" data-arg="Applets;applets;">.</div>
+								<div class="[%core.appletclass('expandable')%]" id="[%id%]-applets" data-arg="Applets;applets;">.</div>
 							</td>
 						</tr>
 					</table>
@@ -511,7 +383,7 @@
 							<size>name#</size>
 							<item index="i">
 								<text>
-									<div class="[%core.classname('expandable')%]" id="[%id%]-type-[%name[i]%]" data-arg="[%name[i]%];type;type-[%name[i]%]">.</div>
+									<div class="[%core.appletclass('expandable')%]" id="[%id%]-type-[%name[i]%]" data-arg="[%name[i]%];type;type-[%name[i]%]">.</div>
 								</text>
 							</item>
 						</array>
@@ -616,7 +488,7 @@
 							<size>name#</size>
 							<item index="i">
 								<text>
-									<div class="[%core.classname('expandable')%]" id="[%id%]-var-[%name[i]%]" data-arg="[%name[i]%];type;var-[%name[i]%]">.</div>
+									<div class="[%core.appletclass('expandable')%]" id="[%id%]-var-[%name[i]%]" data-arg="[%name[i]%];type;var-[%name[i]%]">.</div>
 								</text>
 							</item>
 						</array>
@@ -728,7 +600,7 @@
 							<size>keys#</size>
 							<item index="i">
 								<text>
-									<div class="[%core.classname('expandable')%]" id="[%id%]-action-[%i%]" data-arg="action #[%i + 1%];expression;[%keys[i]%]">.</div>
+									<div class="[%core.appletclass('expandable')%]" id="[%id%]-action-[%i%]" data-arg="action #[%i + 1%];expression;[%keys[i]%]">.</div>
 								</text>
 							</item>
 						</array>
@@ -756,7 +628,7 @@
 			</state>
 			<actions>
 				<!-- request info from parent -->
-				<output>{request: parentid}</output>
+				<output>{request: state.parentid}</output>
 			</actions>
 		</init>
 		<respond>
@@ -850,7 +722,7 @@
 							<size>name#</size>
 							<item index="i">
 								<text>
-									<div class="[%core.classname('expandable')%]" id="[%id%]-applet-[%name[i]%]" data-arg="[%name[i]%];appletinfo;[%name[i]%]">.</div>
+									<div class="[%core.appletclass('expandable')%]" id="[%id%]-applet-[%name[i]%]" data-arg="[%name[i]%];appletinfo;[%name[i]%]">.</div>
 								</text>
 							</item>
 						</array>
@@ -1038,11 +910,11 @@
 										<li>output: [%core.code.typeStr(state.info.output.type)%]</li>
 										<li>state([%state.info.state.name%]): [%core.code.typeStr(state.info.state.type)%]</li>
 										<li> 
-											<div id="[%id%]-content" class="[%core.classname('expandable')%]" data-arg="content;expression;[%id%]-content">.</div>
+											<div id="[%id%]-content" class="[%core.appletclass('expandable')%]" data-arg="content;expression;[%id%]-content">.</div>
 										</li>
 										<li>init:
-											<div id="[%id%]-initstate" class="[%core.classname('expandable')%]" data-arg="state;expression;[%id%]-initstate">.</div>
-											<div id="[%id%]-initactions" class="[%core.classname('expandable')%]" data-arg="actions;actions;[%id%]-initactions">.</div>
+											<div id="[%id%]-initstate" class="[%core.appletclass('expandable')%]" data-arg="state;expression;[%id%]-initstate">.</div>
+											<div id="[%id%]-initactions" class="[%core.appletclass('expandable')%]" data-arg="actions;actions;[%id%]-initactions">.</div>
 										</li>
 									</ul>
 								</text>
@@ -1089,24 +961,36 @@
 						<any>
 							<def var="newstate">
 								<calc>
-									{name: state.name, info: input.info, exprinfo: exprinfo}
+									{name: state.name, info: input.info, exprinfo: exprinfo, actions: actions}
 									<where>
-										<def var="exprinfo">
-											<entries>
-												<entry>
-													<text>
-														[%id%]-content
-													</text>
-													<value>input.info.content</value>
-												</entry>
-												<entry>
-													<text>
-														[%id%]-initstate
-													</text>
-													<value>input.info.init.state</value>
-												</entry>
-											</entries>
-										</def>
+										<all>
+											<def var="exprinfo">
+												<entries>
+													<entry>
+														<text>
+															[%id%]-content
+														</text>
+														<value>input.info.content</value>
+													</entry>
+													<entry>
+														<text>
+															[%id%]-initstate
+														</text>
+														<value>input.info.init.state</value>
+													</entry>
+												</entries>
+											</def>
+											<def var="actions">
+												<entries>
+													<entry>
+														<text>
+															[%id%]-initactions
+														</text>
+														<value>input.info.initactions</value>
+													</entry>
+												</entries>
+											</def>
+										</all>
 									</where>
 								</calc>
 							</def>
@@ -1117,9 +1001,15 @@
 			</state>
 			<actions>
 				<calc>
-					<output>{reply: {id: input.exprid, info: state.exprinfo@(input.exprid)}}</output>
+					<output>{expr: {id: input.exprid, info: state.exprinfo@(input.exprid)}}</output>
 					<where>
 						<is>input.exprid</is>
+					</where>
+				</calc>
+				<calc>
+					<output>{actions: {id: input.actionsid, info: state.actions@(input.actionsid)}}</output>
+					<where>
+						<is>input.actionsid</is>
 					</where>
 				</calc>
 				<calc>
@@ -1144,6 +1034,9 @@
 			</from>
 			<from applet="expression">
 				{exprid: data.request}
+			</from>
+			<from applet="actions">
+				{actionsid: data.request}
 			</from>
 		</accept>
 	</applet>

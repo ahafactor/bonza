@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<library>
+	<common>
+		<unwrap>core.string</unwrap>
+	</common>
+	<applet name="expandable" id="id">
+		<!-- an expandable panel -->
+		<state name="state">
+			<all>
+				<prop name="title">
+					<string/>
+				</prop>
+				<prop name="appname">
+					<string/>
+				</prop>
+				<prop name="arg">
+					<string/>
+				</prop>
+				<any>
+					<prop name="collapsed" />
+					<prop name="expanded" />
+				</any>
+			</all>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.collapsed</is>
+							<def var="content">
+								<text>
+									<table class="expandable">
+										<tr>
+											<th>
+												<div class="expand-icon">+</div>
+											</th>
+											<th class="panel-title">
+												[%state.title%]
+											</th>
+										</tr>
+									</table>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.expanded</is>
+							<def var="content">
+								<text>
+									<table class="expandable">
+										<tr>
+											<th>
+												<div class="collapse-icon">-</div>
+											</th>
+											<th class="panel-title">
+												[%state.title%]
+											</th>
+										</tr>
+										<tr>
+											<td></td>
+											<td>
+												<div class="[%core.appletclass(state.appname)%]" id="[%id%]-content" data-arg="[%state.arg%]">.</div>
+											</td>
+										</tr>
+									</table>
+								</text>
+							</def>
+						</all>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<!-- argument format: <title>;<applet-name>;<applet-argument> -->
+			<state>
+				<calc>
+					{title: trim(title), appname: trim(appname), arg: trim(rest2), collapsed:}
+					<where>
+						<all>
+							<def var="pos1">
+								indexOf({str: arg, substr: ";"})
+							</def>
+							<def var="title">
+								substr({str: arg, start: 0, end: pos1})
+							</def>
+							<def var="rest1">
+								substr({str: arg, start: pos1 + 1, end: length(arg)})
+							</def>
+							<def var="pos2">
+								indexOf({str: rest1, substr: ";"})
+							</def>
+							<def var="appname">
+								substr({str: rest1, start: 0, end: pos2})
+							</def>
+							<def var="rest2">
+								substr({str: rest1, start: pos2 + 1, end: length(rest1)})
+							</def>
+						</all>
+					</where>
+				</calc>
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<prop name="toggle" />
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>state.collapsed</is>
+								<def var="newstate">
+									{title: state.title, appname: state.appname, arg: state.arg, expanded:}
+								</def>
+							</all>
+							<all>
+								<is>state.expanded</is>
+								<def var="newstate">
+									{title: state.title, appname: state.appname, arg: state.arg, collapsed:}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<actions>
+				<redraw/>
+			</actions>
+		</respond>
+		<events>
+			<click>{toggle:}</click>
+		</events>
+	</applet>
+	<applet name="main-layout-1" id="id">
+		<state name="state">
+			<all>
+				<prop name="title">
+					<string/>
+				</prop>
+				<prop name="subtitle">
+					<string/>
+				</prop>
+				<prop name="logo">
+					<string/>
+				</prop>
+				<prop name="menuapplet">
+					<string/>
+				</prop>
+				<prop name="pageapplet">
+					<string/>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<text>
+				<table class="main-page-table">
+					<tr>
+						<td rowspan="2">
+							<image src="[%state.logo%]"/>
+						</td>
+						<td>
+							<div class="main-title">[%state.title%]</div>
+						</td>
+						<td rowspan="2">
+							<div class="appletclass('[%state.menuapplet%]')" id="main-menu">Initializing...</div>
+						</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>
+							<span class="main-subtitle">[%state.subtitle%]</span>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td colspan="3">
+							<div class="appletclass('[%state.pageapplet%]')" id="page">Initializing...</div>
+						</td>
+					</tr>
+				</table>
+			</text>
+		</content>
+		<init arg="arg">
+			<state>
+				<calc>
+					{title: args[0], subtitle: args[1], logo: args[2], menuapplet: args[3], pageapplet: args[4]}
+					<where>
+						<def var="args">
+							split({str: arg, sep: ";"})
+						</def>
+					</where>
+				</calc>
+			</state>
+		</init>
+	</applet>
+</library>
