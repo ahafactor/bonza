@@ -97,7 +97,7 @@ function runFabsiteLibrary(url) {
 
     var core = {
         appletclass: function(name) {
-            return "fabsite-" + name;
+            return "applet-" + name;
         },
         nbsp: "&nbsp;",
         lt: "&lt;",
@@ -254,7 +254,7 @@ function runFabsiteLibrary(url) {
 
     /*
         Metatype for core
-    */
+        */
     var coremathtype = {
         all: [{
             prop: {
@@ -792,7 +792,7 @@ function runFabsiteLibrary(url) {
 
     /* 
         Run-time expression processing
-     */
+        */
 
     function ExprEngine(actions) {
 
@@ -1618,7 +1618,7 @@ function runFabsiteLibrary(url) {
                             }
                             for (i = 0; i < array.length; i++) {
                                 context2[argname] = array[i];
-                                if (evalStmt(temp.children[0], context2, output2)) {
+                                if (evalStmt(firstExpr(temp), context2, output2)) {
                                     output.result = array[i];
                                     console.log("find : " + format(output.result));
                                     return true;
@@ -3499,6 +3499,8 @@ function runFabsiteLibrary(url) {
         if (id === null) {
             id = "id";
         }
+        this.initState = null;
+        this.initActions = [];
         this.idname = id;
         this.events = {};
         this.listeners = {};
@@ -3518,7 +3520,12 @@ function runFabsiteLibrary(url) {
                     if (this.initargname === null) {
                         this.initargname = "arg";
                     }
-                    this.initState = firstExpr(findChild(child, "state"));
+                    temp = findChildren(child, "state");
+                    if (temp.length === 1) {
+                        this.initState = firstExpr(temp[0]);
+                    } else {
+                        this.initState = null;
+                    }
                     temp = findChildren(child, "actions");
                     if (temp.length === 1) {
                         this.initActions = getChildren(temp[0]);
@@ -3529,12 +3536,18 @@ function runFabsiteLibrary(url) {
                 case "respond":
                     // this.respcontentname = child.getAttribute("content");
                     this.inputname = findChild(child, "input").getAttribute("name");
-                    this.respState = firstExpr(findChild(child, "state"));
-                    temp = findChildren(child, "actions");
+                    temp = findChildren(child, "before");
                     if (temp.length === 1) {
-                        this.respActions = getChildren(temp[0]);
+                        this.respBefore = getChildren(temp[0]);
                     } else {
-                        this.respActions = [];
+                        this.respBefore = [];
+                    }
+                    this.respState = firstExpr(findChild(child, "state"));
+                    temp = findChildren(child, "after");
+                    if (temp.length === 1) {
+                        this.respAfter = getChildren(temp[0]);
+                    } else {
+                        this.respAfter = [];
                     }
                     break;
                 case "events":
@@ -3665,7 +3678,6 @@ function runFabsiteLibrary(url) {
 
         this.create = function(id, element) {
             this.local[this.idname] = id;
-            // var element = document.getElementById(id);
             if (element !== null) {
                 if (element.attributes["data-arg"]) {
                     this.local[this.initargname] = element.attributes["data-arg"].value;
@@ -3673,9 +3685,13 @@ function runFabsiteLibrary(url) {
                     this.local[this.initargname] = "";
                 }
                 console.log("create " + applet.name + "::" + id + " : " + this.local[this.initargname]);
-                if (engine.evalExpr(this.initState, this.local, output)) {
-                    this.instances[id] = output.result;
-                    this.local[this.statename] = output.result;
+                if (this.initState === null || engine.evalExpr(this.initState, this.local, output)) {
+                    if (this.initState !== null) {
+                        this.instances[id] = output.result;
+                        this.local[this.statename] = output.result;
+                    } else {
+                        this.instances[id] = null;
+                    }
                     if (engine.evalExpr(this.content, this.local, output)) {
                         element.innerHTML = output.result;
                     }
@@ -3708,29 +3724,33 @@ function runFabsiteLibrary(url) {
             }
         };
         this.respond = function(id, msg) {
-            this.input[id].push(msg);
-            resume();
+            if (this.input.hasOwnProperty(id)) {
+                this.input[id].push(msg);
+                resume();
+            }
         };
         this.run = function(id) {
             var instance = this.instances[id];
+            var action;
             var queue = this.input[id];
             this.local[this.idname] = id;
             this.local[this.statename] = instance;
-            /*            var element = document.getElementById(id);
-            if (element !== null) {
-                this.local[this.respcontentname] = element.innerHTML;
-            }
-*/
             i = 0;
             while (i < queue.length) {
                 this.local[this.inputname] = queue[i];
                 console.log("respond " + applet.name + "::" + id + " : " + format(queue[i]));
+                for (i = 0; i < this.respBefore.length; i++) {
+                    if (engine.evalExpr(this.respBefore[i], this.local, output)) {
+                        action = output.result;
+                        action(this, id);
+                    }
+                }
                 if (engine.evalExpr(this.respState, this.local, output)) {
                     this.instances[id] = output.result;
                     this.local[this.statename] = output.result;
-                    for (i = 0; i < this.respActions.length; i++) {
-                        if (engine.evalExpr(this.respActions[i], this.local, output)) {
-                            var action = output.result;
+                    for (i = 0; i < this.respAfter.length; i++) {
+                        if (engine.evalExpr(this.respAfter[i], this.local, output)) {
+                            action = output.result;
                             action(this, id);
                         }
                     }
@@ -3912,6 +3932,7 @@ function runFabsiteLibrary(url) {
         var oldname;
         var newname;
         var liburl;
+        var skip;
 
         temp = findChildren(xml, "common");
         if (temp.length > 0) {
@@ -3933,11 +3954,14 @@ function runFabsiteLibrary(url) {
             this.applets[name] = applet;
         }
 
-        for (name in this.applets) {
-            var target = this.applets[name];
+        for (name in lib.applets) {
+            var target = lib.applets[name];
             for (prop in target.listeners) {
-                applet = this.applets[prop];
-                applet.targets.push(target);
+                if (lib.applets.hasOwnProperty(prop)) {
+                    applet = lib.applets[prop];
+                    console.log(name + " listens " + applet.name);
+                    applet.targets.push(target);
+                }
             }
         }
 
@@ -3945,6 +3969,7 @@ function runFabsiteLibrary(url) {
         this.context.core.code = code;
 
         doimport = function(url, childlib) {
+            console.log("importing " + url);
             for (prop in varmap[url]) {
                 console.log("import " + prop + " as " + varmap[url][prop] + " : " + format(childlib.context[prop]));
                 lib.context[varmap[url][prop]] = childlib.context[prop];
@@ -3952,8 +3977,9 @@ function runFabsiteLibrary(url) {
             for (name in lib.applets) {
                 var target = lib.applets[name];
                 for (prop in childlib.applets) {
-                    if (target.listeners.hasOwnProperty(appmap[url][prop])) {
+                    if (target.listeners.hasOwnProperty(appmap[url][prop])) { //parent's applet listens to child's applet?
                         applet = childlib.applets[prop];
+                        console.log(name + " listens " + applet.name);
                         applet.targets.push(target);
                     }
                 }
@@ -3969,6 +3995,7 @@ function runFabsiteLibrary(url) {
         };
 
         temp = findChildren(xml, "import");
+        skip = false;
         for (i = 0; i < temp.length; i++) {
             liburl = temp[i].getAttribute("library");
             vars = findChildren(temp[i], "var");
@@ -4014,13 +4041,12 @@ function runFabsiteLibrary(url) {
         var id;
         var ids;
         var i;
-        activelib = lib;
         if (pending === 0) {
             console.log("RUN at " + (new Date()).toTimeString().slice(0, 8));
             ids = [];
             for (name in lib.applets) {
                 applet = lib.applets[name];
-                elements = document.getElementsByClassName("fabsite-" + name);
+                elements = document.getElementsByClassName("applet-" + name);
                 for (i = 0; i < elements.length; i++) {
                     element = elements[i];
                     id = element.getAttribute("id");
@@ -4049,6 +4075,14 @@ function runFabsiteLibrary(url) {
         }
     };
     var active = false;
+    var initlib = function(url, lib) {
+        var name;
+        var prop;
+
+        activelib = lib;
+
+        runlib(url, lib);
+    };
     var run = function() {
         active = false;
         runlib(url, activelib);
@@ -4061,5 +4095,5 @@ function runFabsiteLibrary(url) {
         }
     };
 
-    getLib(url, runlib);
+    getLib(url, initlib);
 }

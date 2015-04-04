@@ -1,11 +1,6 @@
-td {
-	vertical-align: middle;
-}
-.calculator {
-	font-size: 2em;
-	border-radius: 10px;
+.calculator-body {
+	font-size: 1.6em;
 	border: 1px solid;
-	border-style: outset;
 	border-color: black;
 	background-color: DeepSkyBlue;
 	padding: 10px;

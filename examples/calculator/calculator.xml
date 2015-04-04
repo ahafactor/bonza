@@ -44,7 +44,7 @@
 		</state>
 		<content>
 			<text>
-				<table class="calculator">
+				<table class="calculator-body">
 					<tr>
 						<td colspan="4">
 							<div class="[%appletclass('display')%]" id="display"/>
@@ -242,9 +242,9 @@
 					</where>
 				</calc>
 			</state>
-			<actions>
+			<after>
 				<output>state.value</output>
-			</actions>
+			</after>
 		</respond>
 		<accept data="id">
 			<from applet="button">
@@ -302,9 +302,9 @@
 				<string/>
 			</input>
 			<state>input</state>
-			<actions>
+			<after>
 				<redraw/>
-			</actions>
+			</after>
 		</respond>
 		<accept data="data">
 			<from applet="calculator">data</from>
@@ -388,7 +388,7 @@
 					</where>
 				</calc>
 			</state>
-			<actions>
+			<after>
 				<calc>
 					<output>state.id</output>
 					<where>
@@ -410,7 +410,7 @@
 					</where>
 				</calc>
 				<redraw/>
-			</actions>
+			</after>
 		</respond>
 		<events>
 			<mousedown>{down:}</mousedown>

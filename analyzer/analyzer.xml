@@ -127,7 +127,7 @@
 		</def>
 		<unwrap>core.string</unwrap>
 	</common>
-	<import library="essentials.xml">
+	<import library="../essentials.xml">
 		<applet name="expandable"/>
 	</import>
 	<applet name="analyzer" id="id">

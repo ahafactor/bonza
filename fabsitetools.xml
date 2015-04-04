@@ -1,0 +1,274 @@
+<library>
+	<import library="essentials.xml">
+		<applet name="main-layout-1"/>
+		<applet name="menu-bar">
+			<any>
+				<prop name="up">
+					<string/>
+				</prop>
+				<prop name="down">
+					<string/>
+				</prop>
+			</any>
+		</applet>	
+		<applet name="page-menu">
+			<any>
+				<prop name="up">
+					<string/>
+				</prop>
+				<prop name="down">
+					<string/>
+				</prop>
+			</any>
+		</applet>	
+		<applet name="menu-item">
+			<string/>
+		</applet>		
+		<applet name="page-layout-1"/>
+	</import>
+	<import library="examples/calculator/calculator.xml">
+		<applet name="calculator"/>
+		<applet name="display"/>
+		<applet name="button"/>
+	</import>
+	<typedef name="page">
+		<any>
+			<prop name="home" />
+			<prop name="demos" />
+			<prop name="downloads" />
+			<prop name="tools" />
+			<prop name="forum" />
+		</any>
+	</typedef>
+	<common>
+		<unwrap>core</unwrap>
+		<unwrap>core.string</unwrap>
+	</common>
+	<applet name="main-menu" id="id">
+		<content>
+			<text>
+				<div class="[%core.appletclass('menu-bar')%]" id="[%id%]-bar" data-arg="Home:home;Demos:demos;Downloads:downloads;Tools:tools;Forum:forum">Initializing...</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="page-fabsite" id="id">
+		<state name="state">
+			<type name="page"></type>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.home</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('home-welcome')%]" id="[%id%]-home">Home page here</div>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.demos</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('page-layout-1')%]" id="[%id%]-demos" data-arg="demos-menu;demos-page">Demos page here</div>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.downloads</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('page-layout-1')%]" id="[%id%]-downloads" data-arg="downloads-menu;downloads-page">Downloads page here</div>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.tools</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('page-layout-1')%]" id="[%id%]-tools" data-arg="tools-menu;tools-page">Tools page here</div>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.forum</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('page-layout-1')%]" id="[%id%]-forum" data-arg="forum-menu;forum-page">Forum page here</div>
+								</text>
+							</def>
+						</all>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				{home:}
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<type name="page"/>
+			</input>
+			<state>
+				input
+			</state>
+			<after>
+				<redraw/>
+			</after>
+		</respond>
+		<accept data="data">
+			<from applet="menu-item">
+				<calc>
+					page
+					<where>
+						<any>
+							<all>
+								<is>data = "home"</is>
+								<def var="page">
+									{home:}
+								</def>
+							</all>
+							<all>
+								<is>data = "demos"</is>
+								<def var="page">
+									{demos:}
+								</def>
+							</all>
+							<all>
+								<is>data = "downloads"</is>
+								<def var="page">
+									{downloads:}
+								</def>
+							</all>
+							<all>
+								<is>data = "tools"</is>
+								<def var="page">
+									{tools:}
+								</def>
+							</all>
+							<all>
+								<is>data = "forum"</is>
+								<def var="page">
+									{forum:}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="home-welcome" id="id">
+		<content>
+			<text>
+				<div class="page-title">Welcome to Fab Site Tools!</div>
+				<br/>
+				<p>
+					This web site is dedicated to <strong>Fab Site Tools</strong> (FST for short), a revolutionary collection of software tools designed for building flexible, maintainable, fast and reliable web applications.
+					The entire site was itself built using this powerful framework.
+				</p>
+				<p>
+					
+				</p>
+			</text>
+		</content>
+	</applet>
+	<applet name="demos-menu" id="id">
+		<content>
+			<text>
+				<div class="[%core.appletclass('page-menu')%]" id="[%id%]-menu" data-arg="Introduction:demos-intro;Calculator:demos-calculator">Initializing...</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="demos-page" id="id">
+		<state name="state">
+			<any>
+				<prop name="intro" />
+				<prop name="calculator" />
+			</any>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.calculator</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('demos-calculator')%]" id="[%id%]-calculator">Calculator</div>
+								</text>
+							</def>
+						</all>
+						<def var="content">
+							<text>
+								<div class="page-title">Demos</div>
+								<br/>
+								<p>
+									All these examples are written entirely in FSML, our XML-based declarative language. No JavaScript is involved, apart from the Fab Site Engine.
+								</p>
+							</text>
+						</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				{intro:}
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<type name="page"/>
+			</input>
+			<state>
+				input
+			</state>
+			<after>
+				<redraw/>
+			</after>
+		</respond>
+		<accept data="data">
+			<from applet="menu-item">
+				<calc>
+					page
+					<where>
+						<any>
+							<all>
+								<is>data = "demos-calculator"</is>
+								<def var="page">
+									{calculator:}
+								</def>
+							</all>
+							<def var="page">
+								{intro:}
+							</def>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="demos-calculator" id="id">
+		<content>
+			<text>
+				<div class="page-title">Calculator Demo</div>
+				<br/>
+				<p>
+					This example demonstrates basic communication among three applets: calculator, display and button (multiple instances).
+				</p>
+				<br/>
+				<div class="[%appletclass('calculator')%]" id="[%id%]-calculator">Calculator</div>
+				<br/>
+				<p>
+					The source code is available <a href="examples/calculator/calculator.xml" target="_blank">here</a>.
+				</p>
+			</text>
+		</content>
+	</applet>
+</library>
