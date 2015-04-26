@@ -402,4 +402,22 @@ else
  }
 }
 </script>
+							<div class="row">
+								<div class="col-sm-5"/>
+								<div class="col-sm-1">
+									<div class="[%appletclass('button')%]" id="[%id%]-reveal" data-arg="Show;reveal">?</div>
+								</div>
+								<div class="col-sm-1">
+									<button type="button" class="btn btn-primary">Next</button>
+								</div>
+								<div class="col-sm-6"/>
+							</div>
+							<div class="row">
+								<hr/>
+								<div class="definition col-sm-12">
+									<p><strong>{{state.term}}</strong></p>
+									<p>{{state.example}}</p>
+								</div>
+							</div>
+Content-Type: text/html; charset=ISO-8859-4
 										

@@ -1,0 +1,43 @@
+.prompt {
+    text-align: center;
+    font-size: 1.3em;
+    color: DarkCyan;
+}
+.definition {
+    text-align: center;
+    font-size: 1.3em;
+}
+.centered {
+    text-align: center;
+}
+.answer {
+    border: 1px solid;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.btn { font-size: 1.2em; }
+.error {
+    background-color: red;
+    color: white;
+    text-align: center;
+}
+.answer:hover {
+  background-color: GhostWhite;
+}
+.answer-green {
+  background-color: LightGreen;
+    border: 1px solid;
+    border-radius: 10px;
+}
+.answer-orange {
+  background-color: orange;
+    border: 1px solid;
+    border-radius: 10px;
+}
+.right {
+	float: right;
+}
+.game-score {
+    font-size: 1.2em;
+	float: right;
+}

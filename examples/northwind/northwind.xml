@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<library>
+	<!--         Browse Database Demo             -->
+	<!-- Author: Roman Movchan, Melbourne, Australia -->
+	<typedef name="XMLnode">
+		<any>
+			<prop name="childNodes">
+				<array>
+					<dynamic/>
+				</array>
+			</prop>
+			<prop name="nodeName">
+				<string/>
+			</prop>
+			<prop name="nodeValue">
+				<string/>
+			</prop>
+		</any>
+	</typedef>
+	<typedef name="tabledata">
+		<all>
+			<prop name="header">
+				<array>
+					<string/>
+				</array>
+			</prop>
+			<prop name="rows">
+				<array>
+					<dynamic/>
+				</array>
+			</prop>
+		</all>
+	</typedef>
+	<common>
+		<unwrap>core</unwrap>
+		<unwrap>string</unwrap>
+		<unwrap>format</unwrap>
+		<def var="processXML">
+			<func>
+				<arg name="xml">
+					<string/>
+				</arg>
+				<return>
+					<calc>
+						{header: header, rows: rows}
+						<where>
+							<all>
+								<def var="table">
+									<cast>core.xml.parseText(xml)<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="headerrow">
+									<cast>table.childNodes[0]<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="header">
+									<array>
+										<size>headerrow.childNodes#</size>
+										<item index="i">
+											<calc>
+												celltext.nodeValue
+												<where>
+													<all>
+														<def var="cell">
+															<cast>headerrow.childNodes[i]<to><type name="XMLnode"/></to></cast>
+														</def>
+														<def var="celltext">
+															<cast>cell.childNodes[0]<to><type name="XMLnode"/></to></cast>
+														</def>
+													</all>
+												</where>
+											</calc>
+										</item>
+									</array>
+								</def>
+								<def var="rows">
+									<array>
+										<size>table.childNodes# - 1</size>
+										<item index="i">
+											<cast>table.childNodes[i + 1]<to><type name="XMLnode"/></to></cast>
+										</item>
+									</array>
+								</def>
+							</all>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+		<def var="path">
+			"examples/northwind/"
+		</def>
+	</common>
+	<applet name="table" id="id">
+		<state name="state">
+			<all>
+				<prop name="table">
+					<string/>
+				</prop>
+				<prop name="offset">
+					<integer/>
+				</prop>
+				<prop name="max">
+					<integer/>
+				</prop>
+				<prop name="status">
+					<any>
+						<prop name="getting"/>
+						<prop name="showing">
+							<type name="tabledata"/>
+						</prop>
+					</any>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.table = ""</is>
+							<def var="content">
+								<text>
+									Please select a table from the list above
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.status.getting</is>
+							<def var="content">
+								<text>
+									Getting data for "[%state.table%]" ...
+								</text>
+							</def>
+						</all>
+						<def var="content">
+							<calc>
+								<text>
+									<div>
+										[%nav%]
+										<table class="table">
+											<tr><th>#</th>[%header%]</tr>
+											[%join({parts: rows, sep: ""})%]
+										</table>
+									</div>
+								</text>
+								<where>
+									<all>
+										<def var="headercells">
+											<array>
+												<size>state.status.showing.header#</size>
+												<!-- <div class="[%appletclass('column')%]" id="[%id%]-column-[%i%]" data-arg="[%state.table%]:[%state.status.showing.header[i]%]"> -->
+												<item index="i">
+													<text>
+														<th>
+															[%state.status.showing.header[i]%]
+														</th>
+													</text>
+												</item>
+											</array>
+										</def>
+										<def var="header">
+											join({parts: headercells, sep: ""})
+										</def>
+										<any>
+											<all>
+												<is>state.status.showing.rows# 'gt' state.max</is>
+												<def var="n">
+													state.max
+												</def>
+												<def var="nav">
+													<text>
+														<div class="[%appletclass('navigator')%]" id="[%id%]-navigator" data-arg="[%state.table%]:[%state.status.showing.rows#%]">Navigator</div>
+													</text>
+												</def>
+											</all>
+											<all>
+												<def var="nav">
+													""
+												</def>
+												<def var="n">
+													state.status.showing.rows#
+												</def>
+											</all>
+										</any>
+										<def var="rows">
+											<array>
+												<size>n</size>
+												<item index="i">
+													<text>
+														<tr class="[%appletclass('row')%]" id="[%id%]-row-[%i%]" data-arg="[%state.table%]:[%i%]"><td>[%nbsp%]</td>
+													</tr>
+												</text>
+											</item>
+										</array>
+									</def>
+								</all>
+							</where>
+						</calc>
+					</def>
+				</any>
+			</where>
+		</calc>
+	</content>
+	<init arg="arg">
+		<state>
+			{table: arg, offset: 0, max: 20, status: {getting:} }
+		</state>
+	</init>
+	<respond>
+		<input name="input">
+			<any>
+				<prop name="get">
+					<string/>
+				</prop>
+				<prop name="data">
+					<type name="tabledata"/>
+				</prop>
+				<prop name="next" />
+				<prop name="prev" />
+			</any>
+		</input>
+		<state>
+			<calc>
+				newstate
+				<where>
+					<any>
+						<all>
+							<is>input.get</is>
+							<def var="newstate">
+								<alter>
+									state
+									<set prop="table">input.get</set>
+									<set prop="status">{getting: }</set>
+								</alter>
+							</def>
+						</all>
+						<all>
+							<is>input.data</is>
+							<def var="newstate">
+								<alter>
+									state
+									<set prop="status">{showing: input.data}</set>
+									<set prop="offset">0</set>
+								</alter>
+							</def>
+						</all>
+						<all>
+							<is>input.jump</is>
+							<def var="newstate">
+								<alter>
+									state
+									<set prop="offset">
+										<calc>
+											newoffset
+											<where>
+												<any>
+													<all>
+														<def var="next">
+															input.jump + (state.max)
+														</def>
+														<def var="total">
+															state.status.showing.rows#
+														</def>
+														<is>next 'ge' total</is>
+														<def var="newoffset">
+															state.status.showing.rows# - (state.max)
+														</def>
+													</all>
+													<all>
+														<is>input.jump 'lt' 0</is>
+														<def var="newoffset">
+															0
+														</def>
+													</all>
+													<def var="newoffset">
+														input.jump
+													</def>
+												</any>
+											</where>
+										</calc>
+									</set>
+								</alter>
+							</def>
+						</all>
+						<def var="newstate">
+							state
+						</def>
+					</any>
+				</where>
+			</calc>
+		</state>
+		<after>
+			<calc>
+				<redraw/>
+				<where>
+					<any>
+						<is>input.data</is>
+						<is>input.get</is>
+					</any>
+				</where>
+			</calc>
+			<calc>
+				<get>url<success name="data">{data: processXML(data)}</success></get>
+				<where>
+					<all>
+						<is>input.get</is>
+						<def var="table">
+							replace({str: input.get, substr: ' ', to: '%20'})
+						</def>
+						<def var="url">
+							<text>
+								[%path%]get_data.php?table=[%table%]
+							</text>
+						</def>
+					</all>
+				</where>
+			</calc>
+			<output>{data: state.status.showing, offset: state.offset}</output>
+		</after>
+	</respond>
+	<accept data="data">
+		<from applet="jump">
+			<calc>
+				{jump: data.rownum}
+				<where>
+					<is>data.table = state.table</is>
+				</where>
+			</calc>
+		</from>
+		<from applet="table-select">
+			{get: data}
+		</from>
+	</accept>
+</applet>
+<applet name="row" id="id">
+	<state name="state">
+		<all>
+			<prop name="table">
+				<string/>
+			</prop>
+			<prop name="position">
+				<integer/>
+			</prop>
+			<prop name="status">
+				<any>
+					<prop name="unknown" />
+					<prop name="data">
+						<type name="XMLnode"/>
+					</prop>
+				</any>
+			</prop>
+			<prop name="offset">
+				<integer/>
+			</prop>
+		</all>
+	</state>
+	<content>
+		<calc>
+			content
+			<where>
+				<any>
+					<all>
+						<is>state.status.data</is>
+						<def var="cells">
+							<array>
+								<size>state.status.data.childNodes#</size>
+								<item index="j">
+									<calc>
+										<text>
+											<td>[%item%]</td>
+										</text>
+										<where>
+											<all>
+												<def var="cell">
+													<cast>state.status.data.childNodes[j]<to><type name="XMLnode"/></to></cast>
+												</def>
+												<def var="value">
+													<cast>cell.childNodes[0]<to><type name="XMLnode"/></to></cast>
+												</def>
+												<any>
+													<all>
+														<def var="celltext">
+															<cast>value.childNodes[0]<to><type name="XMLnode"/></to></cast>
+														</def>
+														<def var="item">
+															celltext.nodeValue
+														</def>
+													</all>
+													<def var="item">
+														""
+													</def>
+												</any>
+											</all>
+										</where>
+									</calc>
+								</item>
+							</array>
+						</def>
+						<def var="content">
+							<text>
+								<td class="[%appletclass('table')%]-#">[%state.position + state.offset + 1%]</td>
+								[%join({parts: cells, sep: ''})%]
+							</text>
+						</def>
+					</all>
+					<def var="content">
+						""
+					</def>
+				</any>
+			</where>
+		</calc>
+	</content>
+	<init arg="arg">
+		<state>
+			<calc>
+				{table: table, position: strToInt(position), status: unknown, offset: 0}
+				<where>
+					<all>
+						<def var="pos">
+							indexOf({str: arg, substr: ":"})
+						</def>
+						<def var="table">
+							substr({str: arg, start: 0, end: pos})
+						</def>
+						<def var="position">
+							substr({str: arg, start: pos + 1, rest: })
+						</def>
+					</all>
+				</where>
+			</calc>
+		</state>
+	</init>
+	<respond>
+		<input name="input">
+			<all>
+				<prop name="data">
+					<type name="XMLnode"/>
+				</prop>
+				<prop name="offset">
+					<integer/>
+				</prop>
+			</all>
+		</input>
+		<state>
+			<alter>
+				state
+				<set prop="status">{data: input.data}</set>
+				<set prop="offset">input.offset</set>
+			</alter>
+		</state>
+		<after>
+			<redraw/>
+		</after>
+	</respond>
+	<accept data="data">
+		<from applet="table">
+			<calc>
+				{data: rowdata, offset: data.offset}
+				<where>
+					<all>
+						<def var="index">
+							state.position + data.offset
+						</def>
+						<def var="rowdata">
+							data.data.rows[index]
+						</def>
+					</all>
+				</where>
+			</calc>
+		</from>
+	</accept>
+</applet>
+<applet name="navigator" id="id">
+	<state name="state">
+		<all>
+			<prop name="offset">
+				<integer/>
+			</prop>
+			<prop name="range">
+				<integer/>
+			</prop>
+			<prop name="total">
+				<integer/>
+			</prop>
+			<prop name="table">
+				<string/>
+			</prop>
+		</all>
+	</state>
+	<content>
+		<calc>
+			<text>
+				<div class="table">
+					<div class="row">
+						<div class="col-sm-2">
+							[%up%]
+						</div>
+						<div class="col-sm-2 centered">
+							[%state.offset + 1%]-[%state.offset + state.range%][%nbsp%]of[%nbsp%][%state.total%]
+						</div>
+						<div class="col-sm-2">
+							[%down%]
+						</div>
+					</div>
+				</div>
+			</text>
+			<where>
+				<all>
+					<any>
+						<all>
+							<is>state.offset 'gt' 0</is>
+							<def var="up">
+								<text>
+									<span class="[%appletclass('jump')%] glyphicon glyphicon-fast-backward table-navigation" id="[%id%]-top" data-arg="[%state.table%]:0">top</span>
+									<span>[%nbsp%]</span>
+									<span class="[%appletclass('jump')%] glyphicon glyphicon-step-backward table-navigation" id="[%id%]-[%state.offset - state.range%]" data-arg="[%state.table%]:[%state.offset - state.range%]">prev</span>
+								</text>
+							</def>
+						</all>
+						<def var="up">
+							""
+						</def>
+					</any>
+					<any>
+						<all>
+							<def var="last">
+								state.total - state.range
+							</def>
+							<is>state.offset 'lt' last</is>
+							<def var="down">
+								<text>
+									<span class="[%appletclass('jump')%] glyphicon glyphicon-fast-forward table-navigation right" id="[%id%]-bottom" data-arg="[%state.table%]:[%last%]">bottom</span>
+									<span class="right">[%nbsp%]</span>
+									<span class="[%appletclass('jump')%] glyphicon glyphicon-step-forward table-navigation right" id="[%id%]-[%state.offset + state.range%]" data-arg="[%state.table%]:[%state.offset + state.range%]">next</span>
+								</text>
+							</def>
+						</all>
+						<def var="down">
+							""
+						</def>
+					</any>
+				</all>
+			</where>
+		</calc>
+	</content>
+	<init arg="arg">
+		<state>
+			<calc>
+				{offset: 0, range: 20, total: strToInt(total), table: table}
+				<where>
+					<all>
+						<def var="pos">
+							indexOf({str: arg, substr: ":"})
+						</def>
+						<def var="table">
+							substr({str: arg, start: 0, end: pos})
+						</def>
+						<def var="total">
+							substr({str: arg, start: pos + 1, rest: })
+						</def>
+					</all>
+				</where>
+			</calc>
+		</state>
+	</init>
+	<respond>
+		<input name="input">
+			<integer/>
+		</input>
+		<state>
+			<alter>
+				state
+				<set prop="offset">input</set>
+			</alter>
+		</state>
+		<after>
+			<redraw/>
+		</after>
+	</respond>
+	<accept data="data">
+		<from applet="table">data.offset</from>
+	</accept>
+</applet>
+<applet name="jump" id="id">
+	<state name="state">
+		<all>
+			<prop name="table">
+				<string/>
+			</prop>
+			<prop name="rownum">
+				<integer/>
+			</prop>
+		</all>
+	</state>
+	<content>
+		""
+	</content>
+	<init arg="arg">
+		<state>
+			<calc>
+				{table: table, rownum: strToInt(rownum)}
+				<where>
+					<all>
+						<def var="pos">
+							indexOf({str: arg, substr: ":"})
+						</def>
+						<def var="table">
+							substr({str: arg, start: 0, end: pos})
+						</def>
+						<def var="rownum">
+							substr({str: arg, start: pos + 1, rest: })
+						</def>
+					</all>
+				</where>
+			</calc>
+		</state>
+	</init>
+	<respond>
+		<input name="input">
+			<all>
+				<prop name="do" />
+			</all>
+		</input>
+		<state>
+			state
+		</state>
+		<after>
+			<output>{table: state.table, rownum: state.rownum}</output>
+		</after>
+	</respond>
+	<events>
+		<click>{do:}</click>
+	</events>
+</applet>
+<applet name="table-select" id="id">
+	<state name="state">
+		<any>
+			<prop name="unknown" />
+			<prop name="list">
+				<array>
+					<string/>
+				</array>
+			</prop>
+		</any>
+	</state>
+	<content>
+		<calc>
+			<text>
+				<div>
+					<label for="[%id%]-combo">Table:[%nbsp%]</label>
+					<select id="[%id%]-combo">
+						[%join({parts: list, sep: ''})%]
+					</select>
+				</div>
+			</text>
+			<where>
+				<all>
+					<is>state.list</is>
+					<def var="list">
+						<array>
+							<size>state.list#</size>
+							<item index="i">
+								<text>
+									<option value="[%state.list[i]%]">[%state.list[i]%]</option>
+								</text>
+							</item>
+						</array>
+					</def>
+				</all>
+			</where>
+		</calc>
+	</content>
+	<init arg="arg">
+		<state>
+			{unknown:}
+		</state>
+		<actions>
+			<calc>
+				<get>url<success name="data">{get: core.xml.parseText(data)}</success></get>
+				<where>
+					<def var="url">
+						<text>
+							[%path%]list.php
+						</text>
+					</def>
+				</where>
+			</calc>
+		</actions>
+	</init>
+	<respond>
+		<input name="input">
+			<any>
+				<prop name="list">
+					<type name="XMLnode"/>
+				</prop>
+				<prop name="selected">
+					<string/>
+				</prop>
+			</any>
+		</input>
+		<state>
+			<calc>
+				newstate
+				<where>
+					<any>
+						<all>
+							<is>input.get</is>
+							<def var="list">
+								<array>
+									<size>input.get.childNodes# + 1</size>
+									<item index="i">
+										<calc>
+											text
+											<where>
+												<any>
+													<all>
+														<is>i 'gt' 0</is>
+														<def var="table">
+															<cast>input.get.childNodes[i - 1]<to><type name="XMLnode"/></to></cast>
+														</def>
+														<def var="textnode">
+															<cast>table.childNodes[0]<to><type name="XMLnode"/></to></cast>
+														</def>
+														<def var="text">
+															textnode.nodeValue
+														</def>
+													</all>
+													<def var="text">
+														''
+													</def>
+												</any>
+											</where>
+										</calc>
+									</item>
+								</array>
+							</def>
+							<def var="newstate">
+								{list: list}
+							</def>
+						</all>
+						<def var="newstate">
+							state
+						</def>
+					</any>
+				</where>
+			</calc>
+		</state>
+		<after>
+			<calc>
+				<redraw/>
+				<where>
+					<is>input.get</is>
+				</where>
+			</calc>
+			<calc>
+				<output>input.selected</output>
+				<where>
+					<is>input.selected 'ne' ""</is>					
+				</where>
+			</calc>
+		</after>
+	</respond>
+	<events data="data">
+		<change>{selected: data}</change>	
+	</events>
+</applet>
+<!-- 	<applet name="column" id="id">
+		<state name="state">
+			<all>
+				<prop name="table">
+					<string/>
+				</prop>
+				<prop name="name">
+					<string/>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<text>
+				<a href="#" class="tooltip">[%state.name%]
+					<span>[%state.table%]</span>
+				</a>
+			</text>
+		</content>
+		<init arg="arg">
+			<state>
+				<calc>
+					{table: table, name: name}
+					<where>
+						<all>
+							<def var="pos">
+								indexOf({str: arg, substr: ":"})
+							</def>
+							<def var="table">
+								substr({str: arg, start: 0, end: pos})
+							</def>
+							<def var="name">
+								substr({str: arg, start: pos + 1, rest: })
+							</def>
+						</all>
+					</where>
+				</calc>
+			</state>
+		</init>
+	</applet> -->
+</library>

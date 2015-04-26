@@ -28,26 +28,58 @@
 	</import>
 	<import library="examples/calculator/calculator.xml">
 		<applet name="calculator"/>
-		<applet name="display"/>
-		<applet name="button"/>
+		<applet name="calculator-display"/>
+		<applet name="calculator-button"/>
 	</import>
+	<import library="examples/VB/VB.xml">
+		<applet name="game"/>
+		<applet name="score"/>
+		<applet name="set-level"/>
+		<applet name="answer"/>
+		<applet name="thumb"/>
+		<applet name="definition"/>
+		<applet name="error"/>
+	</import>
+	<import library="examples/northwind/northwind.xml">
+		<applet name="table"/>
+		<applet name="row"/>
+		<applet name="navigator"/>
+		<applet name="jump"/>
+		<applet name="table-select"/>
+	</import>
+	<!-- <import library="analyzer/analyzer.xml">
+		<applet name="analyzer"/>
+		<applet name="source"/>
+		<applet name="types"/>
+		<applet name="vars"/>
+		<applet name="actions"/>
+		<applet name="applets"/>
+		<applet name="type"/>
+		<applet name="appletinfo"/>
+		<applet name="button"/>
+		<applet name="expression"/>
+		
+	</import> -->
 	<typedef name="page">
 		<any>
 			<prop name="home" />
 			<prop name="demos" />
 			<prop name="downloads" />
 			<prop name="tools" />
-			<prop name="forum" />
+			<prop name="help" />
 		</any>
 	</typedef>
 	<common>
 		<unwrap>core</unwrap>
-		<unwrap>core.string</unwrap>
+		<unwrap>string</unwrap>
+		<def var="version">
+			{major: 0, minor: 1, build: 1}
+		</def>
 	</common>
 	<applet name="main-menu" id="id">
 		<content>
 			<text>
-				<div class="[%core.appletclass('menu-bar')%]" id="[%id%]-bar" data-arg="Home:home;Demos:demos;Downloads:downloads;Tools:tools;Forum:forum">Initializing...</div>
+				<div class="[%core.appletclass('menu-bar')%]" id="[%id%]-bar" data-arg="Home:home;Demos:demos;Downloads:downloads;Tools:tools;Help:help">Initializing...</div>
 			</text>
 		</content>
 	</applet>
@@ -80,7 +112,7 @@
 							<is>state.downloads</is>
 							<def var="content">
 								<text>
-									<div class="[%core.appletclass('page-layout-1')%]" id="[%id%]-downloads" data-arg="downloads-menu;downloads-page">Downloads page here</div>
+									<div class="[%core.appletclass('downloads')%]" id="[%id%]-downloads">Downloads page here</div>
 								</text>
 							</def>
 						</all>
@@ -88,15 +120,15 @@
 							<is>state.tools</is>
 							<def var="content">
 								<text>
-									<div class="[%core.appletclass('page-layout-1')%]" id="[%id%]-tools" data-arg="tools-menu;tools-page">Tools page here</div>
+									<div class="[%core.appletclass('tools-analyze')%]" id="[%id%]-tools">Tools page here</div>
 								</text>
 							</def>
 						</all>
 						<all>
-							<is>state.forum</is>
+							<is>state.help</is>
 							<def var="content">
 								<text>
-									<div class="[%core.appletclass('page-layout-1')%]" id="[%id%]-forum" data-arg="forum-menu;forum-page">Forum page here</div>
+									<div class="[%core.appletclass('help')%]" id="[%id%]-help">Help page here</div>
 								</text>
 							</def>
 						</all>
@@ -151,9 +183,9 @@
 								</def>
 							</all>
 							<all>
-								<is>data = "forum"</is>
+								<is>data = "help"</is>
 								<def var="page">
-									{forum:}
+									{help:}
 								</def>
 							</all>
 						</any>
@@ -165,22 +197,97 @@
 	<applet name="home-welcome" id="id">
 		<content>
 			<text>
-				<div class="page-title">Welcome to Fab Site Tools!</div>
-				<br/>
-				<p>
-					This web site is dedicated to <strong>Fab Site Tools</strong> (FST for short), a revolutionary collection of software tools designed for building flexible, maintainable, fast and reliable web applications.
-					The entire site was itself built using this powerful framework.
-				</p>
-				<p>
-					
-				</p>
+				<div>
+					<div class="page-title">Welcome to Fab Site Tools!</div>
+					<br/>
+					<p>
+						This web site is dedicated to <strong>Fab Site Tools</strong> (FST for short), a groundbreaking suite of software tools designed for building sophisticated, flexible, maintainable, fast and reliable web applications/sites.
+					</p>
+					<p>
+						The entire site was itself built using this powerful framework. Notice how fast it is, regardless of the network traffic.
+					</p>
+
+					<table>
+						<tr>
+							<td>
+								<span class="glyphicon glyphicon-info-sign">[%nbsp%]</span>
+							</td>
+							<td>
+								<hr/>
+								<i>
+									<p>
+										With FST, web applications are built from components called applets. An applet can be used to create a number of instances; each instance is linked to an element on the web page (usually a <cite>div</cite> block) and has its own state - a value of an arbitrary type, typically an object. The applet determines how the state is reflected in the content of the visual element and its behavior.
+									</p>
+									<p>
+										A very important feature of applets is that they can be nested - i.e. an applet instance can contain any number of instances of the same or other applets. This lets the user of FST easily create
+										web applications/sites of arbitrary complexity.
+									</p>
+									<p>
+										Applets can communicate by broadcasting messages (output) of any type and by subscribing to the output of other applets.
+									</p>
+									<p>
+										Users can create web applications by utilizing applet libraries - pre-existing (the FST web site offers a few of them) or their own.
+									</p>
+									<p>
+										To define applet libraries, an XML-based declarative language is used. The language is easy to learn and is powerful enough for a wide variety of applications; please see the demos and read the
+										support manuals to find out about the capabilities and benefits of the language.
+									</p>
+									<p>
+										FST applets can be embedded into any web page and hence co-exist with any legacy applications.
+									</p>
+									<hr/>
+								</i>
+							</td>
+						</tr>
+					</table>
+					<p>
+						FST can help the users save their time and money in a number of ways, at all the stages of the software development:
+						<ul>
+							<li>when coding - applets have well-defined structure, based on the proven and tested design patterns</li>
+							<li>when debugging - a comprehensive execution trace is generated automatically</li>
+							<li>when testing - due to the modularity and static type checking built in the language, a vast majority of errors are detected early</li>
+							<li>when maintaining - again, modularity and static typing, along with the language being declarative, help avoid many maintenance problems</li>
+						</ul>
+					</p>
+				</div>
 			</text>
+		</content>
+	</applet>
+	<applet name="downloads" id="id">
+		<content>
+			<text>
+				<div>
+					<div class="page-title">Download FSDK</div>
+					<br/>
+					<p>
+						Here you can download, free of charge, the Fab Site Development Kit. It consists of the following:
+						<ul>
+							<li>the Fabula interpreter</li>
+							<li>Essentials Library</li>
+							<li>the source code of the examples from the Demos pages, including the server-side scripts</li>
+						</ul>
+					</p>
+					<p>
+						<button id="download" class="btn btn-primary"><strong>Download</strong></button>[%nbsp%]Current version: [%version.major%].[%version.minor%].[%version.build%]
+					</p>
+					<p>
+						For the information on the Fabula language visit the <strong>Help</strong> page of our website.
+					</p>
+					<p>
+						When you start coding in Fabula, you will need also to use the Fabula Code Expert (see <strong>Tools</strong>) for comprehensive analysis of any new/changed code.
+					</p>
+					<p>
+						Please visit our <a href="https://muut.com/fab-site-tools" target="_blank">Forum</a> for more information or to get support.
+					</p>
+				</div>
+			</text>
+					<!-- <div class="[%core.appletclass('donate')%]" id="[%id%]-donate">Initializing...</div> -->
 		</content>
 	</applet>
 	<applet name="demos-menu" id="id">
 		<content>
 			<text>
-				<div class="[%core.appletclass('page-menu')%]" id="[%id%]-menu" data-arg="Introduction:demos-intro;Calculator:demos-calculator">Initializing...</div>
+				<div class="[%core.appletclass('page-menu')%]" id="[%id%]-menu" data-arg="Introduction:demos-intro;Calculator:demos-calculator;Vocabulary Builder:demos-VB;Browse Database:demos-Northwind">Initializing...</div>
 			</text>
 		</content>
 	</applet>
@@ -189,6 +296,8 @@
 			<any>
 				<prop name="intro" />
 				<prop name="calculator" />
+				<prop name="VB" />
+				<prop name="northwind" />
 			</any>
 		</state>
 		<content>
@@ -200,17 +309,38 @@
 							<is>state.calculator</is>
 							<def var="content">
 								<text>
-									<div class="[%core.appletclass('demos-calculator')%]" id="[%id%]-calculator">Calculator</div>
+									<div class="[%core.appletclass('demos-calculator')%]" id="[%id%]-calculator">Initializing...</div>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.VB</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('demos-VB')%]" id="[%id%]-VB">Initializing...</div>
+								</text>
+							</def>
+						</all>
+						<all>
+							<is>state.northwind</is>
+							<def var="content">
+								<text>
+									<div class="[%core.appletclass('demos-Northwind')%]" id="[%id%]-Northwind">Initializing...</div>
 								</text>
 							</def>
 						</all>
 						<def var="content">
 							<text>
-								<div class="page-title">Demos</div>
-								<br/>
-								<p>
-									All these examples are written entirely in FSML, our XML-based declarative language. No JavaScript is involved, apart from the Fab Site Engine.
-								</p>
+								<div>
+									<div class="page-title">Demos</div>
+									<br/>
+									<p>
+										Please choose a demo to run from the menu on the left. The demos demonstrate the capabilities of Fabula, our XML-based declarative language.
+									</p>
+									<p>
+										The only third-party library used is Bootstrap. Some examples also have server side, written in PHP.
+									</p>
+								</div>
 							</text>
 						</def>
 					</any>
@@ -245,6 +375,18 @@
 									{calculator:}
 								</def>
 							</all>
+							<all>
+								<is>data = "demos-VB"</is>
+								<def var="page">
+									{VB:}
+								</def>
+							</all>
+							<all>
+								<is>data = "demos-Northwind"</is>
+								<def var="page">
+									{northwind:}
+								</def>
+							</all>
 							<def var="page">
 								{intro:}
 							</def>
@@ -257,17 +399,108 @@
 	<applet name="demos-calculator" id="id">
 		<content>
 			<text>
-				<div class="page-title">Calculator Demo</div>
-				<br/>
-				<p>
-					This example demonstrates basic communication among three applets: calculator, display and button (multiple instances).
-				</p>
-				<br/>
-				<div class="[%appletclass('calculator')%]" id="[%id%]-calculator">Calculator</div>
-				<br/>
-				<p>
-					The source code is available <a href="examples/calculator/calculator.xml" target="_blank">here</a>.
-				</p>
+				<div>
+					<div class="page-title">Calculator Demo</div>
+					<br/>
+					<p>
+						This example demonstrates basic communication among three applets: calculator, display and button (multiple instances).
+					</p>
+					<br/>
+					<div class="[%appletclass('calculator')%]" id="[%id%]-calculator">Calculator</div>
+					<br/>
+					<p>
+						The source code is available <a href="examples/calculator/calculator.xml" target="_blank">here</a>.
+					</p>
+				</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="demos-VB" id="id">
+		<content>
+			<text>
+				<div>
+					<div class="page-title">Vocabulary Builder Demo</div>
+					<br/>
+					<p>
+						The Vocabulary Builder was originally written in JavaScript for <a href="http://www.definitions.net/" target="_blank">www.definitions.net</a>. 
+						Below is a new version, rewritten in Fabula.
+					</p>
+					<br/>
+					<div class="[%appletclass('game')%]" id="[%id%]-game">Vocabulary Builder</div>
+					<br/>
+					<p>
+						The source code is available <a href="examples/VB/VB.xml" target="_blank">here</a>.
+						The code is interesting for several reasons. First, it uses AJAX to fetch word definitions using the Definitions API. Second, it parses the XML received.
+					</p>
+				</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="demos-Northwind" id="id">
+		<content>
+			<text>
+				<div>
+					<div class="page-title">Browse Database Demo</div>
+					<br/>
+					<p>
+						This example demonstrates how a database could be browsed using FST. The following applets are created:
+						<ul>
+							<li>table selection combo</li>
+							<li>table</li>
+							<li>row (multiple instances)</li>
+							<li>navigator</li>
+							<li>navigation control (4 instances: start, back, forward, end)</li>
+						</ul>
+					</p>
+					<p>
+						The backend is PHP/MySQL, the data are requested via AJAX and transferred in XML format. The Northwind sample database is used for this demo.
+					</p>
+					<br/>
+					<div class="[%appletclass('table-select')%]" id="[%id%]-table-select">Loading list of tables...</div>
+					<div class="[%appletclass('table')%]" id="[%id%]-table">Table</div>
+					<br/>
+					<p>
+					</p>
+				</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="tools-analyze" id="id">
+		<content>
+			<text>
+				<div>
+					<div class="page-title">Fabula Code Expert (Beta)</div>
+					<br/>
+					<!-- <div class="[%appletclass('expert')%]" id="[%id%]-expert">Code Expert</div> -->
+					<p>
+						For those who want to code in Fabula, the Code Expert is a necessity. Its main goals are:
+					</p>
+					<ul>
+						<li>to assist the user in creating Fabula code</li>
+						<li>to validate given code in terms of possible syntax (e.g. mismatching tags) and semantic (e.g. undefined variables, type mismatch) errors</li>
+					</ul>
+					<p>
+						Of course, Fabula code, which is simply a kind of XML, can be written manually. Moreover, even erroneous code can be executed; however, it is very likely to fail or crash, not to mention behave unpredictably. 
+						With Code Expert, the majority of errors are detected before actually running the code, thanks to the strict language rules in Fabula.
+					</p>
+					<p>
+						To launch Fabula Code Expert, click <a href="expert/expert.html" target="_blank">here</a>.
+					</p>
+				</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="donate" id="id">
+		<content>
+			<text>
+				<small><i>To support the development of FST, please</i></small>
+				<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+					<input type="hidden" name="cmd" value="_s-xclick"/>
+					<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+"/>
+					<input type="image" src="https://www.paypalobjects.com/en_AU/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal — The safer, easier way to pay online."/>
+					<img alt="" border="0" src="https://www.paypalobjects.com/en_AU/i/scr/pixel.gif" width="1" height="1"/>
+				</form>
 			</text>
 		</content>
 	</applet>

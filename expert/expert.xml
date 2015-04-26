@@ -1,0 +1,530 @@
+<library>
+	<!-- <import library="essentials.xml">
+		<applet name="main-layout-1"/>
+		<applet name="menu-bar">
+			<any>
+				<prop name="up">
+					<string/>
+				</prop>
+				<prop name="down">
+					<string/>
+				</prop>
+			</any>
+		</applet>	
+		<applet name="page-menu">
+			<any>
+				<prop name="up">
+					<string/>
+				</prop>
+				<prop name="down">
+					<string/>
+				</prop>
+			</any>
+		</applet>	
+		<applet name="menu-item">
+			<string/>
+		</applet>		
+		<applet name="page-layout-1"/>
+		<applet name="expandable"/>
+	</import> -->
+	<typedef name="XMLnode">
+		<any>
+			<prop name="childNodes">
+				<array>
+					<dynamic/>
+				</array>
+			</prop>
+			<prop name="nodeName">
+				<string/>
+			</prop>
+			<prop name="nodeType">
+				<integer/>
+			</prop>
+			<prop name="nodeValue">
+				<string/>
+			</prop>
+		</any>
+	</typedef>
+	<common>
+		<unwrap>core</unwrap>
+		<unwrap>string</unwrap>
+		<unwrap>format</unwrap>
+<!-- 		<def var="nodeerrors">
+			<func>
+				<arg name="node">
+					<type name="XMLnode"/>
+				</arg>
+				<return>
+					<calc>
+						result
+						<where>
+							<any>
+								<all>
+									<is>list# = 0</is>
+									<def var="result">
+										""
+									</def>
+								</all>
+								<all>
+									<def var="rows">
+										<array>
+											<size>list#</size>
+											<item index="i">
+												<calc>
+													<text>
+														<li>child.nodeValue</li>
+													</text>
+													<where>
+														<def var="child">
+															<cast>list[i]<to><type name="XMLnode"/></to></cast>
+														</def>
+													</where>
+												</calc>
+											</item>
+										</array>
+									</def>
+									<def var="result">
+										<text>
+											<ul class="error">
+												join({parts: rows, sep: ""})
+											</ul>
+										</text>
+									</def>
+								</all>
+							</any>
+						</where>
+						<where>
+							<def var="list">
+								<select>
+									<in>node.childNodes</in>
+									<item name="item">
+										<all>
+											<def var="child">
+												<cast>item<to><type name="XMLnode"/></to></cast>
+											</def>
+											<is>child.nodeName = "error"</is>
+										</all>
+									</item>
+								</select>
+							</def>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+		<def var="nodecomments">
+			<func>
+				<arg name="node">
+					<type name="XMLnode"/>
+				</arg>
+				<return>
+					<calc>
+						result
+						<where>
+							<any>
+								<all>
+									<is>list# = 0</is>
+									<def var="result">
+										""
+									</def>
+								</all>
+								<all>
+									<def var="rows">
+										<array>
+											<size>list#</size>
+											<item index="i">
+												<calc>
+													<text>
+														<tr>
+															<td><span class="glyphicon glyphicon-info-sign expert-comment"></span></td>
+															<td><span class="expert-comment">child.nodeValue</span></td>
+														</tr>
+													</text>
+													<where>
+														<def var="child">
+															<cast>list[i]<to><type name="XMLnode"/></to></cast>
+														</def>
+													</where>
+												</calc>
+											</item>
+										</array>
+									</def>
+									<def var="result">
+										<text>
+											<table>
+												join({parts: rows, sep: ""})
+											</table>
+										</text>
+									</def>
+								</all>
+							</any>
+						</where>
+						<where>
+							<def var="list">
+								<select>
+									<in>node.childNodes</in>
+									<item name="item">
+										<all>
+											<def var="child">
+												<cast>item<to><type name="XMLnode"/></to></cast>
+											</def>
+											<is>child.nodeType = 8</is>
+										</all>
+									</item>
+								</select>
+							</def>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+		<def var="nodecomments">
+			<func>
+				<arg name="node">
+					<type name="XMLnode"/>
+				</arg>
+				<return>
+					<calc>
+						result
+						<where>
+							<any>
+								<all>
+									<is>list# = 0</is>
+									<def var="result">
+										""
+									</def>
+								</all>
+								<all>
+									<def var="rows">
+										<array>
+											<size>list#</size>
+											<item index="i">
+												<calc>
+													<text>
+														<div class="appletclass('expandable')" id="[%id%]-child-[%i + 1%]" data-arg="[%child.nodeName%];node;[%child.nodeName%]">[%child.nodeName%]</div>
+													</text>
+													<where>
+														<def var="child">
+															<cast>list[i]<to><type name="XMLnode"/></to></cast>
+														</def>
+													</where>
+												</calc>
+											</item>
+										</array>
+									</def>
+									<def var="result">
+										<text>
+											<p>
+												join({parts: rows, sep: ""})
+											</p>
+										</text>
+									</def>
+								</all>
+							</any>
+						</where>
+						<where>
+							<def var="list">
+								<select>
+									<in>node.childNodes</in>
+									<item name="item">
+										<all>
+											<def var="child">
+												<cast>item<to><type name="XMLnode"/></to></cast>
+											</def>
+											<not>
+												<any>
+													<is>child.nodeType = 8</is>
+													<is>child.nodeName = "error"</is>
+												</any>
+											</not>
+										</all>
+									</item>
+								</select>
+							</def>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+		<def var="nodeattributes">
+			<func>
+				<arg name="node">
+					<type name="XMLnode"/>
+				</arg>
+				<return>
+					<calc>
+						result
+						<where>
+							<any>
+								<all>
+									<is>keys# = 0</is>
+									<def var="result">
+										""
+									</def>
+								</all>
+								<all>
+									<def var="rows">
+										<array>
+											<size>keys#</size>
+											<item index="i">
+												<text>
+													<tr>
+														<td>[%keys[i]%]=[%attr@(keys[i])%]</td>
+													</tr>
+												</text>
+											</item>
+										</array>
+									</def>
+									<def var="result">
+										<text>
+											<table>
+												join({parts: rows, sep: ""})
+											</table>
+										</text>
+									</def>
+								</all>
+							</any>
+						</where>
+						<where>
+							<all>
+								<def var="attr">
+									xml.getAttributes(node)
+								</def>
+								<def var="keys">
+									<keys>attr</keys>
+								</def>
+							</all>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+	-->	</common>
+	<applet name="expert" id="id">
+		<content>
+			<text>
+				<div class="page-title">Fabula Code Expert (Beta)</div>
+				<br/>
+				<div class="[%appletclass('toolbar')%]" id="[%id%]-toolbar">Toolbar</div>
+				<hr/>
+				<div class="[%appletclass('workarea')%]" id="[%id%]-workarea">Work Area</div>
+			</text>
+		</content>
+	</applet>
+	<!-- <applet name="node" id="id">
+		<state name="state">
+			<all>
+				<prop name="parent">
+					<string/>
+				</prop>
+				<prop name="data">
+					<any>
+						<prop name="node">
+							<type name="XMLnode"/>
+						</prop>
+						<prop name="none" />
+					</any>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.data.node</is>
+							<def var="content">
+								<text>
+									<table>
+										<tr><td>[%nodeerrors(state.data.node)%]</td></tr>
+										<tr><td>[%nodeattributes(state.data.node)%]</td></tr>
+										<tr><td>[%nodecomments(state.data.node)%]</td></tr>
+										<tr><td>[%nodechildren(state.data.node)%]</td></tr>
+									</table>
+								</text>
+							</def>
+						</all>
+						<def var="content">
+							""
+						</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				{parent: arg, data: {none:}}
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+
+			</input>
+			<before>
+
+			</before>
+			<state>
+
+			</state>
+			<after>
+
+			</after>
+		</respond>
+	</applet> -->	
+	<applet name="toolbar" id="id">
+		<content>
+			<text>
+				<div class="table">
+					<div class="row">
+						<div class="col-sm-1">
+							<div class="[%appletclass('new')%]" id="[%id%]-new">New</div>
+						</div>
+						<div class="col-sm-1">
+							<div class="[%appletclass('open')%]" id="[%id%]-open">Open</div>
+						</div>
+					</div>
+				</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="new" id="id">
+		<state name="state">
+			<string/>
+		</state>
+		<content>
+			<text>
+				<button class="btn btn-primary" id="[%id%]-new"><span class="glyphicon glyphicon-plus"></span>[%nbsp%]New</button>
+			</text>
+		</content>
+		<respond time="now">
+			<input name="input">
+				<any>
+					<prop name="do" />
+				</any>
+			</input>
+			<state>""</state>
+			<after>
+				<calc>
+					<output>filename</output>
+					<where>
+						<all>
+							<def var="t">
+								core.time.decode(now)
+							</def>
+							<def var="filename">
+								<text>fablib-[%t.year%]-[%t.month%]-[%t.day%]-[%t.hours%]-[%t.min%]-[%t.sec%].xml</text>
+							</def>
+						</all>
+					</where>
+				</calc>
+			</after>
+		</respond>
+		<events data="data">
+			<click>{do: }</click>
+		</events>
+	</applet>
+	<applet name="open" id="id">
+		<output>
+			<all>
+				<prop name="name">
+					<string/>
+				</prop>
+				<prop name="content">
+					<string/>
+				</prop>
+			</all>
+		</output>
+		<state name="state">
+			<string/>
+		</state>
+		<content>
+			<text>
+				<input type="file" id="[%id%]-file-select" style="display: none;"/>
+				<button class="btn btn-primary" id="[%id%]-open" onclick="document.getElementById('[%id%]-file-select').click();"><span class="glyphicon glyphicon-open"></span>[%nbsp%]Open</button>
+			</text>
+		</content>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="received">
+						<string/>
+					</prop>
+					<prop name="open" />
+				</any>
+			</input>
+			<state>""</state>
+			<after>
+				<calc>
+					<postfile><url>"expert.php"</url><fieldid><text>[%id%]-file-select</text></fieldid><success name="result">{received: result}</success></postfile>
+					<where>
+						<is>input.open</is>						
+					</where>
+				</calc>
+				<output>input.received</output>
+			</after>
+		</respond>
+		<events data="data">
+			<change>{open: data}</change>
+		</events>
+	</applet>
+	<applet name="workarea" id="id">
+		<state name="state">
+			<dictionary>
+				<string/>
+			</dictionary>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<all>
+						<def var="filenames">
+							<keys>state</keys>
+						</def>
+						<def var="parts">
+							<array>
+								<size>filenames#</size>
+								<item index="i">
+									<text>
+										<div class="appletclass('library')" id='[%id%]-lib-[%i%]'>[%filenames[i]%]</div>
+									</text>
+								</item>
+							</array>
+						</def>
+						<def var="content">
+							join({parts: parts, sep: ""})
+						</def>
+					</all>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				<noentries>
+					<string/>
+				</noentries>
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="add">
+						<string/>
+					</prop>
+				</any>
+			</input>
+			<state>
+				<merge>
+					state
+					<entries>
+						<entry>input.add</entry>
+					</entries>
+				</merge>				
+			</state>
+			<after>
+				<redraw/>
+			</after>
+		</respond>
+	</applet>
+</library>

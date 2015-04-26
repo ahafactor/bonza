@@ -4,7 +4,7 @@
 	width: 100%;
 	border-style: solid;
 	border-width: 1px;
-	border-radius: 4px;
+	border-radius: 2px;
 	background-color: white;
 }
 .applet-expandable:hover {
@@ -36,11 +36,16 @@
 	text-align: left;
 }
 .main-title {
-	font-family: Verdana;
-	font-size: 2em;
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 2.2em;
 	font-weight: bold;
+	font-style: italic;
 	text-align: center;
 	text-shadow: 5px 5px 5px silver;
+	color: MidnightBlue;
+}
+.main-title>a:hover {
+	text-decoration: none;
 }
 .main-subtitle {
 	margin-left: auto;
@@ -54,7 +59,7 @@
 	border-style: none;
 	border-radius: 8px;
 	color: white;
-	background-color: silver;
+	background-color: Gold;
 
 }
 .creator {
@@ -68,32 +73,38 @@
 	font-family: Verdana;
 	font-weight: bold;
 	text-align: center;
+	background-color: white;
+}
+.applet-page-menu {
+	font-family: Verdana;
+	text-align: left;
+	background-color: white;
 }
 .menu-bar {
-	background-color: white;
 }
 .menu-item-inactive {
 	background-color: white;
 	cursor: pointer;
-	padding: 4px;
 	color: gray;
 	border-style: none;
 	border-radius: 4px;
+	padding: 4px;
 }
 .menu-item-inactive:hover {
 	background-color: GhostWhite;
-	cursor: pointer;
-	padding: 4px;
-	color: gray;
-	border-style: none;
-	border-radius: 4px;
 }
-.menu-item-active {
+.applet-menu-bar .menu-item-active {
 	background-color: DarkTurquoise;
-	padding: 4px;
 	color: white;
 	border-style: none;
 	border-radius: 4px;
+	padding: 4px;
+}
+.applet-page-menu .menu-item-active {
+	background-color: white;
+	color: black;
+	font-weight: bold;
+	padding: 4px;
 }
 td.logo {
 	width: auto;
@@ -119,4 +130,17 @@ table.menu-bar {
 	font-size: 1.2em;
 	color: IndianRed;
 	font-weight: bold;
+	font-family: Courier;
+}
+.table-navigation {
+	cursor: pointer;
+	color: black;
+}
+.table-navigation:hover {
+	background-color: GhostWhite;
+}
+.submit-form {
+	width: 40%;
+	margin-left: auto;
+	margin-right: auto;
 }

@@ -1,0 +1,1125 @@
+<library>
+	<!--         Vocabulary Builder Demo             -->
+	<!-- Author: Roman Movchan, Melbourne, Australia -->
+	<typedef name="Vocabulary">
+		<all>
+			<prop name="nouns">
+				<array>
+					<string/>
+				</array>
+			</prop>
+			<prop name="adjectives">
+				<array>
+					<string/>
+				</array>
+			</prop>
+			<prop name="verbs">
+				<array>
+					<string/>
+				</array>
+			</prop>
+		</all>
+	</typedef>
+	<typedef name="XMLnode">
+		<any>
+			<prop name="childNodes">
+				<array>
+					<dynamic/>
+				</array>
+			</prop>
+			<prop name="nodeName">
+				<string/>
+			</prop>
+			<prop name="nodeValue">
+				<string/>
+			</prop>
+		</any>
+	</typedef>
+	<common>
+		<unwrap>core</unwrap>
+		<unwrap>string</unwrap>
+		<unwrap>format</unwrap>
+		<unwrap>math</unwrap>
+		<unwrap>time</unwrap>
+		<def var="tokenid">
+			<!-- token id for accessing Definitions API -->
+			"I2C0oAKz3X9t8X9l"
+		</def>
+		<def var="trimall">
+			<func>
+				<arg name="arg">
+					<array>
+						<string/>
+					</array>
+				</arg>
+				<return>
+					<array>
+						<size>arg#</size>
+						<item index="i">
+							trim(arg[i])
+						</item>
+					</array>
+				</return>
+			</func>
+		</def>
+		<def var="vocabularies">
+			<list>
+				<calc>
+					<list>
+						<calc>nounlist</calc> 
+						<calc>adjlist</calc>
+						<calc>verblist</calc>
+					</list>
+					<where>
+						<all>
+							<def var="nouns">
+								<text>
+									cycling,odometer,investigating,match,relocation,intelligence,endeavor,downsizing,confectionery,bowel,suffering,gauge,assortment,guts,value,contribution,troop,directory,staff,
+									mediocrity,decline,aerial,deterioration,witness,tranquillity,apex,ransom,permutation,fudge,rateables,slip,purse,drought,accommodation,accessory,accident,transition,empire,spices,
+									adventure,temptation,humility,doom,assault,model,aspiration,equity,perusal,nuisance,integrity,vehicle,scrutiny,rapture,heredity,durability,torque,bias
+								</text>
+							</def>
+							<def var="nounlist">
+								trimall(split({str: nouns, sep: ","}))
+							</def>
+							<def var="adjectives">
+								<text>
+									transparent,urban,sought,dependable,reassuring,nasty,alternate,disjointed,aligned,tight,noninvasive,witless,victimised,whirring,squashy,brilliant,busy,
+									cosmopolitan,dangerous,handsome,frantic,greedy,blistering,occasional,fancy,obnoxious,plush,abrupt,profound,gullible,rustic,crucial,orthogonal,erratic,
+									humid,furious,savage,vulgar,durable,impudent,opaque,suspicious,rogue
+								</text>
+							</def>
+							<def var="adjlist">
+								trimall(split({str: adjectives, sep: ","}))
+							</def>
+							<def var="verbs">
+								<text>
+									blur,obligate,signify,restore,disturb,observe,condemn,jeopardize,accompany,acclaim,attend,embark,emerge,depend,disguise,inspire,distinguish,conform,
+									substitute,aggravate,moan,trigger,bash,deny,demolish,amend,interrogate,conceal,tolerate,incline,escalate,avert,trespass,stipulate,feud,penetrate,
+									skirmish
+								</text>
+							</def>
+							<def var="verblist">
+								trimall(split({str: verbs, sep: ","}))
+							</def>
+						</all>
+					</where>
+				</calc>
+				<calc>
+					<list>
+						<calc>nounlist</calc> 
+						<calc>adjlist</calc>
+						<calc>verblist</calc>
+					</list>
+					<where>
+						<all>
+							<def var="nouns">
+								<text>
+									hunch,nitrile,tingle,brasserie,lumberman,concoction,vigorish,hypernym,conveyance,ternion,recital,helm,breastwork,dint,mitre,snap,serendipity,ditch,
+									arborolatry,sheath,peccadillo,anil,crate,whitewash,wavering,encumbrance,canopy,germ,muddle,sweep,contempt,hodgepodge,ignominy,abandon,elan,elation,
+									jab,evangelist
+								</text>
+							</def>
+							<def var="nounlist">
+								trimall(split({str: nouns, sep: ","}))
+							</def>
+							<def var="adjectives">
+								<text>
+									extroversive,proprietary,contagious,ravening,soft-witted,articulate,scholastic,appellative,ultimo,tacky,adscripted,butch,occlusive,incumbent,
+									ambidextrous,contiguous,omnifarious,aculeate,defiant,ectomorphic,indiscernible,elusive,unsealed,foreordained,eminent,reciprocal,arbitrary,eloquent
+								</text>
+							</def>
+							<def var="adjlist">
+								trimall(split({str: adjectives, sep: ","}))
+							</def>
+							<def var="verbs">
+								<text>
+									transpire,famish,cleave,affront,leaven,scarper,pluck,rumpus,loom,abash,abase,abduct,abide,abhor,summon,efface,effray,elate,elix,emanate,denudate,
+									interrupt,embellish
+								</text>
+							</def>
+							<def var="verblist">
+								trimall(split({str: verbs, sep: ","}))
+							</def>
+						</all>
+					</where>
+				</calc>
+				<calc>
+					<list>
+						<calc>nounlist</calc> 
+						<calc>adjlist</calc>
+						<calc>verblist</calc>
+					</list>
+					<where>
+						<all>
+							<def var="nouns">
+								<text>
+									volubility,auspices,jocularity,squint-eye,schlockmeister,macron,larceny,congius,flapper,substrate,anestrus,viverrine,caddie,arbalist,profaneness,
+									foumart,callathump,mumblety-peg,maculation,subrogation,preponderance,chin-wag,howdah,urus,rung,slur,huff,instigation,allogamy,swag,ventricle,
+									couvade,mealie,impounding,calcaneus,liniment,imperviousness,sundog,brashness,meerschaum,collation,flunkey,exponent,taper,cazique,epiphora,
+									hypostatization,confrere,scalawag,tithe,flub,nidus,omphalos,swathing,sapling,fervidness,sousing,abactor,eluvium
+								</text>
+							</def>
+							<def var="nounlist">
+								trimall(split({str: nouns, sep: ","}))
+							</def>
+							<def var="adjectives">
+								<text>
+									dicotyledonous,usurious,splay,pecuniary,ostensive,flabby,lap-strake,irascible,commensal,bristly,askant,tenebrious,numinous,lacerate,inexpiable,
+									bibulous,valetudinarian,naiant,currish,bonzer,jejune,motile,lank,repugnant
+								</text>
+							</def>
+							<def var="adjlist">
+								trimall(split({str: adjectives, sep: ","}))
+							</def>
+							<def var="verbs">
+								<text>
+									descant,splay,huff,monish,fluster,knead,excogitate,suffuse,gloat,abacinate,aberrate,abet,abrade,accinge
+								</text>
+							</def>
+							<def var="verblist">
+								trimall(split({str: verbs, sep: ","}))
+							</def>
+						</all>
+					</where>
+				</calc>
+			</list>
+		</def>
+		<def var="answers">
+			<list>
+				<calc>"A"</calc>
+				<calc>"B"</calc>
+				<calc>"C"</calc>
+				<calc>"D"</calc>
+			</list>
+		</def>
+		<def var="processError">
+			<func>
+				<arg name="xml">
+					<string/>
+				</arg>
+				<return>
+					<calc>
+						error
+						<where>
+							<all>
+								<def var="root">
+									<cast>core.xml.parseText(xml)<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="temp">
+									<cast>root.childNodes[0]<to><type name="XMLnode"/></to></cast>
+								</def>
+								<is>temp.nodeName = "error"</is>
+								<def var="text">
+									<cast>temp.childNodes[0]<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="error">
+									text.nodeValue
+								</def>
+							</all>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+		<def var="processXML">
+			<func>
+				<arg name="xml">
+					<string/>
+				</arg>
+				<return>
+					<calc>
+						definition
+						<where>
+							<all>
+								<def var="root">
+									<cast>core.xml.parseText(xml)<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="results">
+									<cast>root.childNodes[0]<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="temp">
+									<cast>results.childNodes[1]<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="child">
+									<cast>temp.childNodes[0]<to><type name="XMLnode"/></to></cast>
+								</def>
+								<def var="definition">
+									child.nodeValue
+								</def>
+							</all>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+		<def var="getwords">
+			<func>
+				<arg name="arg">
+					<all>
+						<prop name="a">
+							<number/>
+						</prop>
+						<prop name="b">
+							<number/>
+						</prop>
+						<prop name="c">
+							<number/>
+						</prop>
+						<prop name="d">
+							<number/>
+						</prop>
+						<prop name="vocabulary">
+							<array>
+								<string/>
+							</array>
+						</prop>
+					</all>
+				</arg>
+				<return>
+					<calc>
+						words
+						<where>
+							<all>
+								<def var="ai">
+									trunc(arg.a * arg.vocabulary#)
+								</def>
+								<def var="bi">
+									trunc(arg.b * arg.vocabulary#)
+								</def>
+								<def var="ci">
+									trunc(arg.c * arg.vocabulary#)
+								</def>
+								<def var="di">
+									trunc(arg.d * arg.vocabulary#)
+								</def>
+								<def var="words">
+									<entries>
+										<entry>"A"<value>arg.vocabulary[ai]</value></entry>
+										<entry>"B"<value>arg.vocabulary[bi]</value></entry>
+										<entry>"C"<value>arg.vocabulary[ci]</value></entry>
+										<entry>"D"<value>arg.vocabulary[di]</value></entry>
+									</entries>
+								</def>
+							</all>
+						</where>
+					</calc>
+				</return>
+			</func>
+		</def>
+	</common>
+	<applet name="game" id="id">
+		<output>
+			<any>
+				<prop name="prepare">
+					<type name="Vocabulary"/>
+				</prop>
+			</any>
+		</output>
+		<state name="state">
+			<all>
+				<prop name="status">
+					<any>
+						<prop name="getting">
+							<string/>
+						</prop>
+						<prop name="waiting">
+							<!-- right answer known, waiting for user response -->
+							<string/>
+						</prop>
+						<prop name="answered" />
+					</any>
+				</prop>
+				<prop name="level">
+					<integer/>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<text>
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-8">
+							<div class="[%appletclass('error')%]" id="[%id%]-error">?</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-5">
+							<div class="[%appletclass('set-level')%]" id="[%id%]-level">?</div>
+						</div>
+						<div class="col-sm-2">
+							<div class="[%appletclass('score')%]" id="[%id%]-score">?</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-7 prompt centered">
+							<br/>
+							Choose the word that best matches the definition below:
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-7">
+							<br/>
+							<div class="[%appletclass('definition')%]" id="[%id%]-definition" data-arg="[%state.words@(state.status.getting)%]">?</div>
+						</div>
+					</div>
+					<div class="row">
+						<br/>
+					</div>
+					<div class="row">
+						<div class="col-sm-3">
+							<div class="[%appletclass('answer')%]" id="[%id%]-answer-A" data-arg="A">?</div>
+						</div>
+						<div class="col-sm-1">
+							<div class="[%appletclass('thumb')%]" id="[%id%]-thumb-A" data-arg="A">?</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="[%appletclass('answer')%]" id="[%id%]-answer-B" data-arg="B">?</div>
+						</div>
+						<div class="col-sm-1">
+							<div class="[%appletclass('thumb')%]" id="[%id%]-thumb-B" data-arg="B">?</div>
+						</div>
+					</div>
+					<div class="row">
+						<br/>
+					</div>
+					<div class="row">
+						<div class="col-sm-3">
+							<div class="[%appletclass('answer')%]" id="[%id%]-answer-C" data-arg="C">?</div>
+						</div>
+						<div class="col-sm-1">
+							<div class="[%appletclass('thumb')%]" id="[%id%]-thumb-C" data-arg="C">?</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="[%appletclass('answer')%]" id="[%id%]-answer-D" data-arg="D">?</div>
+						</div>
+						<div class="col-sm-1">
+							<div class="[%appletclass('thumb')%]" id="[%id%]-thumb-D" data-arg="D">?</div>
+						</div>
+					</div>
+					<div class="row">
+						<br/>
+					</div>
+				</div>
+			</text>
+		</content>
+		<init arg="arg" random="m,a,b,c,d,p">
+			<state>
+				<calc>
+					{status: {getting: answers[pick]}, words: words, level: 0}
+					<where>
+						<all>
+							<def var="mode">
+								trunc(m * 3)
+							</def>
+							<def var="vocabulary">
+								vocabularies[0][mode]
+							</def>
+							<def var="words">
+								getwords({a: a, b: b, c: c, d: d, vocabulary: vocabulary})
+							</def>
+							<def var="pick">
+								trunc(p * 4)
+							</def>
+						</all>
+					</where>
+				</calc>
+			</state>
+		</init>
+		<respond random="m,a,b,c,d,p">
+			<input name="input">
+				<any>
+					<prop name="level">
+						<!-- user changed level -->
+						<integer/>
+					</prop>
+					<prop name="answer">
+						<!-- user answered A, B, C or D -->
+						<string/>
+					</prop>
+					<prop name="wait"/>
+				</any>
+			</input>
+			<before>
+				<calc>
+					<!-- inform all that the correct answer was received -->
+					<output>{correct: state.status.waiting}</output>
+					<where>
+						<all>
+							<def var="answer">
+								state.words@(input.answer)
+							</def>
+							<def var="should">
+								state.words@(state.status.waiting)
+							</def>
+							<is>answer 'eq' should</is>
+						</all>
+					</where>
+				</calc>
+				<calc>
+					<!-- inform all that an incorrect answer was received -->
+					<output>{incorrect: {answered: input.answer, should: state.status.waiting}}</output>
+					<where>
+						<all>
+							<def var="answer">
+								state.words@(input.answer)
+							</def>
+							<def var="should">
+								state.words@(state.status.waiting)
+							</def>
+							<is>answer 'ne' should</is>
+						</all>
+					</where>
+				</calc>
+			</before>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<!-- level changed -->
+								<is>input.level</is>
+								<def var="newstate">
+									<alter>
+										state
+										<set prop="level">
+											input.level
+										</set>
+									</alter>
+								</def>
+							</all>
+							<all>
+								<!-- definition received, wait for user answer -->
+								<is>input.wait</is>
+								<def var="newstate">
+									<alter>
+										state
+										<set prop="status">
+											{waiting: state.status.getting}
+										</set>
+									</alter>
+								</def>
+							</all>
+							<all>
+								<!-- getting next definition -->
+								<is>input.next</is>
+								<def var="newstate">
+									<calc>
+										{status: {getting: answers[pick]}, words: words, level: state.level}
+										<where>
+											<all>
+												<def var="mode">
+													trunc(m * 3)
+												</def>
+												<def var="vocabulary">
+													vocabularies[state.level][mode]
+												</def>
+												<def var="words">
+													getwords({a: a, b: b, c: c, d: d, vocabulary: vocabulary})
+												</def>
+												<def var="pick">
+													trunc(p * 4)
+												</def>
+											</all>
+										</where>
+									</calc>
+								</def>
+							</all>
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<after>
+				<calc>
+					<!-- when definition was received, display the words to choose from -->
+					<output>{set: state.words}</output>
+					<where>
+						<is>input.wait</is>
+					</where>
+				</calc>
+				<calc>
+					<!-- after user answered, wait 1 sec and then get next question -->
+					<delay>
+						<input>{next:}</input>
+						<by>sec</by>
+					</delay>
+					<where>
+						<is>input.answer</is>
+					</where>
+				</calc>
+				<calc>
+					<!-- if level changed, display next question -->
+					<input>{next:}</input>
+					<where>
+						<is>input.level</is>
+					</where>
+				</calc>
+				<calc>
+					<!-- request new definition -->
+					<output>{get: state.words@(state.status.getting)}</output>
+					<where>
+						<is>state.status.getting</is>
+					</where>
+				</calc>
+			</after>
+		</respond>
+		<accept data="data">
+			<from applet="set-level">
+				{level: data}
+			</from>
+			<from applet="answer">
+				{answer: data.chosen}
+			</from>
+			<from applet="definition">
+				<calc>
+					{wait:}
+					<where>
+						<is>data.done</is>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="answer" id="id">
+		<state name="state">
+			<all>
+				<prop name="id">
+					<string/>
+				</prop>
+				<prop name="word">
+					<string/>
+				</prop>
+				<prop name="status">
+					<any>
+						<prop name="correct" />
+						<prop name="incorrect" />
+						<prop name="unknown" />
+					</any>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<calc>
+				<text>
+					<div class="[%class%]">
+						[%nbsp%]<strong>[%state.id%].</strong>[%nbsp%][%state.word%]
+					</div>
+				</text>
+				<where>
+					<any>
+						<all>
+							<is>state.status.correct</is>
+							<def var="class">
+								"answer-green"
+							</def>
+						</all>
+						<all>
+							<is>state.status.incorrect</is>
+							<def var="class">
+								"answer-orange"
+							</def>
+						</all>
+						<all>
+							<is>state.status.unknown</is>
+							<def var="class">
+								"answer"
+							</def>
+						</all>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				{id: arg, word: "", status: {unknown:}}
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="correct" />
+					<prop name="incorrect" />
+					<prop name="set">
+						<string/>
+					</prop>
+					<prop name="chosen" />
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>input.correct</is>
+								<def var="newstate">
+									<alter>
+										state
+										<set prop="status">{correct:}</set>
+									</alter>
+								</def>
+							</all>
+							<all>
+								<is>input.incorrect</is>
+								<def var="newstate">
+									<alter>
+										state
+										<set prop="status">{incorrect:}</set>
+									</alter>
+								</def>
+							</all>
+							<all>
+								<is>input.set</is>
+								<def var="newstate">
+									<alter>
+										state
+										<set prop="word">input.set</set>
+										<set prop="status">{unknown:}</set>
+									</alter>
+								</def>
+							</all>
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<after>
+				<redraw/>
+				<calc>
+					<output>{chosen: state.id}</output>
+					<where>
+						<is>input.chosen</is>
+					</where>
+				</calc>
+			</after>
+		</respond>
+		<events>
+			<click>{chosen:}</click>
+		</events>
+		<accept data="data">
+			<from applet="game">
+				<calc>
+					input
+					<where>
+						<any>
+							<all>
+								<is>data.set</is>
+								<def var="input">
+									{set: data.set@(state.id)}
+								</def>
+							</all>
+							<all>
+								<is>data.get</is>
+								<def var="input">
+									{set: ""}
+								</def>
+							</all>
+							<all>
+								<any>
+									<is>data.correct = state.id</is>
+									<is>data.incorrect.should = state.id</is>
+								</any>
+								<def var="input">
+									{correct:}
+								</def>
+							</all>
+							<all>
+								<is>data.incorrect.answered = state.id</is>
+								<def var="input">
+									{incorrect:}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="score" id="id">
+		<state name="state">
+			<all>
+				<prop name="correct">
+					<integer/>
+				</prop>
+				<prop name="total">
+					<integer/>
+				</prop>
+			</all>
+		</state>
+		<!-- <span class="[%appletclass('button')%]" id="[%id%]-restart" data-arg="Restart;restart">?</span> -->
+		<content>
+			<text>
+				<span class="game-score">Score:[%nbsp%]<strong>[%state.correct%]</strong>[%nbsp%]of[%nbsp%]<strong>[%state.total%]</strong></span>
+			</text>			
+		</content>
+		<init arg="arg">
+			<state>
+				{correct: 0, total: 0}
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="right" />
+					<prop name="wrong" />
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>input.right</is>
+								<def var="newstate">
+									<alter>
+										state
+										<set prop="correct">state.correct + 1</set>
+										<set prop="total">state.total + 1</set>
+									</alter>
+								</def>
+							</all>
+							<def var="newstate">
+								<alter>
+									state
+									<set prop="total">state.total + 1</set>
+								</alter>
+							</def>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<after>
+				<redraw/>
+			</after>
+		</respond>
+		<accept data="data">
+			<from applet="game">
+				<calc>
+					input
+					<where>
+						<any>
+							<all>
+								<is>data.correct</is>
+								<def var="input">
+									{right:}
+								</def>
+							</all>
+							<all>
+								<is>data.incorrect</is>
+								<def var="input">
+									{wrong:}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="set-level" id="id">
+		<state name="state">
+			<integer/>
+		</state>
+		<content>
+			<text>
+				<label for="[%id%]-combo">Level: [%nbsp%]</label>
+				<select id="[%id%]-combo">
+					<option value="0" selected="selected">Basic</option>
+					<option value="1">Intermediate</option>
+					<option value="2">Advanced</option>
+				</select>
+			</text>
+		</content>
+		<init arg="arg">
+			<state>
+				0
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<integer/>
+			</input>
+			<state>
+				input
+			</state>
+			<after>
+				<output>input</output>
+			</after>
+		</respond>
+		<events data="data">
+			<change>strToInt(data)</change>
+		</events>
+	</applet>
+	<applet name="thumb" id="id">
+		<state name="state">
+			<all>
+				<prop name="id">
+					<string/>
+				</prop>
+				<prop name="status">
+					<any>
+						<prop name="up" />
+						<prop name="none" />
+					</any>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state.status.up</is>
+							<def var="content">
+								<text>
+									<span class="glyphicon glyphicon-thumbs-up"></span>
+								</text>
+							</def>
+						</all>
+						<def var="content">
+							""
+						</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				{id: arg, status: {none:}}
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="correct" />
+					<prop name="reset" />
+				</any>
+			</input>
+			<state>
+				<calc>
+					<alter>
+						state
+						<set prop="status">status</set>
+					</alter>				
+					<where>
+						<any>
+							<all>
+								<is>input.correct</is>
+								<def var="status">
+									{up:}
+								</def>
+							</all>
+							<all>
+								<is>input.reset</is>
+								<def var="status">
+									{none:}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<after>
+				<redraw/>
+			</after>
+		</respond>
+		<accept data="data">
+			<from applet="game">
+				<calc>
+					input
+					<where>
+						<any>
+							<all>
+								<is>data.correct = state.id</is>
+								<def var="input">
+									{correct:}
+								</def>
+							</all>
+							<all>
+								<is>data.get</is>
+								<def var="input">
+									{reset:}
+								</def>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</from>
+		</accept>
+	</applet>
+	<applet name="definition" id="id">
+		<state name="state">
+			<any>
+				<prop name="getting">
+					<string/>
+				</prop>
+				<prop name="text">
+					<string/>
+				</prop>
+			</any>
+		</state>
+		<content>
+			<calc>
+				<text>
+					<div class="definition">[%text%]</div>
+				</text>
+				<where>
+					<any>
+						<all>
+							<is>state.getting</is>
+							<def var="text">
+								"Getting definition..."
+							</def>
+						</all>
+						<def var="text">
+							state.text
+						</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				{getting: arg}
+			</state>
+			<actions>
+				<calc>
+					<get>url<success name="data">{data: data}</success></get>
+					<where>
+						<def var="url">
+							<text>
+								http://www.stands4.com/services/v2/defs.php?uid=3713[%amp%]tokenid=[%tokenid%][%amp%]word=[%state.getting%]
+							</text>
+						</def>
+					</where>
+				</calc>
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="data">
+						<string/>
+					</prop>
+					<prop name="get">
+						<string/>
+					</prop>
+					<!-- <prop name="error">
+						<string/>
+					</prop> -->
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>input.data</is>
+								<any>
+									<def var="newstate">
+										{error: processError(input.data)}
+									</def>
+									<def var="newstate">
+										{text: processXML(input.data)}
+									</def>
+								</any>
+							</all>
+							<def var="newstate">
+								{getting: input.get}
+							</def>
+							<def var="newstate">
+								state
+							</def>
+						</any>
+					</where>
+				</calc>				
+			</state>
+			<after>
+				<output>{error: state.error}</output>
+				<calc>
+					<output>{done:}</output>
+					<where>
+						<is>state.text</is>
+					</where>
+				</calc>
+				<calc>
+					<redraw/>
+					<where>
+						<any>
+							<is>state.text</is>
+							<is>state.getting</is>
+						</any>
+					</where>
+				</calc>
+				<calc>
+					<get>url<success name="data">{data: data}</success></get>
+					<where>
+						<def var="url">
+							<text>
+								http://www.stands4.com/services/v2/defs.php?uid=3713[%amp%]tokenid=[%tokenid%][%amp%]word=[%state.getting%]
+							</text>
+						</def>
+					</where>
+				</calc>
+			</after>
+		</respond>
+		<accept data="data">
+			<from applet="game">
+				{get: data.get}
+			</from>
+		</accept>
+	</applet>
+	<applet name="error" id="id">
+		<state name="state">
+			<string/>
+		</state>
+		<content>
+			<calc>
+				content
+				<where>
+					<any>
+						<all>
+							<is>state = ""</is>
+							<def var="content">
+								""
+							</def>
+						</all>
+						<def var="content">
+							<text>
+								<div class="error">[%state%]</div>
+							</text>
+						</def>
+					</any>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				""
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				<string/>
+			</input>
+			<state>
+				input
+			</state>
+			<after>
+				<redraw/>
+			</after>
+		</respond>
+		<accept data="data">
+			<from applet="definition">data.error</from>
+		</accept>
+	</applet>
+</library>

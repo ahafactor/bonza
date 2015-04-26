@@ -5,7 +5,7 @@
 	background-color: DeepSkyBlue;
 	padding: 10px;
 }
-.display {
+.calculator-display {
 	margin: 5px;
 	text-align: right;
 	border: 2px solid;
@@ -16,7 +16,7 @@
 	padding: 5px;
 	font-family: Courier;
 }
-.button-up {
+.calculator-button-up {
 	font-size: 1.2em;
 	border: 1px solid;
 	border-radius: 6px;
@@ -32,7 +32,7 @@
 	padding-top: 5px;
 	padding-bottom: 5px;
 }
-.button-down {
+.calculator-button-down {
 	font-size: 1.2em;
 	border: 1px solid;
 	border-radius: 6px;

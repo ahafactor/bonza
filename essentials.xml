@@ -35,7 +35,7 @@
 									<table class="expandable">
 										<tr>
 											<th>
-												<div class="expand-icon">+</div>
+												<span class="glyphicon glyphicon-expand"></span>
 											</th>
 											<th class="panel-title">
 												[%state.title%]
@@ -52,7 +52,7 @@
 									<table class="expandable">
 										<tr>
 											<th>
-												<div class="collapse-icon">-</div>
+												<span class="glyphicon glyphicon-collapse-down"></span>
 											</th>
 											<th class="panel-title">
 												[%state.title%]
@@ -169,10 +169,14 @@
 							<table>
 								<tr>
 									<td rowspan="2" class="logo">
-										<image src="[%state.logo%]" width="64" height="64"/>
+										<a href="#">
+											<image src="[%state.logo%]" width="64" height="64"/>
+										</a>
 									</td>
 									<td class="title">
-										<div class="main-title">[%state.title%]</div>
+										
+											<div class="main-title"><a href="#">[%state.title%]</a></div>
+										
 									</td>
 								</tr>
 								<tr>
@@ -194,12 +198,12 @@
 								</tr>
 							</table>
 						</div>
-						<div class="col-sm-5">
+						<div class="col-sm-6">
 							<br/>
 							<div class="[%appletclass(state.menuapplet)%]" id="main-menu">Main menu here</div>
 						</div>
-						<div class="col-sm-2">
-							<div class="[%appletclass(state.loginapplet)%]" id="quick-login"><a href="#">Login</a>[%nbsp%]|[%nbsp%]<a href="#">Sign[%nbsp%]Up</a></div>
+						<div class="col-sm-1">
+							<div class="[%appletclass(state.loginapplet)%]" id="quick-login"><a href="#"><br/><span class="glyphicon glyphicon-log-in"></span></a></div>
 						</div>
 					</div>
 					<div class="row">
@@ -718,7 +722,7 @@
 		</state>
 		<content>
 			<text>
-				<div class="container">
+				<div class="container-fluid">
 					<div class="row">
 						<div class="col-sm-2">
 							<div class="[%appletclass(state.menuapplet)%]" id="[%id%]-menu">[%nbsp%]</div>
