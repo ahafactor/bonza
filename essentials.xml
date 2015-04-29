@@ -17,55 +17,58 @@
 				<prop name="arg">
 					<string/>
 				</prop>
-				<any>
-					<prop name="collapsed" />
-					<prop name="expanded" />
-				</any>
+				<prop name="mode">
+					<any>
+						<prop name="collapsed" />
+						<prop name="expanded" />
+					</any>
+				</prop>
 			</all>
 		</state>
 		<content>
 			<calc>
-				content
+				<text>
+					<table class="expandable">
+						<tr>
+							<th>
+								[%nbsp%]<span class="glyphicon glyphicon-[%icon%] [%class%]"></span>[%nbsp%]
+							</th>
+							<th class="panel-title">
+								[%state.title%]
+							</th>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+								<div class="[%core.appletclass(state.appname)%]" id="[%id%]-content" data-arg="[%state.arg%]" style="display: [%display%];">[%state.appname%]</div>
+							</td>
+						</tr>
+					</table>
+				</text>
 				<where>
 					<any>
 						<all>
-							<is>state.collapsed</is>
-							<def var="content">
-								<text>
-									<table class="expandable">
-										<tr>
-											<th>
-												<span class="glyphicon glyphicon-expand"></span>
-											</th>
-											<th class="panel-title">
-												[%state.title%]
-											</th>
-										</tr>
-									</table>
-								</text>
+							<is>state.mode.collapsed</is>
+							<def var="display">
+								"none"
+							</def>
+							<def var="icon">
+								"expand"
+							</def>
+							<def var="class">
+								"expand-icon"
 							</def>
 						</all>
 						<all>
-							<is>state.expanded</is>
-							<def var="content">
-								<text>
-									<table class="expandable">
-										<tr>
-											<th>
-												<span class="glyphicon glyphicon-collapse-down"></span>
-											</th>
-											<th class="panel-title">
-												[%state.title%]
-											</th>
-										</tr>
-										<tr>
-											<td></td>
-											<td>
-												<div class="[%core.appletclass(state.appname)%]" id="[%id%]-content" data-arg="[%state.arg%]">.</div>
-											</td>
-										</tr>
-									</table>
-								</text>
+							<is>state.mode.expanded</is>
+							<def var="display">
+								"block"
+							</def>
+							<def var="icon">
+								"collapse-down"
+							</def>
+							<def var="class">
+								"collapse-icon"
 							</def>
 						</all>
 					</any>
@@ -76,7 +79,7 @@
 			<!-- argument format: <title>;<applet-name>;<applet-argument> -->
 			<state>
 				<calc>
-					{title: trim(title), appname: trim(appname), arg: trim(rest2), collapsed:}
+					{title: trim(title), appname: trim(appname), arg: trim(rest2), mode: {expanded:}}
 					<where>
 						<all>
 							<def var="pos1">
@@ -108,28 +111,31 @@
 			</input>
 			<state>
 				<calc>
-					newstate
+					<alter>
+						state
+						<set prop="mode">new</set>
+					</alter>
 					<where>
 						<any>
 							<all>
-								<is>state.collapsed</is>
-								<def var="newstate">
-									{title: state.title, appname: state.appname, arg: state.arg, expanded:}
+								<is>state.mode.collapsed</is>
+								<def var="new">
+									{expanded:}
 								</def>
 							</all>
 							<all>
-								<is>state.expanded</is>
-								<def var="newstate">
-									{title: state.title, appname: state.appname, arg: state.arg, collapsed:}
+								<is>state.mode.expanded</is>
+								<def var="new">
+									{collapsed:}
 								</def>
 							</all>
 						</any>
 					</where>
 				</calc>
 			</state>
-			<actions>
+			<after>
 				<redraw/>
-			</actions>
+			</after>
 		</respond>
 		<events>
 			<click>{toggle:}</click>
@@ -175,7 +181,7 @@
 									</td>
 									<td class="title">
 										
-											<div class="main-title"><a href="#">[%state.title%]</a></div>
+										<div class="main-title"><a href="#">[%state.title%]</a></div>
 										
 									</td>
 								</tr>

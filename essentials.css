@@ -2,15 +2,18 @@
 	cursor: pointer;
 	color: black;
 	width: 100%;
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 2px;
 	background-color: white;
+	border-style: dotted;
+	border-width: 1px;
+	border-radius: 4px;
 }
 .applet-expandable:hover {
 	background-color: GhostWhite;
 }
 .expand-icon {
+	color: DarkGreen;
+}
+.plus-icon {
 	border-color: black;
 	border-style: solid;
 	border-width: 1px;
@@ -22,6 +25,9 @@
 	padding-right: 4px;
 }
 .collapse-icon {
+	color: LightGreen;
+}
+.minus-icon {
 	border-color: black;
 	border-style: solid;
 	border-width: 1px;
@@ -143,4 +149,20 @@ table.menu-bar {
 	width: 40%;
 	margin-left: auto;
 	margin-right: auto;
+}
+.editor {
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 4px;
+	padding: 2px;
+	background-color: LightBlue;
+}
+.editor-toolbar {
+	padding: 6px;
+	color: DarkGrey;
+	background-color: LightBlue;
+	width: 100%;
+}
+.right {
+	float: right;
 }
