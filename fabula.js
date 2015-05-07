@@ -1,11 +1,11 @@
 /*
- * =========  FabSite Engine  =========
+ * =======  Fabula Interpreter  =======
  *     © Aha! Factor Pty Ltd, 2015
- * https://github.com/ahafactor/fabsite
+ *       http://fabsitetools.com
  * ====================================
  */
 
-function runFabsiteLibrary(url, trace, extcallback) {
+function fabLoadLibrary(url, trace, extcallback) {
 
     var asyncRequest = function(method, uri, callback, postData) {
         var xhr = new XMLHttpRequest();
@@ -197,13 +197,15 @@ function runFabsiteLibrary(url, trace, extcallback) {
             amp: "&",
             br: "<br/>",
             substr: function(args) {
-                if (args.hasOwnProperty("length")) {
-                    return args.str.substr(args.start, args.length);
+                var from = args.from;
+                var to = args.to;
+                if (to.hasOwnProperty("length")) {
+                    return args.str.substr(from, to.length);
                 } else {
-                    if (args.hasOwnProperty("end")) {
-                        return args.str.slice(args.start, args.end);
+                    if (to.hasOwnProperty("pos")) {
+                        return args.str.slice(from, to.pos);
                     } else {
-                        return args.str.slice(args.start);
+                        return args.str.slice(from);
                     }
                 }
             },
@@ -286,7 +288,10 @@ function runFabsiteLibrary(url, trace, extcallback) {
                 return node.nodeValue;
             },
             getAttribute: function(arg) {
-                return arg.node.getAttribute(arg.name);
+                var temp = arg.node.getAttribute(arg.name);
+                if (temp === null)
+                    throw "Attribute not found";
+                return temp;
             },
             getAttributes: function(node) {
                 var n = node.attributes.length;
@@ -297,6 +302,14 @@ function runFabsiteLibrary(url, trace, extcallback) {
                     result[attrnode.name] = attrnode.nodeValue;
                 }
                 return result;
+            },
+            innerHTML: function(node) {
+                var ser = new XMLSerializer();
+                var temp = "";
+                for (var i = 0; i < node.childNodes.length; i++) {
+                    temp += ser.serializeToString(node.childNodes[i]);
+                }
+                return temp;
             }
         },
     };
@@ -1228,7 +1241,11 @@ function runFabsiteLibrary(url, trace, extcallback) {
             function parseVar() {
                 var i;
                 if (token !== null && token[0] === token[3]) {
-                    result = context[token[0]];
+                    if (token[0] === "null") {
+                        result = null;
+                    } else {
+                        result = context[token[0]];
+                    }
                     token = scanner.exec(formula);
                     return true;
                 } else {
@@ -1374,6 +1391,7 @@ function runFabsiteLibrary(url, trace, extcallback) {
             var idxname;
             var arg;
             var argname;
+            var chame;
             var ret;
             var frmpat = /\[%(.*?)%\]/g;
             var info;
@@ -1583,14 +1601,14 @@ function runFabsiteLibrary(url, trace, extcallback) {
                         break;
                     case "join":
                         temp = getChildren(expr);
-                        l = 0;
+                        // l = 0;
                         for (i = 0; i < temp.length; i++) {
                             if (evalExpr(temp[i], context, output)) {
                                 temp[i] = output.result;
-                                l += output.result.length;
+                                // l += output.result.length;
                             }
                         }
-                        array.length = l;
+                        // array.length = l;
                         l = 0;
                         for (i = 0; i < temp.length; i++) {
                             for (j = 0; j < temp[i].length; j++) {
@@ -1615,7 +1633,9 @@ function runFabsiteLibrary(url, trace, extcallback) {
                     case "alter":
                         temp = firstExpr(expr);
                         if (evalExpr(temp, context, output)) {
-                            obj = output.result;
+                            for (prop in output.result) {
+                                obj[prop] = output.result[prop];
+                            }
                             temp = findChildren(expr, "set");
                             for (i = 0; i < temp.length; i++) {
                                 if (evalExpr(firstExpr(temp[i]), context, output)) {
@@ -1719,7 +1739,7 @@ function runFabsiteLibrary(url, trace, extcallback) {
                             for (i = 0; i < array.length; i++) {
                                 context2[argname] = array[i];
                                 if (evalStmt(firstExpr(temp), context2, output2)) {
-                                    array2.push(array[i]);
+                                    array2.push(output2.result);
                                 }
                             }
                             output.result = array2;
@@ -1771,9 +1791,10 @@ function runFabsiteLibrary(url, trace, extcallback) {
                             return false;
                         }
                         break;
-                    case "output":
+                    case "send":
+                        chname = expr.getAttribute("channel");
                         if (evalExpr(firstExpr(expr), context, result)) {
-                            output.result = actions.output(result.result);
+                            output.result = actions.send(chname, result.result);
                         } else {
                             return false;
                         }
@@ -2318,7 +2339,6 @@ function runFabsiteLibrary(url, trace, extcallback) {
         this.resprandnames = [];
         this.idname = id;
         this.events = {};
-        this.listeners = {};
         this.channels = {};
 
         children = getChildren(xml);
@@ -2385,12 +2405,6 @@ function runFabsiteLibrary(url, trace, extcallback) {
                 case "accept":
                     temp = getChildren(child);
                     for (j = 0; j < temp.length; j++) {
-                        if (temp[j].hasAttribute("applet")) {
-                            this.listeners[temp[j].getAttribute("applet")] = {
-                                data: child.getAttribute("data"),
-                                expr: firstExpr(temp[j])
-                            };
-                        } else
                         if (temp[j].hasAttribute("channel")) {
                             this.channels[temp[j].getAttribute("channel")] = {
                                 data: child.getAttribute("data"),
@@ -2609,13 +2623,9 @@ function runFabsiteLibrary(url, trace, extcallback) {
                         id2 = child.getAttribute("id");
                         if (id2 !== null && id2 !== id) {
                             if (app.exists(id2)) {
-                                app.redraw(id2, applets);
-                                for (var e in app.events) {
-                                    child.addEventListener(e, app.handlers[e]);
-                                }
-                            } else {
-                                app.create(id2, child, applets);
+                                app.destroy(id2);
                             }
+                            app.create(id2, child, applets);
                         }
                     }
                 }
@@ -2699,20 +2709,20 @@ function runFabsiteLibrary(url, trace, extcallback) {
         this.send = function(data) {
             var prop;
             var output = {};
-            trace("channel " + name + " : " + format(data));
+            trace("channel " + this.name + " : " + format(data));
             for (var i = 0; i < this.targets.length; i++) {
                 var target = this.targets[i];
-                if (target.listeners.hasOwnProperty(this.name)) { //target applet has a listener for current channel?
+                if (target.channels.hasOwnProperty(this.name)) { //target applet has a listener for current channel?
                     var local = {};
                     for (prop in target.local) {
                         local[prop] = target.local[prop];
                     }
-                    local[target.listeners[this.name].data] = data;
+                    local[target.channels[this.name].data] = data;
                     for (var id2 in target.instances) {
                         var state = target.instances[id2];
                         local[target.statename] = state;
                         trace("accept " + target.name + "::" + id2 + " : " + format(data));
-                        if (engine.evalExpr(target.listeners[this.name].expr, local, output)) {
+                        if (engine.evalExpr(target.channels[this.name].expr, local, output)) {
                             target.respond(id2, output.result);
                         }
                     }
@@ -2748,12 +2758,12 @@ function runFabsiteLibrary(url, trace, extcallback) {
 
     function Library(xml) {
         this.applets = {};
+        this.channels = {};
         var temp;
         var name;
         var output = {};
         var prop;
         var common;
-        this.channels = {};
         this.context = {
             core: core
         };
@@ -2767,22 +2777,23 @@ function runFabsiteLibrary(url, trace, extcallback) {
                     //resume();
                 };
             },
-            output: function(msg) {
+            send: function(name, msg) {
                 return function(applet, id) {
-                    trace("output " + applet.name + "::" + id + " : " + format(msg));
-                    for (var i = 0; i < applet.targets.length; i++) {
-                        var target = applet.targets[i];
-                        if (target.listeners.hasOwnProperty(applet.name)) { //target applet has a listener for current applet?
+                    trace("send " + applet.name + "::" + id + " to: " + name + " data: " + format(msg));
+                    var channel = lib.channels[name];
+                    for (var i = 0; i < channel.targets.length; i++) {
+                        var target = channel.targets[i];
+                        if (target.channels.hasOwnProperty(name)) { //target applet has a listener for channel?
                             var local = {};
                             for (prop in target.local) {
                                 local[prop] = target.local[prop];
                             }
-                            local[target.listeners[applet.name].data] = msg;
+                            local[target.channels[name].data] = msg;
                             for (var id2 in target.instances) {
                                 var state = target.instances[id2];
                                 local[target.statename] = state;
-                                trace("accept " + target.name + "::" + id2 + " : " + format(msg));
-                                if (engine.evalExpr(target.listeners[applet.name].expr, local, output)) {
+                                trace("accept " + target.name + "::" + id2);
+                                if (engine.evalExpr(target.channels[name].expr, local, output)) {
                                     target.respond(id2, output.result);
                                 }
                             }
@@ -2825,23 +2836,6 @@ function runFabsiteLibrary(url, trace, extcallback) {
                     xmlhttp.send();
                 };
             },
-            // exec: function(str, resultname, success) {
-            //     return function(applet, id) {
-            //         trace("exec " + applet.name + "::" + id + " : " + format(str));
-            //         var local = {};
-            //         for (prop in applet.local) {
-            //             local[prop] = applet.local[prop];
-            //         }
-            //         local[applet.idname] = id;
-            //         local[applet.statename] = applet.instances[id];
-            //         try {
-            //             local[resultname] = eval(str);
-            //             if (engine.evalExpr(success, local, output)) {
-            //                 applet.respond(id, output.result);
-            //             }
-            //         } catch (e) {}
-            //     };
-            // },
             postxml: function(url, data, resultname, success) {
                 return function(applet, id) {
                     trace("postxml " + applet.name + "::" + id + " : " + url + " : " + format(data));
@@ -2902,6 +2896,7 @@ function runFabsiteLibrary(url, trace, extcallback) {
         var applets;
         var varmap = {};
         lib.appmap = {};
+        lib.chmap = {};
         var tempmap;
         var attr;
         var p;
@@ -2940,37 +2935,53 @@ function runFabsiteLibrary(url, trace, extcallback) {
 
         for (name in lib.applets) {
             var target = lib.applets[name];
-            for (prop in target.listeners) {
-                if (lib.applets.hasOwnProperty(prop)) {
-                    applet = lib.applets[prop];
-                    trace(name + " listens applet " + applet.name);
-                    applet.targets.push(target);
-                }
-            }
+            // for (prop in target.listeners) {
+            //     if (lib.applets.hasOwnProperty(prop)) {
+            //         applet = lib.applets[prop];
+            //         trace(name + " listens applet " + applet.name);
+            //         applet.targets.push(target);
+            //     }
+            // }
             for (prop in target.channels) {
                 if (lib.channels.hasOwnProperty(prop)) {
                     channel = lib.channels[prop];
-                    trace(name + " listens channel " + channel.name);
+                    trace("applet " + name + " listens channel " + channel.name);
                     channel.targets.push(target);
                 }
             }
         }
 
         doimport = function(url, childlib) {
+            var target;
+            var channel;
             trace("importing " + url);
             for (prop in varmap[url]) {
                 trace("import var " + prop + " as " + varmap[url][prop] + " : " + format(childlib.context[prop]));
                 lib.context[varmap[url][prop]] = childlib.context[prop];
             }
             for (name in lib.applets) {
-                var target = lib.applets[name];
-                for (prop in childlib.applets) {
-                    if (target.listeners.hasOwnProperty(lib.appmap[url][prop])) { //parent applet listens to child applet?
-                        applet = childlib.applets[prop];
-                        trace(name + " listens " + applet.name);
-                        applet.targets.push(target);
+                target = lib.applets[name];
+                for (prop in childlib.channels) {
+                    if (target.channels.hasOwnProperty(lib.chmap[url][prop])) { //parent applet listens to child applet?
+                        channel = childlib.channels[prop];
+                        trace("applet " + name + " listens channel " + channel.name);
+                        channel.targets.push(target);
                     }
                 }
+            }
+            // for (name in lib.applets) {
+            //     target = lib.applets[name];
+            //     for (prop in childlib.applets) {
+            //         if (target.listeners.hasOwnProperty(lib.appmap[url][prop])) { //parent applet listens to child applet?
+            //             applet = childlib.applets[prop];
+            //             trace(name + " listens " + applet.name);
+            //             applet.targets.push(target);
+            //         }
+            //     }
+            // }
+            for (prop in lib.chmap[url]) {
+                trace("import channel " + prop + " as " + lib.chmap[url][prop]);
+                lib.channels[lib.chmap[url][prop]] = childlib.channels[prop];
             }
             for (prop in lib.appmap[url]) {
                 trace("import applet " + prop + " as " + lib.appmap[url][prop]);
@@ -2986,6 +2997,7 @@ function runFabsiteLibrary(url, trace, extcallback) {
         skip = false;
         for (i = 0; i < temp.length; i++) {
             liburl = temp[i].getAttribute("library");
+            // import variable
             vars = findChildren(temp[i], "var");
             tempmap = {};
             for (j = 0; j < vars.length; j++) {
@@ -3001,6 +3013,23 @@ function runFabsiteLibrary(url, trace, extcallback) {
                 tempmap[oldname] = newname;
             }
             varmap[liburl] = tempmap;
+            // import channel
+            applets = findChildren(temp[i], "channel");
+            tempmap = {};
+            for (j = 0; j < applets.length; j++) {
+                attr = applets[j].getAttribute("name");
+                p = attr.indexOf("/");
+                if (p === -1) {
+                    oldname = attr;
+                    newname = attr;
+                } else {
+                    oldname = attr.slice(0, p);
+                    newname = attr.slice(p + 1);
+                }
+                tempmap[oldname] = newname;
+            }
+            lib.chmap[liburl] = tempmap;
+            // import applet
             applets = findChildren(temp[i], "applet");
             tempmap = {};
             for (j = 0; j < applets.length; j++) {

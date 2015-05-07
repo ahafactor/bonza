@@ -1,0 +1,43 @@
+<document title="Fabula Tutorial">
+	<sections>
+		<document title="Introduction">
+			<text>
+				<p>
+					Fabula is a declarative language for defining applet libraries.
+				</p>
+				<p>
+					"Programming" in Fabula is fun. It resembles playing a simulation game.
+				</p>
+			</text>
+		</document>
+		<document title="Applets">
+			<text>
+				
+			</text>
+		</document>
+		<document title="Channels">
+			<text>
+				
+			</text>
+		</document>
+		<document title="Libraries">
+			<text>
+				
+			</text>
+		</document>
+		<document title="First Examples">
+			<sections>
+				<document title="Hello, World!">
+					<text>
+						In the simplest form, an applet just provides some HTML content to the associated page element.
+					</text>
+				</document>
+				<document title="Calculator">
+					<text>
+						<div class="applet-calculator" id="calculator"> </div>
+					</text>
+				</document>
+			</sections>
+		</document>
+	</sections>
+</document>

@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <library>
+	<channel name="menu-item-state">
+		<any>
+			<prop name="up">
+				<string/>
+			</prop>
+			<prop name="down">
+				<string/>
+			</prop>
+		</any>
+	</channel>
+	<channel name="menu-item-activate">
+		
+	</channel>
+	<channel name="menu-item-id">
+		
+	</channel>
 	<common>
 		<unwrap>core</unwrap>
 		<unwrap>core.string</unwrap>
@@ -86,19 +102,19 @@
 								indexOf({str: arg, substr: ";"})
 							</def>
 							<def var="title">
-								substr({str: arg, start: 0, end: pos1})
+								substr({str: arg, from: 0, to: {pos: pos1}})
 							</def>
 							<def var="rest1">
-								substr({str: arg, start: pos1 + 1, end: length(arg)})
+								substr({str: arg, from: pos1 + 1, to: {end:}})
 							</def>
 							<def var="pos2">
 								indexOf({str: rest1, substr: ";"})
 							</def>
 							<def var="appname">
-								substr({str: rest1, start: 0, end: pos2})
+								substr({str: rest1, from: 0, to : {pos: pos2}})
 							</def>
 							<def var="rest2">
-								substr({str: rest1, start: pos2 + 1, end: length(rest1)})
+								substr({str: rest1, from: pos2 + 1, to: {end:}})
 							</def>
 						</all>
 					</where>
@@ -144,12 +160,6 @@
 	<applet name="main-layout-1" id="id">
 		<state name="state">
 			<all>
-				<prop name="title">
-					<string/>
-				</prop>
-				<prop name="subtitle">
-					<string/>
-				</prop>
 				<prop name="logo">
 					<string/>
 				</prop>
@@ -172,44 +182,13 @@
 				<div class="container-fluid">
 					<div class="row">
 						<div class="col-sm-5">
-							<table>
-								<tr>
-									<td rowspan="2" class="logo">
-										<a href="#">
-											<image src="[%state.logo%]" width="64" height="64"/>
-										</a>
-									</td>
-									<td class="title">
-										
-										<div class="main-title"><a href="#">[%state.title%]</a></div>
-										
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<div class="main-subtitle"><span class="main-subtitle-text">[%nbsp%][%state.subtitle%][%nbsp%]</span></div>
-									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-								<tr>
-									<td>
-										<br/>
-									</td>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-							</table>
+							<a href="#">
+								<image src="[%state.logo%]" width="400" height="160"/>
+							</a>
 						</div>
-						<div class="col-sm-6">
+						<div class="col-sm-7">
 							<br/>
 							<div class="[%appletclass(state.menuapplet)%]" id="main-menu">Main menu here</div>
-						</div>
-						<div class="col-sm-1">
-							<div class="[%appletclass(state.loginapplet)%]" id="quick-login"><a href="#"><br/><span class="glyphicon glyphicon-log-in"></span></a></div>
 						</div>
 					</div>
 					<div class="row">
@@ -232,7 +211,7 @@
 		<init arg="arg">
 			<state>
 				<calc>
-					{title: args[0], subtitle: args[1], logo: args[2], menuapplet: args[3], pageapplet: args[4], loginapplet: args[5], creator: args[6]}
+					{logo: args[0], menuapplet: args[1], pageapplet: args[2], loginapplet: args[3], creator: args[4]}
 					<where>
 						<def var="args">
 							split({str: arg, sep: ";"})
@@ -329,10 +308,10 @@
 													indexOf({str: itemsidtext[i], substr: ":"})
 												</def>
 												<def var="text">
-													substr({str: itemsidtext[i], start: 0, end: pos})
+													substr({str: itemsidtext[i], from: 0, to: {pos: pos}})
 												</def>
 												<def var="itemid">
-													substr({str: itemsidtext[i], start: pos + 1, rest: })
+													substr({str: itemsidtext[i], from: pos + 1, to: {end:}})
 												</def>
 											</all>
 										</where>
@@ -349,7 +328,7 @@
 				</calc>
 			</state>
 			<actions>
-				<output>{down: state.items[0].id}</output>
+				<send channel="menu-item-state">{down: state.items[0].id}</send>
 			</actions>
 		</init>
 		<respond>
@@ -358,7 +337,7 @@
 			</input>
 			<before>
 				<calc>
-					<output>{up: state.active}</output>
+					<send channel="menu-item-state">{up: state.active}</send>
 					<where>
 						<is>
 							<find>
@@ -383,24 +362,14 @@
 				</calc>
 			</state>
 			<after>
-				<output>{down: input}</output>
+				<send channel="menu-item-state">{down: input}</send>
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="menu-item">data</from>
+			<from channel="menu-item-activate">data</from>
 		</accept>
 	</applet>
 	<applet name="page-menu" id="id">
-		<output>
-			<any>
-				<prop name="up">
-					<string/>
-				</prop>
-				<prop name="down">
-					<string/>
-				</prop>
-			</any>
-		</output>
 		<state name="state">
 			<all>
 				<prop name="items">
@@ -477,10 +446,10 @@
 													indexOf({str: itemsidtext[i], substr: ":"})
 												</def>
 												<def var="text">
-													substr({str: itemsidtext[i], start: 0, end: pos})
+													substr({str: itemsidtext[i], from: 0, to: {pos: pos}})
 												</def>
 												<def var="id">
-													substr({str: itemsidtext[i], start: pos + 1, rest: })
+													substr({str: itemsidtext[i], from: pos + 1, to: {end:}})
 												</def>
 											</all>
 										</where>
@@ -503,7 +472,7 @@
 			</input>
 			<before>
 				<calc>
-					<output>{up: state.active}</output>
+					<send channel="menu-item-state">{up: state.active}</send>
 					<where>
 						<is>
 							<find>
@@ -528,11 +497,11 @@
 				</calc>
 			</state>
 			<after>
-				<output>{down: input}</output>
+				<send channel="menu-item-state">{down: input}</send>
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="menu-item">data</from>
+			<from channel="menu-item-activate">data</from>
 		</accept>
 	</applet>
 	<applet name="menu-item" id="id">
@@ -585,7 +554,7 @@
 							<all>
 								<is>charAt({str: text, index: 0}) = "!"</is>
 								<def var="state">
-									{id: id, text: substr({str: text, start: 1, rest:}), down:}
+									{id: id, text: substr({str: text, from: 1, to: {end:}}), down:}
 								</def>
 							</all>
 							<def var="state">
@@ -599,10 +568,10 @@
 								indexOf({str: arg, substr: ":"})
 							</def>
 							<def var="text">
-								substr({str: arg, start: 0, end: pos})
+								substr({str: arg, from: 0, to: {pos: pos}})
 							</def>
 							<def var="id">
-								substr({str: arg, start: pos + 1, rest: })
+								substr({str: arg, from: pos + 1, to: {end:}})
 							</def>
 						</all>
 					</where>
@@ -649,7 +618,7 @@
 							<all>
 								<is>input.do</is>
 								<def var="action">
-									<output>state.id</output>
+									<send channel="menu-item-activate">state.id</send>
 								</def>
 							</all>
 							<def var="action">
@@ -671,7 +640,7 @@
 			</click>
 		</events>
 		<accept data="data">
-			<from applet="menu-bar">
+			<from channel="menu-item-state">
 				<calc>
 					input
 					<where>
@@ -692,7 +661,7 @@
 					</where>
 				</calc>
 			</from>
-			<from applet="page-menu">
+			<!-- <from channel="page-menu">
 				<calc>
 					input
 					<where>
@@ -712,7 +681,7 @@
 						</any>
 					</where>
 				</calc>
-			</from>
+			</from> -->
 		</accept>
 	</applet>
 	<applet name="page-layout-1" id="id">

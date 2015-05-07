@@ -1,29 +1,21 @@
 <library>
+	<typedef name="page">
+		<any>
+			<prop name="home" />
+			<prop name="demos" />
+			<prop name="downloads" />
+			<prop name="tools" />
+			<prop name="help" />
+		</any>
+	</typedef>
 	<import library="essentials.xml">
-		<applet name="main-layout-1"/>
-		<applet name="menu-bar">
-			<any>
-				<prop name="up">
-					<string/>
-				</prop>
-				<prop name="down">
-					<string/>
-				</prop>
-			</any>
-		</applet>	
-		<applet name="page-menu">
-			<any>
-				<prop name="up">
-					<string/>
-				</prop>
-				<prop name="down">
-					<string/>
-				</prop>
-			</any>
-		</applet>	
-		<applet name="menu-item">
+		<channel name="menu-item-activate">
 			<string/>
-		</applet>		
+		</channel>
+		<applet name="main-layout-1"/>
+		<applet name="menu-bar"/>	
+		<applet name="page-menu"/>
+		<applet name="menu-item"/>
 		<applet name="page-layout-1"/>
 	</import>
 	<import library="examples/calculator/calculator.xml">
@@ -47,28 +39,6 @@
 		<applet name="jump"/>
 		<applet name="table-select"/>
 	</import>
-	<!-- <import library="analyzer/analyzer.xml">
-		<applet name="analyzer"/>
-		<applet name="source"/>
-		<applet name="types"/>
-		<applet name="vars"/>
-		<applet name="actions"/>
-		<applet name="applets"/>
-		<applet name="type"/>
-		<applet name="appletinfo"/>
-		<applet name="button"/>
-		<applet name="expression"/>
-		
-	</import> -->
-	<typedef name="page">
-		<any>
-			<prop name="home" />
-			<prop name="demos" />
-			<prop name="downloads" />
-			<prop name="tools" />
-			<prop name="help" />
-		</any>
-	</typedef>
 	<common>
 		<unwrap>core</unwrap>
 		<unwrap>string</unwrap>
@@ -153,7 +123,7 @@
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="menu-item">
+			<from channel="menu-item-activate">
 				<calc>
 					page
 					<where>
@@ -204,51 +174,67 @@
 						This web site is dedicated to <strong>Fab Site Tools</strong> (FST for short), a groundbreaking suite of software tools designed for building sophisticated, flexible, maintainable, fast and reliable web applications/sites.
 					</p>
 					<p>
-						The entire site was itself built using this powerful framework. Notice how fast it is, regardless of the network traffic.
+						The entire site (which is, in fact, a web application) was itself built using this powerful, albeit lightweight, framework.
 					</p>
-
-					<table>
-						<tr>
-							<td>
-								<span class="glyphicon glyphicon-info-sign">[%nbsp%]</span>
-							</td>
-							<td>
-								<hr/>
-								<i>
-									<p>
-										With FST, web applications are built from components called applets. An applet can be used to create a number of instances; each instance is linked to an element on the web page (usually a <cite>div</cite> block) and has its own state - a value of an arbitrary type, typically an object. The applet determines how the state is reflected in the content of the visual element and its behavior.
-									</p>
-									<p>
-										A very important feature of applets is that they can be nested - i.e. an applet instance can contain any number of instances of the same or other applets. This lets the user of FST easily create
-										web applications/sites of arbitrary complexity.
-									</p>
-									<p>
-										Applets can communicate by broadcasting messages (output) of any type and by subscribing to the output of other applets.
-									</p>
-									<p>
-										Users can create web applications by utilizing applet libraries - pre-existing (the FST web site offers a few of them) or their own.
-									</p>
-									<p>
-										To define applet libraries, an XML-based declarative language is used. The language is easy to learn and is powerful enough for a wide variety of applications; please see the demos and read the
-										support manuals to find out about the capabilities and benefits of the language.
-									</p>
-									<p>
-										FST applets can be embedded into any web page and hence co-exist with any legacy applications.
-									</p>
-									<hr/>
-								</i>
-							</td>
-						</tr>
-					</table>
-					<p>
-						FST can help the users save their time and money in a number of ways, at all the stages of the software development:
-						<ul>
-							<li>when coding - applets have well-defined structure, based on the proven and tested design patterns</li>
-							<li>when debugging - a comprehensive execution trace is generated automatically</li>
-							<li>when testing - due to the modularity and static type checking built in the language, a vast majority of errors are detected early</li>
-							<li>when maintaining - again, modularity and static typing, along with the language being declarative, help avoid many maintenance problems</li>
-						</ul>
-					</p>
+					<br/>
+					<div class="popup-head">
+						<span class="glyphicon glyphicon-info-sign"> </span>[%nbsp%]<i><strong>How does it work?</strong></i>
+						<div class="popup-body">
+							<br/>
+							<p>
+								With FST, web applications are built from components called applets. An applet can be used to create a number of instances; each instance is linked to an element on the web page (usually a <cite>div</cite> block) and has its own state - a value of an arbitrary type, typically an object. The applet determines how the state is reflected in the content of the visual element and its behavior.
+							</p>
+							<p>
+								A very important feature of applets is that they can be nested - i.e. an applet instance can contain any number of instances of the same or other applets. This lets the user of FST easily create
+								web applications/sites of arbitrary complexity.
+							</p>
+							<p>
+								Applets can communicate by sending messages of any type to output channels and by subscribing to receive the output from the available channels.
+							</p>
+							<p>
+								Users can create web applications by utilizing applet libraries - pre-existing (the FST web site offers a few of them) or their own.
+							</p>
+							<p>
+								To define applet libraries, an XML-based declarative language is used. The language is easy to learn and is powerful enough for a wide variety of applications.
+							</p>
+							<p>
+								FST applets can be embedded into any web page and co-exist with any legacy applications. External scripts can communicate with applet libraries using their channels.
+							</p>
+						</div>
+					</div>
+					<br/>
+					<div class="popup-head">
+						<span class="glyphicon glyphicon-info-sign"> </span>[%nbsp%]<i><strong>Who can use it?</strong></i>
+						<div class="popup-body">
+							<br/>
+							<p>
+								FST is for web developers. To create applet libraries, one needs to learn Fabula, which should be easy for anyone familiar with XML and HTML. In reality, CSS is also needed in order to
+								create attractive applications/sites. JavaScript may only be needed for advanced use cases, such as integration with legacy applications.
+							</p>
+						</div>
+					</div>
+					<br/>
+					<div class="popup-head">
+						<span class="glyphicon glyphicon-info-sign"> </span>[%nbsp%]<i><strong>What are the benefits of using FST?</strong></i>
+						<div class="popup-body">
+							<br/>
+							<p>
+								There are numerous benefits of the Fabula language:
+								<ul>
+									<li>it's XML-based - therefore, code is easy to analyze, unambiguous, and the syntax is familiar to many people</li>
+									<li>it's declarative - therefore, the probability of algorythmic errors is greatly reduced</li>
+									<li>it's modular - therefore, code is much easier to maintain</li>
+									<li>it's primarily statically typed - therefore, many errors can be detected early</li>
+									<li>it's based on the proven and tested design/coding patterns</li>
+									<li>it's simple and enjoyable to learn and use</li>
+									<li>and so on</li>
+								</ul>
+							</p>
+							<p>
+								FST can help the users save their time and money in a number of ways, at all the stages of the software development.
+							</p>
+						</div>
+					</div>
 				</div>
 			</text>
 		</content>
@@ -262,7 +248,7 @@
 					<p>
 						Here you can download, free of charge, the Fab Site Development Kit. It consists of the following:
 						<ul>
-							<li>the Fabula interpreter</li>
+							<li>Fabula Interpreter</li>
 							<li>Essentials Library</li>
 							<li>the source code of the examples from the Demos pages, including the server-side scripts</li>
 						</ul>
@@ -274,7 +260,7 @@
 						For the information on the Fabula language visit the <strong>Help</strong> page of our website.
 					</p>
 					<p>
-						When you start coding in Fabula, you will need also to use the Fabula Code Expert (see <strong>Tools</strong>) for comprehensive analysis of any new/changed code.
+						When you start coding in Fabula, you will need also to use the <a href="expert/expert.html" target="_blank">Fabula Code Expert</a> for comprehensive analysis of any new/changed code.
 					</p>
 					<p>
 						Please visit our <a href="https://muut.com/fab-site-tools" target="_blank">Forum</a> for more information or to get support.
@@ -364,7 +350,7 @@
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="menu-item">
+			<from channel="menu-item-activate">
 				<calc>
 					page
 					<where>
@@ -469,7 +455,7 @@
 		<content>
 			<text>
 				<div>
-					<div class="page-title">Fabula Code Expert (Beta)</div>
+					<div class="page-title">Fabula Code Expert</div>
 					<br/>
 					<!-- <div class="[%appletclass('expert')%]" id="[%id%]-expert">Code Expert</div> -->
 					<p>
@@ -485,6 +471,27 @@
 					</p>
 					<p>
 						To launch Fabula Code Expert, click <a href="expert/expert.html" target="_blank">here</a>.
+					</p>
+				</div>
+			</text>
+		</content>
+	</applet>
+	<applet name="help" id="id">
+		<content>
+			<text>
+				<div>
+					<div class="page-title">Documentation and Support</div>
+					<br/>
+					<p>
+						We provide the following training/reference materials:
+						<ul>
+							<li><a href="doc/Fabula-tutorial/index.html" target="_blank">Fabula Tutorial</a></li>
+							<li>Fabula Language Reference</li>
+							<li>Fab Site Tools User Guide</li>
+						</ul>
+					</p>
+					<p>
+						Please visit our <a href="https://muut.com/fab-site-tools" target="_blank">Forum</a> for more information or to get support.
 					</p>
 				</div>
 			</text>

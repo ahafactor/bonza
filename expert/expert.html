@@ -13,13 +13,46 @@
     <link data-require="bootstrap-css" data-semver="3.3.1" rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
     <link data-require="bootstrap@*" data-semver="3.2.0" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css" />
     <script data-require="jquery" data-semver="2.1.1" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script data-require="bootstrap" data-semver="3.2.0" src="bootstrap.min.js"></script>
+    <script data-require="bootstrap" data-semver="3.2.0" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.js"></script>
+	<script src="codemirror.js"></script>
+	<link rel="stylesheet" href="codemirror.css">
+	<link rel="stylesheet" href="addon/fold/foldgutter.css" />
+	<link rel="stylesheet" href="expert.css">
+	<script src="xml.js"></script>
+	<script src="addon/fold/foldcode.js"></script>
+	<script src="addon/fold/foldgutter.js"></script>
+	<script src="addon/fold/brace-fold.js"></script>
+	<script src="addon/fold/xml-fold.js"></script>
+	<script src="addon/fold/markdown-fold.js"></script>
+	<script src="addon/fold/comment-fold.js"></script>
+	<script src="addon/edit/closetag.js"></script>
+	<script src="addon/edit/matchtags.js"></script>
+	<script src="addon/edit/closebrackets.js"></script>
+	<script src="addon/edit/matchbrackets.js"></script>
+	<script src="addon/search/searchcursor.js"></script>
+	<script src="addon/search/search.js"></script>
+	<script src="addon/hint/xml-hint.js"></script>
+	<script src="expert.js"></script>
 	<script src="../fabula.js"></script>
 
 </head>
 
-<body onload="runFabsiteLibrary('expert.xml', trace)">
-	<div id="main" class="applet-expert">Loading...</div>
+<body onload="fabLoadLibrary('expert.xml', trace, function(channels){expert_editor = new EditorWrapper('editor', channels['code-editor']); })">
+	<!-- <div id="main" class="applet-expert">Loading...</div> -->
+	<div class="page-title">Fabula Code Expert (Beta)</div>
+	<br/>
+	<div class="editor">
+		<div class="applet-editor-toolbar" id="editor-toolbar">.</div>
+		<textarea id="editor" rows="12" cols="80" style="display:none;"></textarea>
+		<span class="creator"><i>CodeMirror</i> is Copyright &copy; 2014 by <a href="mailto: marijnh@gmail.com4">Marijn Haverbeke</a> and others</span>
+		<span class="applet-cursor-status right" id="cursor-status">.</span>
+	</div>
+	<br/>
+	<button class="btn btn-primary" onclick="document.getElementById('report').innerHTML=WaitText('Validating'); expert_editor.validate(function(text){document.getElementById('report').innerHTML=text;});" data-tooltip="Check for errors"><span class="glyphicon glyphicon-check"></span>&nbsp;Validate</button>&nbsp;
+	<button class="btn btn-primary" onclick="alert('This function is not implemented yet')" data-tooltip="Comprehensive report"><span class="glyphicon glyphicon-list"></span>&nbsp;Analyze</button>
+	<hr/>
+	<div id="report">
+	</div>
 </body>
 
 </html>

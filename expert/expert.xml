@@ -1,6 +1,16 @@
 <library>
-	<!-- <import library="essentials.xml">
-		<applet name="main-layout-1"/>
+	<channel name="code-editor">
+		<all>
+			<prop name="line">
+				<integer/>
+			</prop>
+			<prop name="ch">
+				<integer/>
+			</prop>
+		</all>
+	</channel>
+	<!-- <import library="../essentials.xml"> -->
+	<!-- 	<applet name="main-layout-1"/>
 		<applet name="menu-bar">
 			<any>
 				<prop name="up">
@@ -24,31 +34,31 @@
 		<applet name="menu-item">
 			<string/>
 		</applet>		
-		<applet name="page-layout-1"/>
-		<applet name="expandable"/>
-	</import> -->
-	<typedef name="XMLnode">
-		<any>
-			<prop name="childNodes">
-				<array>
-					<dynamic/>
-				</array>
-			</prop>
-			<prop name="nodeName">
-				<string/>
-			</prop>
-			<prop name="nodeType">
-				<integer/>
-			</prop>
-			<prop name="nodeValue">
-				<string/>
-			</prop>
-		</any>
-	</typedef>
-	<common>
-		<unwrap>core</unwrap>
-		<unwrap>string</unwrap>
-		<unwrap>format</unwrap>
+		<applet name="page-layout-1"/> -->
+		<!-- <applet name="expandable"/> -->
+		<!-- </import> -->
+		<typedef name="XMLnode">
+			<any>
+				<prop name="childNodes">
+					<array>
+						<dynamic/>
+					</array>
+				</prop>
+				<prop name="nodeName">
+					<string/>
+				</prop>
+				<prop name="nodeType">
+					<integer/>
+				</prop>
+				<prop name="nodeValue">
+					<string/>
+				</prop>
+			</any>
+		</typedef>
+		<common>
+			<unwrap>core</unwrap>
+			<unwrap>string</unwrap>
+			<unwrap>format</unwrap>
 <!-- 		<def var="nodeerrors">
 			<func>
 				<arg name="node">
@@ -300,17 +310,6 @@
 			</func>
 		</def>
 	-->	</common>
-	<applet name="expert" id="id">
-		<content>
-			<text>
-				<div class="page-title">Fabula Code Expert (Beta)</div>
-				<br/>
-				<div class="[%appletclass('toolbar')%]" id="[%id%]-toolbar">Toolbar</div>
-				<hr/>
-				<div class="[%appletclass('workarea')%]" id="[%id%]-workarea">Work Area</div>
-			</text>
-		</content>
-	</applet>
 	<!-- <applet name="node" id="id">
 		<state name="state">
 			<all>
@@ -371,160 +370,114 @@
 
 			</after>
 		</respond>
-	</applet> -->	
-	<applet name="toolbar" id="id">
+	</applet> -->
+	<applet name="editor-toolbar" id="id">
 		<content>
 			<text>
-				<div class="table">
-					<div class="row">
-						<div class="col-sm-1">
-							<div class="[%appletclass('new')%]" id="[%id%]-new">New</div>
-						</div>
-						<div class="col-sm-1">
-							<div class="[%appletclass('open')%]" id="[%id%]-open">Open</div>
-						</div>
-					</div>
-				</div>
-			</text>
+				<span class="[%appletclass('add-item')%]" id="[%id%]-add-item" data-tooltip="Insert an item">.</span>
+				<span class="[%appletclass('search')%]" id="[%id%]-search" data-tooltip="Search text">.</span>
+				<span class="[%appletclass('settings')%]" id="[%id%]-settings" data-tooltip="Settings">.</span>
+				<span class="right">
+					<span class="[%appletclass('size-down')%]" id="[%id%]-size-down" data-tooltip="Decrease height">.</span>
+					<span class="[%appletclass('size-up')%]" id="[%id%]-size-up" data-tooltip="Increase height">.</span>
+				</span>
+			</text>			
 		</content>
 	</applet>
-	<applet name="new" id="id">
+	<applet name="add-item" id="id">
+		<content>
+			<text>
+				<span class="popup-head">
+					<span class="glyphicon glyphicon-plus menu-item-inactive"> </span>
+					
+					<span class="popup-body">
+						<div class="popup-menu-item" onclick="expert_editor.insert('applet\n');">applet</div>
+						<div class="popup-menu-item">text</div>
+						<div class="popup-menu-item">formula</div>
+					</span>
+				</span>
+			</text>			
+		</content>
+	</applet>
+	<applet name="search" id="id">
+		<content>
+			<text>
+				<span class="popup-head">
+					<span class="glyphicon glyphicon-search menu-item-inactive"> </span>
+					
+				</span>
+			</text>			
+		</content>
+	</applet>
+	<applet name="settings" id="id">
+		<content>
+			<text>
+				<span class="popup-head">
+					<span class="glyphicon glyphicon-cog menu-item-inactive"> </span>
+					
+				</span>
+			</text>			
+		</content>
+	</applet>
+	<applet name="size-up" id="id">
+		<content>
+			<text>
+				<span class="popup-head">
+					<span class="glyphicon glyphicon-chevron-up menu-item-inactive" onclick="expert_editor.sizeUp();"> </span>
+				</span>
+			</text>			
+		</content>
+	</applet>
+	<applet name="size-down" id="id">
+		<content>
+			<text>
+				<span class="popup-head">
+					<span class="glyphicon glyphicon-chevron-down menu-item-inactive" onclick="expert_editor.sizeDown();"> </span>
+				</span>
+			</text>			
+		</content>
+	</applet>
+	<applet name="cursor-status" id="id">
 		<state name="state">
-			<string/>
-		</state>
-		<content>
-			<text>
-				<button class="btn btn-primary" id="[%id%]-new"><span class="glyphicon glyphicon-plus"></span>[%nbsp%]New</button>
-			</text>
-		</content>
-		<respond time="now">
-			<input name="input">
-				<any>
-					<prop name="do" />
-				</any>
-			</input>
-			<state>""</state>
-			<after>
-				<calc>
-					<output>filename</output>
-					<where>
-						<all>
-							<def var="t">
-								core.time.decode(now)
-							</def>
-							<def var="filename">
-								<text>fablib-[%t.year%]-[%t.month%]-[%t.day%]-[%t.hours%]-[%t.min%]-[%t.sec%].xml</text>
-							</def>
-						</all>
-					</where>
-				</calc>
-			</after>
-		</respond>
-		<events data="data">
-			<click>{do: }</click>
-		</events>
-	</applet>
-	<applet name="open" id="id">
-		<output>
 			<all>
-				<prop name="name">
-					<string/>
+				<prop name="line">
+					<integer/>
 				</prop>
-				<prop name="content">
-					<string/>
+				<prop name="ch">
+					<integer/>
 				</prop>
 			</all>
-		</output>
-		<state name="state">
-			<string/>
 		</state>
 		<content>
 			<text>
-				<input type="file" id="[%id%]-file-select" style="display: none;"/>
-				<button class="btn btn-primary" id="[%id%]-open" onclick="document.getElementById('[%id%]-file-select').click();"><span class="glyphicon glyphicon-open"></span>[%nbsp%]Open</button>
+				ln: [%state.line + 1%] ch: [%state.ch + 1%][%nbsp%]
 			</text>
-		</content>
-		<respond>
-			<input name="input">
-				<any>
-					<prop name="received">
-						<string/>
-					</prop>
-					<prop name="open" />
-				</any>
-			</input>
-			<state>""</state>
-			<after>
-				<calc>
-					<postfile><url>"expert.php"</url><fieldid><text>[%id%]-file-select</text></fieldid><success name="result">{received: result}</success></postfile>
-					<where>
-						<is>input.open</is>						
-					</where>
-				</calc>
-				<output>input.received</output>
-			</after>
-		</respond>
-		<events data="data">
-			<change>{open: data}</change>
-		</events>
-	</applet>
-	<applet name="workarea" id="id">
-		<state name="state">
-			<dictionary>
-				<string/>
-			</dictionary>
-		</state>
-		<content>
-			<calc>
-				content
-				<where>
-					<all>
-						<def var="filenames">
-							<keys>state</keys>
-						</def>
-						<def var="parts">
-							<array>
-								<size>filenames#</size>
-								<item index="i">
-									<text>
-										<div class="appletclass('library')" id='[%id%]-lib-[%i%]'>[%filenames[i]%]</div>
-									</text>
-								</item>
-							</array>
-						</def>
-						<def var="content">
-							join({parts: parts, sep: ""})
-						</def>
-					</all>
-				</where>
-			</calc>
 		</content>
 		<init arg="arg">
 			<state>
-				<noentries>
-					<string/>
-				</noentries>
+				{ line: 0, ch: 0 }
 			</state>
 		</init>
 		<respond>
 			<input name="input">
-				<any>
-					<prop name="add">
-						<string/>
+				<all>
+					<prop name="line">
+						<integer/>
 					</prop>
-				</any>
+					<prop name="ch">
+						<integer/>
+					</prop>
+				</all>
 			</input>
 			<state>
-				<merge>
-					state
-					<entries>
-						<entry>input.add</entry>
-					</entries>
-				</merge>				
+				input				
 			</state>
 			<after>
 				<redraw/>
 			</after>
 		</respond>
+		<accept data="data">
+			<from channel="code-editor">data</from>
+		</accept>
 	</applet>
 </library>

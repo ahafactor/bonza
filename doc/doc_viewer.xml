@@ -1,0 +1,659 @@
+<library>
+	<typedef name="XMLnode">
+		<all>
+			<prop name="childNodes">
+				<array>
+					<dynamic/>
+				</array>
+			</prop>
+			<prop name="nodeName">
+				<string/>
+			</prop>
+			<prop name="nodeValue">
+				<string/>
+			</prop>
+		</all>
+	</typedef>
+	<typedef name="Chapter">
+		<type name="XMLnode"/>
+	</typedef>
+	<typedef name="Path">
+		<array>
+			<all>
+				<prop name="chapter">
+					<type name="Chapter"/>
+				</prop>
+				<prop name="section">
+					<integer/>
+				</prop>
+			</all>
+		</array>
+	</typedef>
+	<typedef name="Navigation">
+		<any>
+			<prop name="prev" />
+			<prop name="next" />
+			<prop name="down">
+				<integer/>
+			</prop>
+			<prop name="up">
+				<integer/>
+			</prop>
+		</any>
+	</typedef>
+	<channel name="navigation">
+		<type name="Navigation"/>
+	</channel>
+	<common>
+		<unwrap>core</unwrap>
+		<unwrap>string</unwrap>
+		<unwrap>format</unwrap>
+		<unwrap>xml</unwrap>
+		<def var="nopath">
+			<noitems>
+				<all>
+					<prop name="chapter">
+						<type name="Chapter"/>
+					</prop>
+					<prop name="section">
+						<integer/>
+					</prop>
+				</all>
+			</noitems>
+		</def>
+		<def var="gettitle">
+			<func>
+				<arg name="arg">
+					<type name="Chapter"/>
+				</arg>
+				<return>
+					getAttribute({node: arg, name: "title"})
+				</return>
+			</func>
+		</def>
+		<def var="gettext">
+			<func>
+				<arg name="arg">
+					<type name="Chapter"/>
+				</arg>
+				<return>
+					innerHTML(findChild({node: arg, name: "text"}))
+				</return>
+			</func>
+		</def>
+		<def var="getsections">
+			<func>
+				<arg name="arg">
+					<type name="Chapter"/>
+				</arg>
+				<return>
+					getChildren(findChild({node: arg, name: "sections"}))
+				</return>
+			</func>
+		</def>
+		<def var="changelast">
+			<func>
+				<arg name="arg">
+					<all>
+						<prop name="path">
+							<type name="Path"/>
+						</prop>
+						<prop name="new">
+							<type name="Chapter"/>
+						</prop>
+					</all>
+				</arg>
+				<return>
+					<array>
+						<size>arg.path#</size>
+						<item index="i">
+							<calc>
+								item
+								<where>
+									<any>
+										<all>
+											<is>i = last</is>
+											<def var="item">
+												{chapter: arg.path[last].chapter, section: arg.new}
+											</def>
+										</all>
+										<def var="item">
+											arg.path[i]
+										</def>
+									</any>
+								</where>
+								<where>
+									<def var="last">
+										arg.path# - 1
+									</def>
+								</where>
+							</calc>
+						</item>
+					</array>
+				</return>
+			</func>
+		</def>
+	</common>
+	<applet name="document-viewer" id="id">
+		<state name="state">
+			<any>
+				<prop name="nodoc" />
+				<prop name="doc">
+					<all>
+						<prop name="main">
+							<type name="Chapter"/>
+						</prop>
+						<prop name="chapter">
+							<type name="Chapter"/>
+						</prop>
+						<prop name="path">
+							<type name="Path"/>
+						</prop>
+					</all>
+				</prop>
+			</any>
+		</state>
+		<content>
+			<calc>
+				<text>
+					<div class="page-title">[%title%]</div>
+					<br/>
+					<br/>
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-sm-2">
+								[%prev%]
+							</div>
+							<div class="col-sm-8">
+								<div class="doc-navigation-bar" id="[%id%]-bar">[%path%]</div>
+							</div>
+							<div class="col-sm-2">
+								[%next%]
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<hr/>
+								<span class="chapter-title">[%nbsp%][%nbsp%][%gettitle(state.doc.chapter)%]</span>
+								<br/>
+								<br/>
+								[%body%]
+								<br/>
+								<br/>
+								<hr/>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-2">
+								[%prev%]
+							</div>
+							<div class="col-sm-8">
+								<div class="doc-navigation-bar" id="[%id%]-bar">[%path%]</div>
+							</div>
+							<div class="col-sm-2">
+								[%next%]
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<hr/>
+								<a href="#">Top</a>
+								<span class="powered">Powered by  <a href="fabsitetools.com">Fab Site Tools</a></span>
+							</div>
+						</div>
+					</div>
+				</text>
+				<where>
+					<all>
+						<def var="title">
+							gettitle(state.doc.main)
+						</def>
+						<any>
+							<def var="body">
+								<!-- return chapter text if exists -->
+								gettext(state.doc.chapter)
+							</def>
+							<def var="body">
+								<!-- otherwise, return list of sections -->
+								<calc>
+									<text>
+										<ol>[%join({parts: items, sep: ""})%]</ol>
+									</text>
+									<where>
+										<def var="items">
+											<array>
+												<size>sections#</size>
+												<item index="i">
+													<text>
+														<li><span class="[%appletclass('navigation-down')%]" id="[%id%]-down-[%i + 1%]" data-arg="[%i%]:[%gettitle(sections[i])%]">[%gettitle(sections[i])%]</span></li>
+													</text>
+												</item>
+											</array>
+										</def>
+									</where>
+									<where>
+										<def var="sections">
+											getsections(state.doc.chapter)
+										</def>
+									</where>
+								</calc>
+							</def>
+						</any>
+						<def var="path">
+							<calc>
+								join({parts: items, sep: "|"})
+								<where>
+									<def var="items">
+										<array>
+											<size>state.doc.path#</size>
+											<item index="i">
+												<text>
+													<span class="[%appletclass('navigation-up')%]" id="[%id%]-up-[%i + 1%]" data-arg="[%i%]:[%gettitle(state.doc.path[i].chapter)%]">[%gettitle(state.doc.path[i].chapter)%]</span>
+												</text>
+											</item>
+										</array>
+									</def>
+								</where>
+							</calc>
+						</def>
+						<any>
+							<all>
+								<def var="p">
+									state.doc.path
+								</def>
+								<is>p# 'gt' 0</is>
+								<def var="last">
+									p[p# - 1]
+								</def>
+								<def var="sections">
+									getsections(last.chapter)
+								</def>
+								<is>last.section 'gt' 0</is>
+								<def var="t">
+									gettitle(sections[last.section - 1])
+								</def>
+								<def var="prev">
+									<text>
+										<div class="[%appletclass('navigation-prev')%]" id="[%id%]-prev" data-arg="[%t%]">previous</div>
+									</text>
+								</def>
+							</all>
+							<def var="prev">
+								""
+							</def>
+						</any>
+						<any>
+							<all>
+								<def var="p">
+									state.doc.path
+								</def>
+								<is>p# 'gt' 0</is>
+								<def var="last">
+									p[p# - 1]
+								</def>
+								<def var="sections">
+									getsections(last.chapter)
+								</def>
+								<is>last.section 'lt' (sections# - 1)</is>
+								<def var="t">
+									gettitle(sections[last.section + 1])
+								</def>
+								<def var="next">
+									<text>
+										<div class="[%appletclass('navigation-next')%]" id="[%id%]-next" data-arg="[%t%]">next</div>
+									</text>
+								</def>
+							</all>
+							<def var="next">
+								""
+							</def>
+						</any>
+					</all>
+				</where>
+			</calc>
+		</content>
+		<init arg="arg">
+			<state>
+				{nodoc:}
+			</state>
+			<actions>
+				<!-- immediately read document -->
+				<get>arg<success name="result">{open: result}</success></get>
+			</actions>
+		</init>
+		<respond>
+			<input name="input">
+				<any>
+					<prop name="open">
+						<string/>
+					</prop>
+					<prop name="navigation">
+						<type name="Navigation"/>
+					</prop>
+				</any>
+			</input>
+			<state>
+				<calc>
+					newstate
+					<where>
+						<any>
+							<all>
+								<is>input.open</is>
+								<def var="newstate">
+									<calc>
+										{doc: {main: doc, chapter: doc, path: nopath}}
+										<where>
+											<def var="doc">
+												parseText(input.open)
+											</def>
+										</where>
+									</calc>
+								</def>
+							</all>
+							<all>
+								<is>input.navigation</is>
+								<any>
+									<all>
+										<is>input.navigation.down</is>
+										<def var="newstate">
+											<alter>
+												state
+												<set prop="doc">
+													<calc>
+														<alter>
+															state.doc
+															<set prop="chapter">sections[input.navigation.down]</set>
+															<set prop="path">
+																<join>
+																	state.doc.path
+																	<list>{chapter: state.doc.chapter, section: input.navigation.down}</list>
+																</join>
+															</set>
+														</alter>
+														<where>
+															<def var="sections">
+																getsections(state.doc.chapter)
+															</def>
+														</where>
+													</calc>
+												</set>
+											</alter>
+										</def>
+									</all>
+									<all>
+										<is>input.navigation.up</is>
+										<def var="chapter">
+											state.doc.path[input.navigation.up].chapter
+										</def>
+										<def var="newstate">
+											<alter>
+												state
+												<set prop="doc">
+													<alter>
+														state.doc
+														<set prop="chapter">chapter</set>
+														<set prop="path">
+															<array>
+																<size>input.navigation.up</size>
+																<item index="i">
+																	state.doc.path[i]
+																</item>
+															</array>
+														</set>
+													</alter>
+												</set>
+											</alter>
+										</def>
+									</all>
+									<all>
+										<is>input.navigation.prev</is>
+										<def var="p">
+											state.doc.path
+										</def>
+										<any>
+											<all>
+												<is>p# 'gt' 0</is>
+												<def var="last">
+													p[p# - 1]
+												</def>
+												<is>last.section 'gt' 0</is>
+												<def var="sect">
+													getsections(last.chapter)[last.section - 1]
+												</def>
+												<def var="newlast">
+													last.section - 1
+												</def>
+												<def var="newstate">
+													<alter>
+														state
+														<set prop="doc">
+															<alter>
+																state.doc
+																<set prop="chapter">sect</set>
+																<set prop="path">changelast({path: p, new: newlast})</set>
+															</alter>
+														</set>
+													</alter>
+												</def>
+											</all>
+											<def var="newstate">
+												state
+											</def>
+										</any>
+									</all>
+									<all>
+										<is>input.navigation.next</is>
+										<def var="p">
+											state.doc.path
+										</def>
+										<any>
+											<all>
+												<is>p# 'gt' 0</is>
+												<def var="last">
+													p[p# - 1]
+												</def>
+												<def var="sections">
+													getsections(last.chapter)
+												</def>
+												<is>last.section 'lt' sections#</is>
+												<def var="newlast">
+													last.section + 1
+												</def>
+												<def var="newstate">
+													<alter>
+														state
+														<set prop="doc">
+															<alter>
+																state.doc
+																<set prop="chapter">sections[newlast]</set>
+																<set prop="path">changelast({path: p, new: newlast})</set>
+															</alter>
+														</set>
+													</alter>
+												</def>
+											</all>
+											<def var="newstate">
+												state
+											</def>
+										</any>
+									</all>
+								</any>
+							</all>
+						</any>
+					</where>
+				</calc>
+			</state>
+			<after>
+				<redraw/>
+				<!-- <send channel="position">state.chapter</send> -->
+			</after>
+		</respond>
+		<accept data="data">
+			<from channel="navigation">{navigation: data}</from>
+		</accept>
+	</applet>
+	<applet name="navigation-prev" id="id">
+		<state name="state">
+			<string/>
+		</state>
+		<content>
+			<text>
+				<span class="menu-item-inactive" data-tooltip="Previous topic">[%lt%][%nbsp%][%state%]</span>
+			</text>
+		</content>
+		<init arg="arg">
+			<state>
+				arg
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				{do:}
+			</input>
+			<state>
+				<!-- no change -->
+				state
+			</state>
+			<after>
+				<send channel="navigation">{prev:}</send>
+			</after>
+		</respond>
+		<events>
+			<click>{do:}</click>
+		</events>
+	</applet>
+	<applet name="navigation-next" id="id">
+		<state name="state">
+			<string/>
+		</state>
+		<content>
+			<text>
+				<span class="menu-item-inactive" data-tooltip="Next topic">[%state%][%nbsp%]></span>
+			</text>
+		</content>
+		<init arg="arg">
+			<state>
+				arg
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				{do:}
+			</input>
+			<state>
+				<!-- no change -->
+				state
+			</state>
+			<after>
+				<send channel="navigation">{next:}</send>
+			</after>
+		</respond>
+		<events>
+			<click>{do:}</click>
+		</events>
+	</applet>
+	<applet name="navigation-down" id="id">
+		<state name="state">
+			<all>
+				<prop name="index">
+					<integer/>
+				</prop>
+				<prop name="title">
+					<string/>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<text>
+				<span class="popup-menu-item" data-tooltip="Click to navigate">[%state.title%]</span>
+			</text>
+		</content>
+		<init arg="arg">
+			<state>
+				<calc>
+					{index: strToInt(index), title: title}
+					<where>
+						<all>
+							<def var="col">
+								indexOf({str: arg, substr: ":"})
+							</def>
+							<def var="index">
+								substr({str: arg, from: 0, to: {pos: col}})
+							</def>
+							<def var="title">
+								substr({str: arg, from: col + 1, to: {end: }})
+							</def>
+						</all>
+					</where>
+				</calc>
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				{do:}
+			</input>
+			<state>
+				<!-- no change -->
+				state
+			</state>
+			<after>
+				<send channel="navigation">{down: state.index}</send>
+			</after>
+		</respond>
+		<events>
+			<click>{do:}</click>
+		</events>
+	</applet>
+	<applet name="navigation-up" id="id">
+		<state name="state">
+			<all>
+				<prop name="index">
+					<integer/>
+				</prop>
+				<prop name="title">
+					<string/>
+				</prop>
+			</all>
+		</state>
+		<content>
+			<text>
+				<span class="menu-item-inactive" data-tooltip="Click to navigate">[%state.title%]</span>
+			</text>
+		</content>
+		<init arg="arg">
+			<state>
+				<calc>
+					{index: strToInt(index), title: title}
+					<where>
+						<all>
+							<def var="col">
+								indexOf({str: arg, substr: ":"})
+							</def>
+							<def var="index">
+								substr({str: arg, from: 0, to: {pos: col}})
+							</def>
+							<def var="title">
+								substr({str: arg, from: col + 1, to: {end: }})
+							</def>
+						</all>
+					</where>
+				</calc>
+			</state>
+		</init>
+		<respond>
+			<input name="input">
+				{do:}
+			</input>
+			<state>
+				<!-- no change -->
+				state
+			</state>
+			<after>
+				<send channel="navigation">{up: state.index}</send>
+			</after>
+		</respond>
+		<events>
+			<click>{do:}</click>
+		</events>
+	</applet>
+</library>

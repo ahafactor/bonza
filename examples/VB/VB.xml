@@ -35,6 +35,25 @@
 			</prop>
 		</any>
 	</typedef>
+	<channel name="definition">
+	</channel>
+	<channel name="error">
+		
+	</channel>
+	<channel name="get">
+		
+	</channel>
+	<channel name="set">
+		
+	</channel>
+	<channel name="correct">
+	</channel>
+	<channel name="incorrect">
+	</channel>
+	<channel name="chosen">
+	</channel>
+	<channel name="set-level">
+	</channel>
 	<common>
 		<unwrap>core</unwrap>
 		<unwrap>string</unwrap>
@@ -443,7 +462,7 @@
 			<before>
 				<calc>
 					<!-- inform all that the correct answer was received -->
-					<output>{correct: state.status.waiting}</output>
+					<send channel="correct">state.status.waiting</send>
 					<where>
 						<all>
 							<def var="answer">
@@ -458,7 +477,7 @@
 				</calc>
 				<calc>
 					<!-- inform all that an incorrect answer was received -->
-					<output>{incorrect: {answered: input.answer, should: state.status.waiting}}</output>
+					<send channel="incorrect">{answered: input.answer, should: state.status.waiting}</send>
 					<where>
 						<all>
 							<def var="answer">
@@ -536,7 +555,7 @@
 			<after>
 				<calc>
 					<!-- when definition was received, display the words to choose from -->
-					<output>{set: state.words}</output>
+					<send channel="set">state.words</send>
 					<where>
 						<is>input.wait</is>
 					</where>
@@ -560,7 +579,7 @@
 				</calc>
 				<calc>
 					<!-- request new definition -->
-					<output>{get: state.words@(state.status.getting)}</output>
+					<send channel="get">state.words@(state.status.getting)</send>
 					<where>
 						<is>state.status.getting</is>
 					</where>
@@ -568,13 +587,13 @@
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="set-level">
+			<from channel="set-level">
 				{level: data}
 			</from>
-			<from applet="answer">
-				{answer: data.chosen}
+			<from channel="chosen">
+				{answer: data}
 			</from>
-			<from applet="definition">
+			<from channel="definition">
 				<calc>
 					{wait:}
 					<where>
@@ -692,7 +711,7 @@
 			<after>
 				<redraw/>
 				<calc>
-					<output>{chosen: state.id}</output>
+					<send channel="chosen">state.id</send>
 					<where>
 						<is>input.chosen</is>
 					</where>
@@ -703,34 +722,29 @@
 			<click>{chosen:}</click>
 		</events>
 		<accept data="data">
-			<from applet="game">
+			<from channel="set">{set: data@(state.id)}</from>
+			<from channel="get">{set: ""}</from>
+			<from channel="correct">
+				<calc>
+					{correct:}
+					<where>
+						<is>data = state.id</is>
+					</where>
+				</calc>
+			</from>
+			<from channel="incorrect">
 				<calc>
 					input
 					<where>
 						<any>
 							<all>
-								<is>data.set</is>
-								<def var="input">
-									{set: data.set@(state.id)}
-								</def>
-							</all>
-							<all>
-								<is>data.get</is>
-								<def var="input">
-									{set: ""}
-								</def>
-							</all>
-							<all>
-								<any>
-									<is>data.correct = state.id</is>
-									<is>data.incorrect.should = state.id</is>
-								</any>
+								<is>data.should = state.id</is>
 								<def var="input">
 									{correct:}
 								</def>
 							</all>
 							<all>
-								<is>data.incorrect.answered = state.id</is>
+								<is>data.answered = state.id</is>
 								<def var="input">
 									{incorrect:}
 								</def>
@@ -800,27 +814,8 @@
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="game">
-				<calc>
-					input
-					<where>
-						<any>
-							<all>
-								<is>data.correct</is>
-								<def var="input">
-									{right:}
-								</def>
-							</all>
-							<all>
-								<is>data.incorrect</is>
-								<def var="input">
-									{wrong:}
-								</def>
-							</all>
-						</any>
-					</where>
-				</calc>
-			</from>
+			<from channel="correct">{right:}</from>
+			<from channel="incorrect">{wrong:}</from>
 		</accept>
 	</applet>
 	<applet name="set-level" id="id">
@@ -850,7 +845,7 @@
 				input
 			</state>
 			<after>
-				<output>input</output>
+				<send channel="set-level">input</send>
 			</after>
 		</respond>
 		<events data="data">
@@ -932,27 +927,15 @@
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="game">
+			<from channel="correct">
 				<calc>
-					input
+					{correct:}
 					<where>
-						<any>
-							<all>
-								<is>data.correct = state.id</is>
-								<def var="input">
-									{correct:}
-								</def>
-							</all>
-							<all>
-								<is>data.get</is>
-								<def var="input">
-									{reset:}
-								</def>
-							</all>
-						</any>
+						<is>data = state.id</is>
 					</where>
 				</calc>
 			</from>
+			<from channel="get">{reset:}</from>
 		</accept>
 	</applet>
 	<applet name="definition" id="id">
@@ -1044,9 +1027,9 @@
 				</calc>				
 			</state>
 			<after>
-				<output>{error: state.error}</output>
+				<send channel="error">state.error</send>
 				<calc>
-					<output>{done:}</output>
+					<send channel="definition">{done:}</send>
 					<where>
 						<is>state.text</is>
 					</where>
@@ -1072,9 +1055,9 @@
 				</calc>
 			</after>
 		</respond>
-		<accept data="data">
-			<from applet="game">
-				{get: data.get}
+		<accept data="word">
+			<from channel="get">
+				{get: word}
 			</from>
 		</accept>
 	</applet>
@@ -1118,8 +1101,8 @@
 				<redraw/>
 			</after>
 		</respond>
-		<accept data="data">
-			<from applet="definition">data.error</from>
+		<accept data="msg">
+			<from channel="error">msg</from>
 		</accept>
 	</applet>
 </library>

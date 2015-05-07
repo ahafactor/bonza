@@ -31,6 +31,15 @@
 			</prop>
 		</all>
 	</typedef>
+	<channel name="tableselect">
+		
+	</channel>
+	<channel name="tabledata">
+		
+	</channel>
+	<channel name="tablenav">
+		
+	</channel>
 	<common>
 		<unwrap>core</unwrap>
 		<unwrap>string</unwrap>
@@ -315,11 +324,11 @@
 					</all>
 				</where>
 			</calc>
-			<output>{data: state.status.showing, offset: state.offset}</output>
+			<send channel="tabledata">{data: state.status.showing, offset: state.offset}</send>
 		</after>
 	</respond>
 	<accept data="data">
-		<from applet="jump">
+		<from channel="tablenav">
 			<calc>
 				{jump: data.rownum}
 				<where>
@@ -327,7 +336,7 @@
 				</where>
 			</calc>
 		</from>
-		<from applet="table-select">
+		<from channel="tableselect">
 			{get: data}
 		</from>
 	</accept>
@@ -420,10 +429,10 @@
 							indexOf({str: arg, substr: ":"})
 						</def>
 						<def var="table">
-							substr({str: arg, start: 0, end: pos})
+							substr({str: arg, from: 0, to: {pos: pos})
 						</def>
 						<def var="position">
-							substr({str: arg, start: pos + 1, rest: })
+							substr({str: arg, from: pos + 1, to: {end:})
 						</def>
 					</all>
 				</where>
@@ -453,7 +462,7 @@
 		</after>
 	</respond>
 	<accept data="data">
-		<from applet="table">
+		<from channel="tabledata">
 			<calc>
 				{data: rowdata, offset: data.offset}
 				<where>
@@ -553,10 +562,10 @@
 							indexOf({str: arg, substr: ":"})
 						</def>
 						<def var="table">
-							substr({str: arg, start: 0, end: pos})
+							substr({str: arg, from: 0, to: {pos: pos}})
 						</def>
 						<def var="total">
-							substr({str: arg, start: pos + 1, rest: })
+							substr({str: arg, from: pos + 1, to: {end:}})
 						</def>
 					</all>
 				</where>
@@ -578,7 +587,7 @@
 		</after>
 	</respond>
 	<accept data="data">
-		<from applet="table">data.offset</from>
+		<from channel="tabledata">data.offset</from>
 	</accept>
 </applet>
 <applet name="jump" id="id">
@@ -605,10 +614,10 @@
 							indexOf({str: arg, substr: ":"})
 						</def>
 						<def var="table">
-							substr({str: arg, start: 0, end: pos})
+							substr({str: arg, from: 0, to: {pos: pos}})
 						</def>
 						<def var="rownum">
-							substr({str: arg, start: pos + 1, rest: })
+							substr({str: arg, from: pos + 1, to: {end:}})
 						</def>
 					</all>
 				</where>
@@ -625,7 +634,7 @@
 			state
 		</state>
 		<after>
-			<output>{table: state.table, rownum: state.rownum}</output>
+			<send channel="tablenav">{table: state.table, rownum: state.rownum}</send>
 		</after>
 	</respond>
 	<events>
@@ -753,7 +762,7 @@
 				</where>
 			</calc>
 			<calc>
-				<output>input.selected</output>
+				<send channel="tableselect">input.selected</send>
 				<where>
 					<is>input.selected 'ne' ""</is>					
 				</where>

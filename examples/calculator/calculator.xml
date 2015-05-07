@@ -15,6 +15,12 @@
 			</prop>
 		</any>
 	</typedef>
+	<channel name="command">
+		<string/>
+	</channel>
+	<channel name="display">
+		<string/>
+	</channel>
 	<common>
 		<unwrap>core</unwrap>
 		<unwrap>string</unwrap>
@@ -23,9 +29,6 @@
 		<def var="maxlen">19</def>
 	</common>
 	<applet name="calculator" id="id">
-		<output>
-			<string />
-		</output>
 		<state name="state">
 			<all>
 				<prop name="value">
@@ -117,7 +120,7 @@
 		<init>
 			<state>{ value: "0", result: 0, command: {clear:}, op: {clear:} }</state>
 			<actions>
-				<output>state.value</output>
+				<send channel="display">state.value</send>
 			</actions>
 		</init>
 		<respond>
@@ -243,11 +246,11 @@
 				</calc>
 			</state>
 			<after>
-				<output>state.value</output>
+				<send channel="display">state.value</send>
 			</after>
 		</respond>
 		<accept data="id">
-			<from applet="calculator-button">
+			<from channel="command">
 				<calc>
 					input
 					<where>
@@ -307,13 +310,10 @@
 			</after>
 		</respond>
 		<accept data="data">
-			<from applet="calculator">data</from>
+			<from channel="display">data</from>
 		</accept>
 	</applet>
 	<applet name="calculator-button" id="id">
-		<output>
-			<string/>
-		</output>
 		<state name="state">
 			<all>
 				<prop name="id">
@@ -390,7 +390,7 @@
 			</state>
 			<after>
 				<calc>
-					<output>state.id</output>
+					<send channel="command">state.id</send>
 					<where>
 						<is>state.down</is>
 					</where>

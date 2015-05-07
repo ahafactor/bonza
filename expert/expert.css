@@ -1,113 +1,27 @@
+*,
+*:before,
+*:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing:    border-box;
+  box-sizing:         border-box;
+}
+
 body {
-	background-color: DarkTurquoise;
-/*	background-image: url("Abstract_technical_background.jpg");
-*/	color: black;
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 90%;
 }
-h1 {
-	text-align: center;
-	color: white;
-    text-shadow: 2px 2px 4px #000000;
+
+.editor {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 4px;
+  padding: 2px;
+  background-color: LightBlue;
 }
-.applet-info {
-}
-.error {
-	color: red;
-}
-.errors {
-	background-color: white;
-	color: red;
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 4px;
-}
-.fabsite-expandable {
-	cursor: pointer;
-	color: black;
-	width: 100%;
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 4px;
-	background-color: white;
-}
-.fabsite-expandable:hover {
-	background-color: GhostWhite;
-}
-.expandable {
-}
-.expand-icon {
-	border-color: black;
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 50%;
-	background-color: DarkTurquoise;
-	color: white;
-	font-family: Courier;
-	padding-left: 4px;
-	padding-right: 4px;
-}
-.collapse-icon {
-	border-color: black;
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 50%;
-	background-color: Orange;
-	color: white;
-	font-family: Courier;
-	padding-left: 4px;
-	padding-right: 4px;
-}
-.panel-title {
-	text-align: left;
-}
-.fabsite-library {
-	background-color: FloralWhite;
-	color: black;
-	border-style: solid;
-	border-width: 2px;
-	border-radius: 4px;
-	padding: 2px;
-	margin-left: auto;
-	margin-right: auto;
-	width: 70%;
-}
-.fabsite-source {
-	margin-left: auto;
-	margin-right: auto;
-	width: 75%;
-	tab-size: 4;
-}
-.fabsite-action {
-	width: 80px;
-	text-align: center;	
-	float: left;
-}
-table td {
-    position:relative;
-}
-.tooltip {
-    width:400px;
-    height:300px;
-    padding:20px;
-    border:1px solid #ccc;
-    box-shadow: 0 0 3px rgba(0,0,0,.3);
-    -webkit-box-shadow: 0 0 3px rgba(0,0,0,.3);
-    border-radius:3px;
-    -webkit-border-radius:3px;
-    position:absolute;
-    top:5px;
-    left:50px;
-    display:none;
-}
-.tooltip {
-    z-index:100;
-}
-.link {
-    display:block;
-    width:9%;
-}
-.link:hover + .tooltip {
-    display:block;
-}
-.tooltip:hover {
-    display:block;
+.applet-editor-toolbar {
+  padding: 6px;
+  color: DarkGrey;
+  background-color: LightBlue;
+  width: 100%;
 }

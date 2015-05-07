@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Champagne & Limousines';
+  src: url('Champagne & Limousines Bold.woff') format('woff'),
+       url('Champagne & Limousines Bold.ttf') format('truetype');
+}
 .applet-expandable {
 	cursor: pointer;
 	color: black;
@@ -100,7 +105,7 @@
 	background-color: GhostWhite;
 }
 .applet-menu-bar .menu-item-active {
-	background-color: DarkTurquoise;
+	background-color: SkyBlue;
 	color: white;
 	border-style: none;
 	border-radius: 4px;
@@ -136,7 +141,8 @@ table.menu-bar {
 	font-size: 1.2em;
 	color: IndianRed;
 	font-weight: bold;
-	font-family: Courier;
+	font-family: "Champagne & Limousines";
+	font-size: large;
 }
 .table-navigation {
 	cursor: pointer;
@@ -150,19 +156,82 @@ table.menu-bar {
 	margin-left: auto;
 	margin-right: auto;
 }
-.editor {
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 4px;
-	padding: 2px;
-	background-color: LightBlue;
-}
-.editor-toolbar {
-	padding: 6px;
-	color: DarkGrey;
-	background-color: LightBlue;
-	width: 100%;
-}
+
 .right {
 	float: right;
+}
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:before {
+  content: "";
+  position: absolute;
+  border-top: 10px solid hsla(0, 0%, 20%, 0.9);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  visibility: hidden;
+  top: -9px;
+  left: -1px;
+  opacity: 0.9;
+}
+
+[data-tooltip]:after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: -39px;
+  left: -26px;
+  background-color: hsla(0, 0%, 20%, 0.9);
+  color: #fff;
+  padding: 5px 15px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0.9;
+}
+
+[data-tooltip]:hover:before, [data-tooltip]:hover:after {
+  visibility: visible;
+  -webkit-transition: visibility 0s linear .3s;
+  -moz-transition: visibility 0s linear .3s;
+  -o-transition: visibility 0s linear .3s;
+  transition: visibility 0s linear .3s;
+  opacity: 0.9;
+}
+
+.more-link .more-body { display: none; }
+
+.more-link:hover > .more-body {
+	display: block;
+	background-color: GhostWhite;
+	border-radius: 8px;
+	border-style: none;
+	padding: 8px;
+}
+
+.popup-head .popup-body { display: none; }
+
+.popup-head:hover > .popup-body {
+	display: block;
+	border: gray solid thin;
+	border-radius: 4px;
+	background-color: white;
+	position: absolute;
+	z-index: 999;
+	padding: 4px 4px;
+    box-shadow: 4px 4px 4px #888888;
+    max-width: 960px;
+}
+
+.popup-menu-item {
+  background-color: white;
+  cursor: pointer;
+  color: gray;
+  border-style: none;
+  padding: 2px;
+}
+.popup-menu-item:hover {
+  background-color: GhostWhite;
 }
