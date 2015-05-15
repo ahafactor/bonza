@@ -5,7 +5,7 @@
  * ====================================
  */
 
-function fabLoadLibrary(url, trace, extcallback) {
+function fabLoadLibrary(url, trace, plugin) {
 
     var asyncRequest = function(method, uri, callback, postData) {
         var xhr = new XMLHttpRequest();
@@ -126,7 +126,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             log: function(x) {
                 return Math.log(x);
             },
-            trunc: function(x) {
+            floor: function(x) {
                 return Math.floor(x);
             },
             NaN: function(x) {
@@ -1273,27 +1273,27 @@ function fabLoadLibrary(url, trace, extcallback) {
                 }
             }
 
-            // trace("evalFormula " + formula);
+            // if(trace) trace("evalFormula " + formula);
 
             try {
                 if (parseFormula()) {
                     if (result === true || result === false) { //Fabula has no booleans
                         if (result) {
-                            trace(formula + " -> success");
+                            if(trace) trace(formula + " -> success");
                         } else {
-                            trace(formula + " -> failed");
+                            if(trace) trace(formula + " -> failed");
                         }
                         return result;
                     }
                     output.result = result;
-                    trace(formula + " -> " + format(result));
+                    if(trace) trace(formula + " -> " + format(result));
                     return true;
                 } else {
-                    trace(formula + " -> failed");
+                    if(trace) trace(formula + " -> failed");
                     return false;
                 }
             } catch (error) {
-                trace(formula + " -> failed");
+                if(trace) trace(formula + " -> failed");
                 return false;
             }
         }
@@ -1410,7 +1410,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                     return evalFormula(expr.nodeValue.trim(), context, output);
                 }
 
-                // trace("evalExpr " + expr.nodeName);
+                // if(trace) trace("evalExpr " + expr.nodeName);
 
                 switch (expr.nodeName) {
                     case "invalid":
@@ -1426,7 +1426,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                         // temp = ser.serializeToString(expr);
                         // temp = expr.innerHTML.trim();
                         output.result = temp.replace(frmpat, frmval);
-                        trace("text : " + temp + " -> " + format(output.result));
+                        if(trace) trace("text : " + temp + " -> " + format(output.result));
                         break;
                     case "eval":
                         if (evalExpr(firstExpr(expr), context, result)) {
@@ -1453,10 +1453,10 @@ function fabLoadLibrary(url, trace, extcallback) {
                             // });
                             // output.result = cast(result.result, info.type);
                             output.result = result.result;
-                            trace("cast : " + format(output.result));
+                            if(trace) trace("cast : " + format(output.result));
                         } else {
                             output.result = undefined;
-                            trace("cast : failed");
+                            if(trace) trace("cast : failed");
                             return false;
                         }
                         break;
@@ -1468,12 +1468,12 @@ function fabLoadLibrary(url, trace, extcallback) {
                                 array[i] = result.result;
                             } else {
                                 output.result = undefined;
-                                trace("list : failed");
+                                if(trace) trace("list : failed");
                                 return false;
                             }
                         }
                         output.result = array;
-                        trace("list : " + format(result.result));
+                        if(trace) trace("list : " + format(result.result));
                         break;
                     case "entries":
                         temp = findChildren(expr, "entry");
@@ -1486,17 +1486,17 @@ function fabLoadLibrary(url, trace, extcallback) {
                                     obj[temp2] = result.result;
                                 } else {
                                     output.result = undefined;
-                                    trace("entries : failed");
+                                    if(trace) trace("entries : failed");
                                     return false;
                                 }
                             } else {
                                 output.result = undefined;
-                                trace("entries : failed");
+                                if(trace) trace("entries : failed");
                                 return false;
                             }
                         }
                         output.result = obj;
-                        trace("entries : " + format(obj));
+                        if(trace) trace("entries : " + format(obj));
                         break;
                     case "array":
                         temp = firstExpr(findChild(expr, "size"));
@@ -1519,11 +1519,11 @@ function fabLoadLibrary(url, trace, extcallback) {
                             }
                         } else {
                             output.result = undefined;
-                            trace("array : failed");
+                            if(trace) trace("array : failed");
                             return false;
                         }
                         output.result = array;
-                        trace("array : " + format(array));
+                        if(trace) trace("array : " + format(array));
                         break;
                     case "dictionary":
                         temp = firstExpr(findChild(expr, "size"));
@@ -1543,22 +1543,22 @@ function fabLoadLibrary(url, trace, extcallback) {
                                         obj[temp2] = result.result; //value
                                     } else {
                                         output.result = undefined;
-                                        trace("dictionary : failed");
+                                        if(trace) trace("dictionary : failed");
                                         return false;
                                     }
                                 } else {
                                     output.result = undefined;
-                                    trace("dictionary : failed");
+                                    if(trace) trace("dictionary : failed");
                                     return false;
                                 }
                             }
                         } else {
                             output.result = undefined;
-                            trace("dictionary : failed");
+                            if(trace) trace("dictionary : failed");
                             return false;
                         }
                         output.result = obj;
-                        trace("dictionary : " + format(obj));
+                        if(trace) trace("dictionary : " + format(obj));
                         break;
                     case "keys":
                         if (evalExpr(firstExpr(expr), context, result)) {
@@ -1566,9 +1566,9 @@ function fabLoadLibrary(url, trace, extcallback) {
                                 array.push(prop);
                             }
                             output.result = array;
-                            trace("keys : " + format(array));
+                            if(trace) trace("keys : " + format(array));
                         } else {
-                            trace("keys : failed");
+                            if(trace) trace("keys : failed");
                             return false;
                         }
                         break;
@@ -1678,10 +1678,10 @@ function fabLoadLibrary(url, trace, extcallback) {
                             var funcout = {};
                             context2[argname] = x;
                             if (evalExpr(ret, context2, funcout)) {
-                                trace("invoke(" + format(x) + ") -> " + format(funcout.result));
+                                if(trace) trace("invoke(" + format(x) + ") -> " + format(funcout.result));
                                 return funcout.result;
                             } else {
-                                trace("invoke(" + format(x) + ") -> failed");
+                                if(trace) trace("invoke(" + format(x) + ") -> failed");
                                 throw "Fail";
                             }
                         };
@@ -1718,14 +1718,14 @@ function fabLoadLibrary(url, trace, extcallback) {
                                 context2[argname] = array[i];
                                 if (evalStmt(firstExpr(temp), context2, output2)) {
                                     output.result = array[i];
-                                    trace("find : " + format(output.result));
+                                    if(trace) trace("find : " + format(output.result));
                                     return true;
                                 }
                             }
-                            trace("find : failed");
+                            if(trace) trace("find : failed");
                             return false;
                         }
-                        trace("find : failed");
+                        if(trace) trace("find : failed");
                         return false;
                     case "select":
                         temp = firstExpr(findChild(expr, "in"));
@@ -1743,7 +1743,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                                 }
                             }
                             output.result = array2;
-                            trace("select : " + array2.length);
+                            if(trace) trace("select : " + array2.length);
                             return true;
                         }
                         return false;
@@ -1764,7 +1764,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                                 }
                             }
                             output.result = count;
-                            trace("count : " + count);
+                            if(trace) trace("count : " + count);
                             return true;
                         }
                         return false;
@@ -1839,7 +1839,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                 }
                 return true;
             } catch (error) {
-                trace(expr.nodeName + " -> failed");
+                if(trace) trace(expr.nodeName + " -> failed");
                 return false;
             }
         }
@@ -1861,24 +1861,24 @@ function fabLoadLibrary(url, trace, extcallback) {
                 return result;
             }
             try {
-                // trace("evalStmt " + stmt.nodeName);
+                // if(trace) trace("evalStmt " + stmt.nodeName);
 
                 switch (stmt.nodeName) {
                     case "is":
                         if (evalExpr(firstExpr(stmt), context, result)) {
-                            trace("is : success");
+                            if(trace) trace("is : success");
                         } else {
-                            trace("is : failed");
+                            if(trace) trace("is : failed");
                             return false;
                         }
                         break;
                     case "not":
                         temp = evalStmt(firstExpr(stmt), context, result);
                         if (temp) {
-                            trace("not : failed");
+                            if(trace) trace("not : failed");
                             return false;
                         } else {
-                            trace("not : success");
+                            if(trace) trace("not : success");
                             return true;
                         }
                         break;
@@ -1886,9 +1886,9 @@ function fabLoadLibrary(url, trace, extcallback) {
                         name = stmt.getAttribute("var");
                         if (evalExpr(firstExpr(stmt), context, result)) {
                             output[name] = result.result;
-                            trace("def " + name + " : " + format(result.result));
+                            if(trace) trace("def " + name + " : " + format(result.result));
                         } else {
-                            trace("def " + name + " : failed");
+                            if(trace) trace("def " + name + " : failed");
                             return false;
                         }
                         break;
@@ -1906,11 +1906,11 @@ function fabLoadLibrary(url, trace, extcallback) {
                                 result = {};
                             } else {
                                 output = {};
-                                trace("all : failed");
+                                if(trace) trace("all : failed");
                                 return false;
                             }
                         }
-                        trace("all " + list() + ": success");
+                        if(trace) trace("all " + list() + ": success");
                         break;
                     case "any":
                         temp = getChildren(stmt);
@@ -1919,20 +1919,20 @@ function fabLoadLibrary(url, trace, extcallback) {
                                 for (prop in result) {
                                     output[prop] = result[prop];
                                 }
-                                trace("any " + list() + ": success");
+                                if(trace) trace("any " + list() + ": success");
                                 return true;
                             }
                         }
-                        trace("any : failed");
+                        if(trace) trace("any : failed");
                         return false;
                     case "unwrap":
                         if (evalExpr(firstExpr(stmt), context, result)) {
                             for (prop in result.result) {
                                 output[prop] = result.result[prop];
                             }
-                            trace("unwrap " + list() + ": success");
+                            if(trace) trace("unwrap " + list() + ": success");
                         } else {
-                            trace("unwrap : failed");
+                            if(trace) trace("unwrap : failed");
                         }
                         break;
                     default:
@@ -2435,7 +2435,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             click: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
-                trace("click " + applet.name + "::" + id);
+                if(trace) trace("click " + applet.name + "::" + id);
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.click, applet.local, output)) {
                     e.stopPropagation();
@@ -2446,7 +2446,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             focus: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
-                trace("focus " + applet.name + "::" + id);
+                if(trace) trace("focus " + applet.name + "::" + id);
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.focus, applet.local, output)) {
                     e.stopPropagation();
@@ -2457,7 +2457,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             blur: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
-                trace("blur " + applet.name + "::" + id);
+                if(trace) trace("blur " + applet.name + "::" + id);
                 applet.local[applet.statename] = instance;
                 // applet.local[applet.eventname] = e.currentTarget.value;
                 if (engine.evalExpr(applet.events.blur, applet.local, output)) {
@@ -2471,7 +2471,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                 var instance = applet.instances[id];
                 applet.local[applet.statename] = instance;
                 applet.local[applet.eventname] = e.target.value;
-                trace("change " + applet.name + "::" + id + " : " + format(e.target.value));
+                if(trace) trace("change " + applet.name + "::" + id + " : " + format(e.target.value));
                 if (engine.evalExpr(applet.events.change, applet.local, output)) {
                     e.stopPropagation();
                     e.preventDefault();
@@ -2481,7 +2481,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             mouseover: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
-                trace("mouseover " + applet.name + "::" + id);
+                if(trace) trace("mouseover " + applet.name + "::" + id);
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mouseover, applet.local, output)) {
                     e.stopPropagation();
@@ -2492,7 +2492,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             mouseout: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
-                trace("mouseout " + applet.name + "::" + id);
+                if(trace) trace("mouseout " + applet.name + "::" + id);
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mouseout, applet.local, output)) {
                     e.stopPropagation();
@@ -2503,7 +2503,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             mousedown: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
-                trace("mousedown " + applet.name + "::" + id);
+                if(trace) trace("mousedown " + applet.name + "::" + id);
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mousedown, applet.local, output)) {
                     e.stopPropagation();
@@ -2514,7 +2514,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             mouseup: function(e) {
                 var id = e.currentTarget.getAttribute("id");
                 var instance = applet.instances[id];
-                trace("mouseup " + applet.name + "::" + id);
+                if(trace) trace("mouseup " + applet.name + "::" + id);
                 applet.local[applet.statename] = instance;
                 if (engine.evalExpr(applet.events.mouseup, applet.local, output)) {
                     e.stopPropagation();
@@ -2545,7 +2545,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                 } else {
                     context[this.initargname] = "";
                 }
-                trace("create " + applet.name + "::" + id + " : " + context[this.initargname]);
+                if(trace) trace("create " + applet.name + "::" + id + " : " + context[this.initargname]);
                 for (i = 0; i < this.initrandnames.length; i++) {
                     context[this.initrandnames[i]] = Math.random();
                 }
@@ -2590,6 +2590,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                         }
                     }
                 }
+                if (plugin) plugin.attach(id, element, this);
             }
         };
         this.exists = function(id) {
@@ -2603,7 +2604,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             var context = {};
             var prop;
             var i;
-            // trace("redraw " + applet.name + "::" + id);
+            // if(trace) trace("redraw " + applet.name + "::" + id);
 
             for (prop in this.local) {
                 context[prop] = this.local[prop];
@@ -2663,7 +2664,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                 if (this.resptimename !== null) {
                     context[this.resptimename] = new Date();
                 }
-                trace("respond " + applet.name + "::" + id + " : " + format(queue[i]));
+                if(trace) trace("respond " + applet.name + "::" + id + " : " + format(queue[i]));
                 for (j = 0; j < this.respBefore.length; j++) {
                     if (engine.evalExpr(this.respBefore[j], context, output)) {
                         action = output.result;
@@ -2687,7 +2688,7 @@ function fabLoadLibrary(url, trace, extcallback) {
         // this.broadcast = function(msg) {
         //     var instance;
         //     this.local[this.inputname] = msg;
-        //     // trace("broadcast " + id);
+        //     // if(trace) trace("broadcast " + id);
         //     for (var id in this.instances) {
         //         instance = this.instances[id];
         //         this.local[this.statename] = instance;
@@ -2697,7 +2698,7 @@ function fabLoadLibrary(url, trace, extcallback) {
         //     delete this.local[this.inputname];
         // };
         this.destroy = function(id) {
-            trace("destroy " + applet.name + "::" + id);
+            if(trace) trace("destroy " + applet.name + "::" + id);
             delete this.instances[id];
             delete this.input[id];
         };
@@ -2709,7 +2710,7 @@ function fabLoadLibrary(url, trace, extcallback) {
         this.send = function(data) {
             var prop;
             var output = {};
-            trace("channel " + this.name + " : " + format(data));
+            if(trace) trace("channel " + this.name + " : " + format(data));
             for (var i = 0; i < this.targets.length; i++) {
                 var target = this.targets[i];
                 if (target.channels.hasOwnProperty(this.name)) { //target applet has a listener for current channel?
@@ -2721,7 +2722,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                     for (var id2 in target.instances) {
                         var state = target.instances[id2];
                         local[target.statename] = state;
-                        trace("accept " + target.name + "::" + id2 + " : " + format(data));
+                        if(trace) trace("accept " + target.name + "::" + id2 + " : " + format(data));
                         if (engine.evalExpr(target.channels[this.name].expr, local, output)) {
                             target.respond(id2, output.result);
                         }
@@ -2772,14 +2773,14 @@ function fabLoadLibrary(url, trace, extcallback) {
         var actions = {
             redraw: function() {
                 return function(applet, id) {
-                    trace("redraw " + applet.name + "::" + id);
+                    if(trace) trace("redraw " + applet.name + "::" + id);
                     applet.redraw(id, lib.applets);
                     //resume();
                 };
             },
             send: function(name, msg) {
                 return function(applet, id) {
-                    trace("send " + applet.name + "::" + id + " to: " + name + " data: " + format(msg));
+                    if(trace) trace("send " + applet.name + "::" + id + " to: " + name + " data: " + format(msg));
                     var channel = lib.channels[name];
                     for (var i = 0; i < channel.targets.length; i++) {
                         var target = channel.targets[i];
@@ -2792,7 +2793,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                             for (var id2 in target.instances) {
                                 var state = target.instances[id2];
                                 local[target.statename] = state;
-                                trace("accept " + target.name + "::" + id2);
+                                if(trace) trace("accept " + target.name + "::" + id2);
                                 if (engine.evalExpr(target.channels[name].expr, local, output)) {
                                     target.respond(id2, output.result);
                                 }
@@ -2803,7 +2804,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             },
             input: function(msg) {
                 return function(applet, id) {
-                    trace("input " + applet.name + "::" + id);
+                    if(trace) trace("input " + applet.name + "::" + id);
                     applet.respond(id, msg);
                 };
             },
@@ -2816,7 +2817,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             },
             get: function(url, resultname, success) {
                 return function(applet, id) {
-                    trace("get " + applet.name + "::" + id + " : " + url);
+                    if(trace) trace("get " + applet.name + "::" + id + " : " + url);
                     var xmlhttp = new XMLHttpRequest();
                     xmlhttp.onreadystatechange = function() {
                         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -2838,7 +2839,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             },
             postxml: function(url, data, resultname, success) {
                 return function(applet, id) {
-                    trace("postxml " + applet.name + "::" + id + " : " + url + " : " + format(data));
+                    if(trace) trace("postxml " + applet.name + "::" + id + " : " + url + " : " + format(data));
                     var xmlhttp = new XMLHttpRequest();
                     xmlhttp.onreadystatechange = function() {
                         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -2861,7 +2862,7 @@ function fabLoadLibrary(url, trace, extcallback) {
             },
             postfile: function(url, fieldid, resultname, success) {
                 return function(applet, id) {
-                    trace("postfile " + applet.name + "::" + id + " : " + url + " : " + fieldid);
+                    if(trace) trace("postfile " + applet.name + "::" + id + " : " + url + " : " + fieldid);
                     var xmlhttp = new XMLHttpRequest();
                     xmlhttp.onreadystatechange = function() {
                         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -2938,14 +2939,14 @@ function fabLoadLibrary(url, trace, extcallback) {
             // for (prop in target.listeners) {
             //     if (lib.applets.hasOwnProperty(prop)) {
             //         applet = lib.applets[prop];
-            //         trace(name + " listens applet " + applet.name);
+            //         if(trace) trace(name + " listens applet " + applet.name);
             //         applet.targets.push(target);
             //     }
             // }
             for (prop in target.channels) {
                 if (lib.channels.hasOwnProperty(prop)) {
                     channel = lib.channels[prop];
-                    trace("applet " + name + " listens channel " + channel.name);
+                    if(trace) trace("applet " + name + " listens channel " + channel.name);
                     channel.targets.push(target);
                 }
             }
@@ -2954,9 +2955,9 @@ function fabLoadLibrary(url, trace, extcallback) {
         doimport = function(url, childlib) {
             var target;
             var channel;
-            trace("importing " + url);
+            if(trace) trace("importing " + url);
             for (prop in varmap[url]) {
-                trace("import var " + prop + " as " + varmap[url][prop] + " : " + format(childlib.context[prop]));
+                if(trace) trace("import var " + prop + " as " + varmap[url][prop] + " : " + format(childlib.context[prop]));
                 lib.context[varmap[url][prop]] = childlib.context[prop];
             }
             for (name in lib.applets) {
@@ -2964,7 +2965,7 @@ function fabLoadLibrary(url, trace, extcallback) {
                 for (prop in childlib.channels) {
                     if (target.channels.hasOwnProperty(lib.chmap[url][prop])) { //parent applet listens to child applet?
                         channel = childlib.channels[prop];
-                        trace("applet " + name + " listens channel " + channel.name);
+                        if(trace) trace("applet " + name + " listens channel " + channel.name);
                         channel.targets.push(target);
                     }
                 }
@@ -2974,17 +2975,17 @@ function fabLoadLibrary(url, trace, extcallback) {
             //     for (prop in childlib.applets) {
             //         if (target.listeners.hasOwnProperty(lib.appmap[url][prop])) { //parent applet listens to child applet?
             //             applet = childlib.applets[prop];
-            //             trace(name + " listens " + applet.name);
+            //             if(trace) trace(name + " listens " + applet.name);
             //             applet.targets.push(target);
             //         }
             //     }
             // }
             for (prop in lib.chmap[url]) {
-                trace("import channel " + prop + " as " + lib.chmap[url][prop]);
+                if(trace) trace("import channel " + prop + " as " + lib.chmap[url][prop]);
                 lib.channels[lib.chmap[url][prop]] = childlib.channels[prop];
             }
             for (prop in lib.appmap[url]) {
-                trace("import applet " + prop + " as " + lib.appmap[url][prop]);
+                if(trace) trace("import applet " + prop + " as " + lib.appmap[url][prop]);
                 lib.applets[lib.appmap[url][prop]] = childlib.applets[prop];
             }
 
@@ -3059,7 +3060,7 @@ function fabLoadLibrary(url, trace, extcallback) {
         var ids;
         var i;
         if (pending === 0) {
-            trace("RUN at " + (new Date()).toTimeString().slice(0, 8));
+            if(trace) trace("RUN at " + (new Date()).toTimeString().slice(0, 8));
             ids = [];
             for (name in lib.applets) {
                 applet = lib.applets[name];
@@ -3105,12 +3106,12 @@ function fabLoadLibrary(url, trace, extcallback) {
                     return "applet-" + prop;
                 }
             }
-            trace("applet " + name + " not found");
+            if(trace) trace("applet " + name + " not found");
         };
 
         activelib = lib;
-        if (extcallback) {
-            extcallback(lib.channels);
+        if (plugin) {
+            plugin.init(lib.channels);
         }
         runlib(url, lib);
     };
@@ -3133,4 +3134,3 @@ function fabLoadLibrary(url, trace, extcallback) {
 trace = function(msg) {
     console.log(msg);
 };
-notrace = function(msg) {};

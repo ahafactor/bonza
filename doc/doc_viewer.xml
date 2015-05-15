@@ -180,18 +180,6 @@
 								[%body%]
 								<br/>
 								<br/>
-								<hr/>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-sm-2">
-								[%prev%]
-							</div>
-							<div class="col-sm-8">
-								<div class="doc-navigation-bar" id="[%id%]-bar">[%path%]</div>
-							</div>
-							<div class="col-sm-2">
-								[%next%]
 							</div>
 						</div>
 						<div class="row">
@@ -241,7 +229,7 @@
 						</any>
 						<def var="path">
 							<calc>
-								join({parts: items, sep: "|"})
+								join({parts: items, sep: " | "})
 								<where>
 									<def var="items">
 										<array>
@@ -485,7 +473,6 @@
 			</state>
 			<after>
 				<redraw/>
-				<!-- <send channel="position">state.chapter</send> -->
 			</after>
 		</respond>
 		<accept data="data">
@@ -498,7 +485,7 @@
 		</state>
 		<content>
 			<text>
-				<span class="menu-item-inactive" data-tooltip="Previous topic">[%lt%][%nbsp%][%state%]</span>
+				<a href="#" data-tooltip="Previous topic">[%lt%][%nbsp%][%state%]</a>
 			</text>
 		</content>
 		<init arg="arg">
@@ -511,7 +498,7 @@
 				{do:}
 			</input>
 			<state>
-				<!-- no change -->
+				<!-- no state change -->
 				state
 			</state>
 			<after>
@@ -528,7 +515,7 @@
 		</state>
 		<content>
 			<text>
-				<span class="menu-item-inactive" data-tooltip="Next topic">[%state%][%nbsp%]></span>
+				<a href="#" data-tooltip="Next topic">[%state%][%nbsp%]></a>
 			</text>
 		</content>
 		<init arg="arg">
@@ -541,7 +528,7 @@
 				{do:}
 			</input>
 			<state>
-				<!-- no change -->
+				<!-- no state change -->
 				state
 			</state>
 			<after>
@@ -565,7 +552,7 @@
 		</state>
 		<content>
 			<text>
-				<span class="popup-menu-item" data-tooltip="Click to navigate">[%state.title%]</span>
+				<a href="#" data-tooltip="Select topic">[%state.title%]</a>
 			</text>
 		</content>
 		<init arg="arg">
@@ -593,7 +580,7 @@
 				{do:}
 			</input>
 			<state>
-				<!-- no change -->
+				<!-- no state change -->
 				state
 			</state>
 			<after>
@@ -617,7 +604,7 @@
 		</state>
 		<content>
 			<text>
-				<span class="menu-item-inactive" data-tooltip="Click to navigate">[%state.title%]</span>
+				<a href="#" data-tooltip="Go up">[%state.title%]</a>
 			</text>
 		</content>
 		<init arg="arg">
@@ -645,7 +632,7 @@
 				{do:}
 			</input>
 			<state>
-				<!-- no change -->
+				<!-- no state change -->
 				state
 			</state>
 			<after>

@@ -429,10 +429,10 @@
 							indexOf({str: arg, substr: ":"})
 						</def>
 						<def var="table">
-							substr({str: arg, from: 0, to: {pos: pos})
+							substr({str: arg, from: 0, to: {pos: pos}})
 						</def>
 						<def var="position">
-							substr({str: arg, from: pos + 1, to: {end:})
+							substr({str: arg, from: pos + 1, to: {end:}})
 						</def>
 					</all>
 				</where>

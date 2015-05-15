@@ -485,8 +485,8 @@
 					<p>
 						We provide the following training/reference materials:
 						<ul>
-							<li><a href="doc/Fabula-tutorial/index.html" target="_blank">Fabula Tutorial</a></li>
-							<li>Fabula Language Reference</li>
+							<li>Fabula Tutorial</li>
+							<li><a href="doc/Fabula-reference/index.html" target="_blank">Fabula Language Reference</a></li>
 							<li>Fab Site Tools User Guide</li>
 						</ul>
 					</p>

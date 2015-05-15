@@ -1,3 +1,13 @@
 .chapter-title {
 	font-weight: bold;
+	font-size: 1.2em;
+}
+.cm-s-default {
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 7px;
+	border-color: gray;
+}
+body {
+  background: #fafafa;
 }

@@ -1,0 +1,23 @@
+<library>
+	<import library="../doc_viewer.xml">
+		<applet name="document-viewer"/>
+		<applet name="navigation-prev"/>
+		<applet name="navigation-next"/>
+		<applet name="navigation-down"/>
+		<applet name="navigation-up"/>
+	</import>
+	<applet name="reference-viewer" id="id">
+		<content>
+			<text>
+				<div class="applet-document-viewer" id="[%id%]-viewer" data-arg="reference-doc.xml">Fabula Language Reference</div>
+			</text>
+		</content>
+	</applet>	
+	<applet name="code-viewer" id="id">
+		<content>
+			<invalid>
+				<string/>
+			</invalid>
+		</content>
+	</applet>
+</library>

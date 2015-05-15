@@ -301,16 +301,16 @@
 						<where>
 							<all>
 								<def var="ai">
-									trunc(arg.a * arg.vocabulary#)
+									floor(arg.a * arg.vocabulary#)
 								</def>
 								<def var="bi">
-									trunc(arg.b * arg.vocabulary#)
+									floor(arg.b * arg.vocabulary#)
 								</def>
 								<def var="ci">
-									trunc(arg.c * arg.vocabulary#)
+									floor(arg.c * arg.vocabulary#)
 								</def>
 								<def var="di">
-									trunc(arg.d * arg.vocabulary#)
+									floor(arg.d * arg.vocabulary#)
 								</def>
 								<def var="words">
 									<entries>
@@ -429,7 +429,7 @@
 					<where>
 						<all>
 							<def var="mode">
-								trunc(m * 3)
+								floor(m * 3)
 							</def>
 							<def var="vocabulary">
 								vocabularies[0][mode]
@@ -438,7 +438,7 @@
 								getwords({a: a, b: b, c: c, d: d, vocabulary: vocabulary})
 							</def>
 							<def var="pick">
-								trunc(p * 4)
+								floor(p * 4)
 							</def>
 						</all>
 					</where>
@@ -529,7 +529,7 @@
 										<where>
 											<all>
 												<def var="mode">
-													trunc(m * 3)
+													floor(m * 3)
 												</def>
 												<def var="vocabulary">
 													vocabularies[state.level][mode]
@@ -538,7 +538,7 @@
 													getwords({a: a, b: b, c: c, d: d, vocabulary: vocabulary})
 												</def>
 												<def var="pick">
-													trunc(p * 4)
+													floor(p * 4)
 												</def>
 											</all>
 										</where>

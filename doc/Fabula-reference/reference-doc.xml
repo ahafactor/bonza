@@ -1,0 +1,595 @@
+<document title="Fabula Language Reference">
+	<sections>
+		<document title="Introduction">
+			<text>
+				<p>
+					Fabula is a declarative language for client-side web programming. It is the native language of Fab Site Tools (FST), a groundbreaking suite of software tools designed for developing
+					sophisticated, flexible, maintainable, fast and reliable web applications/sites.
+				</p>
+				<p>
+					Fabula's syntax is XML-based. We assume therefore the knowledge of XML. In addition, the knowledge of (X)HTML is also required.
+				</p>
+				<p>
+					With FST, a web application consists of at least three things:
+					<ul>
+						<li>the Fabula Interpreter</li>
+						<li>an XML file (or multiple files) with the source in Fabula</li>
+						<li>an HTML page that calls the interpreter and passes it the location of the source</li>
+					</ul>
+					In addition, CSS files can be (and usually are) created, like with the normal web (JavaScript) programming.
+				</p>
+				<p>
+					The Fabula source defines a <i>library</i>. The purpose of a library is to define one or more <i>applets</i>. Applets are components from which web applications are built.
+				</p>
+				<p>
+					An applet can be used to create a number of <i>instances</i>; each instance is linked to an element on the web page (such as a <code>div</code> block) and has its own state - a value of an arbitrary type, typically an object. The applet determines how the state is reflected in the content of the visual element and its behavior.
+				</p>
+				<p>
+					The association between elements and applets is established using the elements' <code>class</code> attribute. When an element has the value of <code>class</code> like <code>applet-</code> 
+					followed by an applet name, it is associated with that applet, an instance is created, its content is computed and replaces the content of the element. What is important, this new content
+					may again contain elements of classes associated with applets and therefore new instances are created, and so on.
+				</p>
+				<p>
+					Applets can affect the environment by issuing <i>actions</i>. Unlike the imperative languages, in Fabula actions are performed separately (and asynchronously) from the application's logic.
+				</p>
+				<p>
+					The environment informs an applet instance of any relevant changes by sending it <i>input</i>. The applet responds to the input by computing a new state of the instance and issuing some actions.
+				</p>
+				<p>
+					In the syntax diagrams below, we use the following conventions:
+					<ul>
+						<li>optional elements are followed by question marks, e.g. <code>arg-attribute?</code></li>
+						<li>elements that can be present multiple (zero or more) number of times are followed by ellipses, e.g. <code>statement...</code></li>
+					</ul>
+				</p>
+			</text>
+		</document>
+		<document title="Values and Computations">
+			<sections>
+				<document title="Introduction">
+					<text>
+						<p>
+							In Fabula, a web application operates by computing and circulating <i>values</i>. The state of an instance is a value; the corresponding element's content is a value (string); applets
+							communicate by sending/receiving values ("messages"); an action issued by an applet is also a value, and so on.
+						</p>
+						<p>
+							To prevent many typical errors and make the code more comprehensible, values are classified into data types. The data type of any value can always be found ("inferred") by looking at the code.
+						</p>
+					</text>
+				</document>
+				<document title="Data Types">
+					<sections>
+						<document title="Numeric Types">
+							<text>
+								<p>
+									Fabula distinguishes two numeric data types: <code>integer</code> and <code>number</code>. Every <code>integer</code> value belongs to the <code>number</code> data type; see below chapter "Data Type Covariance". To convert a number to an integer, a conversion function needs to be applied, such as <code>floor</code> (see chapter "The Core").
+								</p>
+								<p>
+									Arithmetical operations (addition, subtraction, multiplication and division) on two values of the same numeric type always result in a value of the same type. The only exception is 
+									division: it always results in a number.
+								</p>
+								<p>
+									There are several pre-defined functions that operate on numbers, available through the universally global variable <code>core</code> (see chapter "The Core").
+								</p>
+								<p>
+									The XML notation for a numeric type is simply an empty tag with the name of the type: <code>&lt;integer/></code> or <code>&lt;number/></code>.
+								</p>
+							</text>
+						</document>
+						<document title="Time and Intervals">
+							<text>
+								<p>
+									A value of data type <code>time</code> represents a point in time. A value of type <code>interval</code> is the duration of some period in time.
+								</p>
+								<p>
+									Time plus or minus interval gives time. Intervals can be added or subtracted, or multiplied/divided by a number. It is not possible, for example, to add up two values of
+									type <code>time</code>.
+								</p>
+								<p>
+									Time values can be constructed with the built-in functions (see "The Core").
+								</p>
+								<p>
+									The XML notation for these types is simply an empty tag with the name of the type: <code>&lt;time/></code> or <code>&lt;interval/></code>.
+								</p>
+							</text>
+						</document>
+						<document title="Strings">
+							<text>
+								<p>
+									The <code>string</code> data type represents strings of characters.
+								</p>
+								<p>
+									The XML notation for this type is simply an empty tag with the name of the type: <code>&lt;string/></code>.
+								</p>
+							</text>
+						</document>
+						<document title="Arrays and Dictionaries">
+							<text>
+								<p>
+									Arrays are finite collections of uniform (i.e. of the same type) data, accessible via integer indexes. The number of items in an array is called the array's size. Indexes always
+									start from zero and their maximum value is the array's size minus one. There can't be any "empty spaces", i.e. undefined items, in an array.
+								</p>
+								<p>
+									The type of items in an array is called the array's base type.
+								</p>
+								<p>
+									Dictionaries are similar to arrays, except that their items are accessible by string keys and not integer indexes.
+								</p>
+								<p>
+									The XML notation for an array type is: <code>&lt;array> item-type &lt;/array></code>.
+									For a dictionary type, it is, correspondingly: <code>&lt;dictionary> item-type &lt;/dictionary></code>.
+								</p>
+							</text>
+						</document>
+						<document title="Functions">
+							<text>
+								<p>
+									A function is a value that can be applied to another value, called argument, in order to obtain third value, called the result.
+								</p>
+								<p>
+									The XML notation for this type is: <code>&lt;func> argument-type result-type &lt;/func></code>.
+								</p>
+							</text>
+						</document>
+						<document title="Objects">
+							<sections>
+								<document title="Properties">
+									<text>
+										<p>
+											Objects are complex values that consist of <i>properties</i>. Each property has a name and a value of an arbitrary type. All the properties of an object must have different names.
+										</p>
+										<p>
+											An object with no properties is called a <i>null</i> object, or simply null.
+										</p>
+									</text>
+								</document>
+								<document title="Composite Object Type">
+									<text>
+										<p>
+											With a composite object type, every possible value consists of a fixed number of properties. Their names and types are known statically.
+										</p>
+										<p>
+											The XML notation for this type is: <code>&lt;all> property... &lt;/all></code> where <code>property</code> is a property specification in the form:
+											<code>&lt;prop name="property-name"> property-type &lt;/prop></code>. A null object therefore has type <code>&lt;all/></code>.
+										</p>
+										<p>
+											For example:
+											<textarea id="example-all-type" class="applet-code-viewer" style="display: none;">
+	<all>
+		<prop name="header">
+			<array>
+				<string />
+			</array>
+		</prop>
+		<prop name="rows">
+			<array>
+				<dynamic />
+			</array>
+		</prop>
+	</all>
+											</textarea>
+										</p>
+									</text>
+								</document>
+								<document title="Variant Object Type">
+									<text>
+										<p>
+											With a variant object type, every possible value consists of just one of a fixed number of properties. Their names and types are known statically.
+										</p>
+										<p>
+											The XML notation for this type is: <code>&lt;any> property... &lt;/any></code> where <code>property</code> is a property specification in the form:
+											<code>&lt;prop name="property-name"> property-type &lt;/prop></code> or <code>&lt;prop name="property-name"/></code>. When the type of a property is
+											omitted, it is assumed to be null (<code>&lt;all/></code>).
+										</p>
+										<p>
+											A variant type must have at least one property.
+										</p>
+										<p>
+											For example:
+											<textarea id="example-any-type" class="applet-code-viewer" style="display: none;">
+	<any>
+		<prop name="equal"/>
+		<prop name="clear"/>
+		<prop name="plus"/>
+		<prop name="minus"/>
+		<prop name="multiply"/>
+		<prop name="divide"/>
+		<prop name="char">
+			<string/>
+		</prop>
+	</any>
+											</textarea>
+										</p>
+									</text>
+								</document>
+							</sections>
+						</document>
+						<document title="Actions">
+							<text>
+								<p>
+									An action is a value that requests a change in the environment. To be actually performed, an action needs to be passed to the environment by placing to an appropriate section
+									of an applet (<code>actions</code>, <code>before</code> or <code>after</code>; see "Applets").
+								</p>
+							</text>
+						</document>
+						<document title="Dynamic Data">
+							<text>
+								<p>
+									Dynamic values are values for which the exact structure is not known before the program is run. Fabula has no means of processing such values directly; they must be 
+									typecasted to the valid static types to be processed.
+								</p>
+							</text>
+						</document>
+						<document title="User-defined Types">
+							<text>
+								<p>
+									User-defined types are just aliases to type expressions. They are introduced using the <code>typedef</code> construct (see chapter "Libraries").
+								</p>
+								<p>
+									The XML notation for a user-defined type is: <code>&lt;type name="type-name"/></code> where <code>type-name</code> is the name assigned by a <code>typedef</code>
+									definition.
+								</p>
+							</text>
+						</document>
+						<document title="Data Type Covariance">
+							<text>
+								<p>
+									When every value of type A belongs to type B, we say that type A is <i>covariant</i> to B, or that B is <i>contravariant</i> to A.
+								</p>
+								<p>
+									Fabula has strict and precise covariance rules:
+									<ul>
+										<li>any type is covariant, and contravariant, to itself</li>
+										<li>any type is covariant to <code>&lt;dynamic/></code></li>
+										<li><code>&lt;integer/></code> is covariant to <code>&lt;number/></code></li>
+										<li><code>&lt;array> A &lt;/array></code> is covariant to <code>&lt;array> B &lt;/array></code> when and only when A is covariant to B</li>
+										<li><code>&lt;dictionary> A &lt;/dictionary></code> is covariant to <code>&lt;dictionary> B &lt;/dictionary></code> when and only when A is covariant to B</li>
+										<li><code>&lt;func> A B &lt;/func></code> is covariant to <code>&lt;func> C D &lt;/func></code> when and only when B is covariant to D and A is contravariant to C</li>
+										<li><code>&lt;all> P... &lt;/all></code> is covariant to <code>&lt;all> Q... &lt;/all></code> when and only when for each property Q from the second composite type 
+										there is a property P in the first composite type with the same name whose type is covariant to the other property's</li>
+										<li><code>&lt;any> P... &lt;/any></code> is covariant to <code>&lt;any> Q... &lt;/any></code> when and only when for each property P from the first variant type 
+										there is a property Q in the second variant type with the same name whose type is contravariant to the other property's</li>
+										<li>in all other cases, types are neither covariant nor contravariant</li>
+									</ul>
+								</p>
+								<p>
+									If type A is covariant to type B, then a value of type A can be used wherever a value of type B is expected.
+								</p>
+								<p>
+									Covariance is important for understanding the possible type errors and how to avoid them. For example, if a function accepts an argument of type <code>number</code>, then
+									it can be called with an actual argument of type <code>integer</code>, but not <code>string</code>, because <code>integer</code> is covariant to <code>number</code> and
+									<code>string</code> is not. We need to emphasise that Fabula does no implicit type conversions, so an appropriate function needs to be called to convert a string to
+									a number when it's necessary.
+								</p>
+							</text>
+						</document>
+					</sections>
+				</document>
+				<document title="Variables">
+					<text>
+						<p>
+							Like in mathematics, in Fabula values can be replaced with symbolic names called variables. Since Fabula is a declarative language, variables have no operational semantics;
+							they can be reused (in different scopes) but not redefined.
+						</p>
+						<p>
+							A variable is always attached to a value and can't be "undefined".
+						</p>
+						<p>
+							There are variables of several kinds, depending on the scope and the way they get their values.
+							<ul>
+								<li>a global variable - available globally in a library; user-defined</li>
+								<li>a state variable - available in an applet's <code>content</code> and <code>respond</code> sections; gives access to the state of an instance</li>
+								<li>an ID variable - available throughout an applet's code; gives access to the <code>id</code> attribute of the page element associated with an instance</li>
+								<li>an arg variable - available in an applet's <code>init</code> section; gives access to the <code>data-arg</code> attribute of the page element associated with an instance</li>
+								<li>an input variable - available in an applet's <code>respond</code> section; gives access to the data supplied by an action or event</li>
+								<li>a local variable - available inside a <code>calc</code> expression; user-defined</li>
+								<li>an argument - available inside a closure's <code>return</code> expression; gives access to the data supplied when the function is called</li>
+								<li>finally, there is a single "universally global" variable named <code>core</code> that refers to a composite object value that contains various general use functions and constants, such as ones for number, string or time manipulation</li>
+							</ul>
+						</p>
+					</text>
+				</document>
+				<document title="Expressions and Statements">
+					<sections>
+						<document title="Introduction">
+							<text>
+								<p>
+									A <i>task</i> in Fabula is a formal description of some condition that needs to be satisfied.
+								</p>
+								<p>
+									Fabula distinguishes two kinds of tasks: <i>expressions</i> and <i>statements</i>. The difference is in the syntax.
+								</p>
+								<p>
+									An expression simply returns an anonymous value that satisfies some condition. A statement finds values of its <i>output variables</i> that satisfy some condition.
+									If the statement has no output variables, the condition "should" (see the next chapter) be already valid in the statement's context.
+								</p>
+							</text>
+						</document>
+						<document title="Success and Failure">
+							<text>
+								<p>
+									Traditionally, programs are first written with the assumption that everything works as expected and no part ever fails; later, some logic is added to handle
+									"exceptional" situations like division by zero, illegal reference etc. 
+								</p>
+								<p>
+									Fabula forces a different approach. In Fabula, a task only describes some desired condition, some goal that in reality, depending on the existing conditions, may not be 
+									achieved. We say that evaluating a task can either <i>succeed</i> or <i>fail</i>. When a task has failed, its result(s) are undefined and cannot be used.
+								</p>
+								<p>
+									For example, we have an expression that finds an item in an integer array that is greater than zero. If all the items in the array are negative, the expression will fail.
+									Therefore, any code that uses the result of our expression (and assumes it's positive) potentially leads to an error and must not be evaluated. Fabula's semantic rules
+									are designed to prevent such situations.
+								</p>
+								<p>
+									Fabula's computation logic is based on the concept of success or failure. This concept is so powerful that Fabula doesn't need a Boolean data type or an exception handling
+									mechanism.
+								</p>
+								<p>
+									Notice that every computation in Fabula must either succeed or fail. This means that non-terminating computations are not possible in Fabula.
+								</p>
+							</text>
+						</document>
+						<document title="Expressions">
+							<sections>
+								<document title="Formulas">
+									<sections>
+										<document title="Introduction">
+											<text>
+												A primitive form of an expression is a formula. Formulas are text elements, i.e. they are not enclosed in XML tags. 
+											</text>
+										</document>
+										<document title="Numbers and Strings">
+											<text>
+												<p>
+													The simplest case of a formula is a literal value, either numeric or string. 
+												</p>
+												<p>
+													A series of digits, possibly preceded by a minus sign, represents an integer literal. A number literal also contains a period sign and/or the exponent notation.
+												</p>
+												<p>
+													A string literal is any text in single or double quotes. 
+												</p>
+											</text>
+										</document>
+										<document title="Variables">
+											<text>
+												
+											</text>
+										</document>
+										<document title="Function Calls">
+											<text>
+												
+											</text>
+										</document>
+										<document title="Array Access">
+											<text>
+												
+											</text>
+										</document>
+										<document title="Dictionary Access">
+											<text>
+												
+											</text>
+										</document>
+										<document title="Operators">
+											<text>
+												
+											</text>
+										</document>
+										<document title="Relations">
+											<text>
+												
+											</text>
+										</document>
+										<document title="Object Literals">
+											<text>
+												
+											</text>
+										</document>
+									</sections>
+								</document>
+								<document title="Text">
+									<text>
+										<p>Another way to define a string value is using a <code>text</code> element: <code>&lt;text> text-with-formulas &lt;/text></code>.
+										Here <code>text-with-formulas</code> is any text that may contain formulas in the form: <code>[%formula%]</code>. The value of a <code>text</code> element is the text
+										between the tags with the formulas substituted with their values, converted to strings if needed.
+										Each formula must be of an appropriate data type: 
+										string, integer or number.</p>
+										<p>
+										For example, expression:
+										<textarea id="example-hello" class="applet-code-viewer" style="display: none;">
+	<text>
+		Hello, [%name%]!
+	</text>
+										</textarea>
+										when the context has a variable called <code>name</code> with the value <code>"World"</code>, will return string "Hello, World!".</p>
+										<p>
+											Note that if the text contains XML/HTML tags, they must be correctly balanced and all the attributes in it must have values. In other words, the text must satisfy the
+											XHTML specification. Otherwise, the syntax of the entire Fabula program will be broken and it will not be able to run.
+										</p>
+									</text>
+								</document>
+								<document title="Array/Dictionary Expressions">
+									<text>
+
+									</text>
+								</document>
+								<document title="Closures">
+									<text>
+
+									</text>
+								</document>
+								<document title="Object Expressions">
+									<text>
+
+									</text>
+								</document>
+								<document title="Action Expressions">
+									<text>
+
+									</text>
+								</document>
+								<document title="Conditional Expressions">
+									<text>
+
+									</text>
+								</document>
+								<document title="Miscellaneous Expressions">
+									<text>
+
+									</text>
+								</document>
+							</sections>
+						</document>
+						<document title="Statements">
+							<sections>
+								<document title="Introduction">
+									<text>
+
+									</text>
+								</document>
+								<document title="Definition Statement">
+									<text>
+
+									</text>
+								</document>
+								<document title="Assertion Statement">
+									<text>
+
+									</text>
+								</document>
+								<document title="Unwrap Statement">
+									<text>
+
+									</text>
+								</document>
+								<document title="Conjunction Statement">
+									<text>
+
+									</text>
+								</document>
+								<document title="Disjunction Statement">
+									<text>
+
+									</text>
+								</document>
+								<document title="Negation Statement">
+									<text>
+
+									</text>
+								</document>
+							</sections>
+						</document>
+					</sections>
+				</document>
+			</sections>
+		</document>
+		<document title="Applets">
+			<sections>
+				<document title="Applet Structure">
+					<text>
+
+					</text>
+				</document>
+				<document title="State">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Content">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Initialization">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Response">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Events">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Communication">
+					<text>
+						
+					</text>
+				</document>
+			</sections>
+		</document>
+		<document title="Libraries">
+			<sections>
+				<document title="Library Structure">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Type Definition">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Common Data">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Applet Definition">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Channel Definition">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Library Import">
+					<text>
+						
+					</text>
+				</document>
+			</sections>
+		</document>
+		<document title="The Core">
+			<sections>
+				<document title="Core Structure">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Math Functions">
+					<text>
+						
+					</text>
+				</document>
+				<document title="String Functions">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Time Functions">
+					<text>
+						
+					</text>
+				</document>
+				<document title="Format Functions">
+					<text>
+						
+					</text>
+				</document>
+				<document title="XML Functions">
+					<text>
+						
+					</text>
+				</document>
+			</sections>
+		</document>
+	</sections>
+</document>

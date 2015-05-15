@@ -3,6 +3,40 @@
   src: url('Champagne & Limousines Bold.woff') format('woff'),
        url('Champagne & Limousines Bold.ttf') format('truetype');
 }
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Source Sans Pro'), local('SourceSansPro-Regular'), url(//themes.googleusercontent.com/static/fonts/sourcesanspro/v5/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format('woff');
+}
+
+body, html { margin: 0; padding: 0; height: 100%; }
+section, article { display: block; padding: 0; }
+
+body {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+a:link {
+  color: #A21313;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #A21313;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #A21313;
+  text-decoration: none;
+}
+
+a:active {
+  color: #A21313;
+  text-decoration: none;
+}
 .applet-expandable {
 	cursor: pointer;
 	color: black;
@@ -160,6 +194,7 @@ table.menu-bar {
 .right {
 	float: right;
 }
+
 [data-tooltip] {
   position: relative;
 }
@@ -211,7 +246,13 @@ table.menu-bar {
 	padding: 8px;
 }
 
-.popup-head .popup-body { display: none; }
+.popup-head:hover {
+	position: relative;
+}
+
+.popup-head > .popup-body { 
+	display: none; 
+}
 
 .popup-head:hover > .popup-body {
 	display: block;
@@ -219,6 +260,8 @@ table.menu-bar {
 	border-radius: 4px;
 	background-color: white;
 	position: absolute;
+	top: 16px;
+	left: -4px;
 	z-index: 999;
 	padding: 4px 4px;
     box-shadow: 4px 4px 4px #888888;
