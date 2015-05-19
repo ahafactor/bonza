@@ -13,4 +13,9 @@ function Plugin() {
             cm.setSize(null, n * h);
         }
     };
+    this.run = function() {
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
+    };
 }

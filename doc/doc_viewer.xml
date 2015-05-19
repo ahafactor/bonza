@@ -229,7 +229,7 @@
 						</any>
 						<def var="path">
 							<calc>
-								join({parts: items, sep: " | "})
+								join({parts: items, sep: " / "})
 								<where>
 									<def var="items">
 										<array>
@@ -485,7 +485,7 @@
 		</state>
 		<content>
 			<text>
-				<a href="#" data-tooltip="Previous topic">[%lt%][%nbsp%][%state%]</a>
+				<a href="#" data-toggle="tooltip" data-placement="right" title="Previous topic">[%larr%][%nbsp%][%state%]</a>
 			</text>
 		</content>
 		<init arg="arg">
@@ -515,7 +515,7 @@
 		</state>
 		<content>
 			<text>
-				<a href="#" data-tooltip="Next topic">[%state%][%nbsp%]></a>
+				<a href="#" data-toggle="tooltip" data-placement="left" title="Next topic">[%state%][%nbsp%][%rarr%]</a>
 			</text>
 		</content>
 		<init arg="arg">
@@ -552,7 +552,7 @@
 		</state>
 		<content>
 			<text>
-				<a href="#" data-tooltip="Select topic">[%state.title%]</a>
+				<a href="#" data-toggle="tooltip" data-placement="right" title="Select topic">[%state.title%]</a>
 			</text>
 		</content>
 		<init arg="arg">
@@ -604,7 +604,7 @@
 		</state>
 		<content>
 			<text>
-				<a href="#" data-tooltip="Go up">[%state.title%]</a>
+				<a href="#" data-toggle="tooltip" data-placement="top" title="Go up">[%state.title%]</a>
 			</text>
 		</content>
 		<init arg="arg">
