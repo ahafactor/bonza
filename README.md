@@ -1,3 +1,5 @@
+ATTENTION: this project is now obsolete; instead, a new project is available at [fabwebtools.com] (http://fabwebtools.com/).
+
 # Fabsite Framework
 
 Fabsite Framework is designed for building flexible, maintainable, fast and reliable web applications. 
